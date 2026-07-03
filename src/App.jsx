@@ -3,7 +3,8 @@ import {
   Calculator, Droplets, TrendingUp, Users, FileText, Lock, Check,
   ChevronRight, Globe, Plus, X, Activity, Apple, Heart, AlertCircle,
   ArrowRight, Sparkles, ClipboardList, UserPlus, Search, Calendar,
-  Trash2, Edit3, Download, Crown, Zap, Scale, Ruler, Cake
+  Trash2, Edit3, Download, Crown, Zap, Scale, Ruler, Cake, Printer,
+  BarChart2, Leaf, Shield, Star, Info
 } from "lucide-react";
 
 /* ============================================================
@@ -20,6 +21,16 @@ const STR = {
       title: "Beslenme bilimini herkes için netleştir",
       sub: "Bireyler için doğru hesaplama, diyetisyenler için klinik düzeyde araçlar — tek uygulamada.",
       ctaFree: "Ücretsiz Başla", ctaPro: "Diyetisyen misiniz?",
+    },
+    stats: { templates: "Hastalık Şablonu", languages: "Dil Desteği", formula: "Bilimsel Formül", free: "Ücretsiz Erişim" },
+    howItWorks: {
+      title: "Nasıl Çalışır?",
+      step1Title: "Bilgilerini Gir",
+      step1Desc: "Yaş, kilo, boy ve aktivite düzeyini gir.",
+      step2Title: "Anında Hesapla",
+      step2Desc: "BMR, TDEE, su ihtiyacı ve makrolarını saniyeler içinde gör.",
+      step3Title: "Takip Et & İlerle",
+      step3Desc: "Günlük kayıtlarınla ilerleni izle, diyetisyensen danışanlarını yönet.",
     },
     calc: {
       title: "Günlük İhtiyaç Hesaplama",
@@ -40,9 +51,11 @@ const STR = {
       tdee: "Günlük Toplam İhtiyaç (TDEE)", tdeeDesc: "Aktivite dahil günlük toplam kalori",
       target: "Hedef Kalori", targetDesc: "Hedefine göre önerilen günlük alım",
       water: "Su İhtiyacı", waterDesc: "Günlük önerilen su tüketimi",
+      bmi: "Vücut Kitle İndeksi (VKİ)", bmiDesc: "Boy ve kilona göre vücut ağırlığı kategorisi",
       macros: "Makro Dağılımı",
       protein: "Protein", carbs: "Karbonhidrat", fat: "Yağ",
       perDay: "/ gün", liters: "litre", kcal: "kcal",
+      bmiUnder: "Zayıf", bmiNormal: "Normal", bmiOver: "Fazla Kilolu", bmiObese: "Obez",
       disclaimer: "Bu hesaplamalar genel formüllere dayanır ve bireysel tıbbi tavsiye yerine geçmez. Özel sağlık durumların için bir diyetisyene danış.",
       saveEntry: "Bugüne Kaydet",
       saved: "Kaydedildi!",
@@ -109,8 +122,18 @@ const STR = {
       breakfast: "Kahvaltı", lunch: "Öğle Yemeği", dinner: "Akşam Yemeği", snack: "Ara Öğün",
       medicalNote: "Bu şablon genel klinik kılavuzlara dayanır; ilaç etkileşimleri ve bireysel laboratuvar değerleri mutlaka dikkate alınmalıdır.",
       backToList: "Listeye Dön",
+      print: "Yazdır / PDF",
     },
-    common: { close: "Kapat", back: "Geri", next: "İleri", optional: "isteğe bağlı" },
+    footer: {
+      desc: "Bireyler için beslenme hesaplamaları, diyetisyenler için klinik takip araçları.",
+      links: "Bağlantılar",
+      calc: "Hesap Makinesi",
+      track: "Takip",
+      pro: "Pro",
+      rights: "Tüm hakları saklıdır.",
+      disclaimer: "Bu uygulama tıbbi tavsiye vermez. Sağlık kararları için bir uzmana danışın.",
+    },
+    common: { close: "Kapat", back: "Geri", next: "İleri", optional: "isteğe bağlı", loading: "Yükleniyor..." },
   },
   en: {
     appName: "NutriBase",
@@ -122,6 +145,16 @@ const STR = {
       title: "Make nutrition science clear for everyone",
       sub: "Accurate calculations for individuals, clinical-grade tools for dietitians — in one app.",
       ctaFree: "Start Free", ctaPro: "Are you a dietitian?",
+    },
+    stats: { templates: "Condition Templates", languages: "Languages", formula: "Scientific Formula", free: "Free Access" },
+    howItWorks: {
+      title: "How It Works",
+      step1Title: "Enter Your Details",
+      step1Desc: "Enter your age, weight, height and activity level.",
+      step2Title: "Calculate Instantly",
+      step2Desc: "See your BMR, TDEE, water and macro needs in seconds.",
+      step3Title: "Track & Progress",
+      step3Desc: "Monitor your progress with daily logs; manage clients if you're a dietitian.",
     },
     calc: {
       title: "Daily Needs Calculator",
@@ -142,9 +175,11 @@ const STR = {
       tdee: "Total Daily Energy (TDEE)", tdeeDesc: "Total daily calories including activity",
       target: "Target Calories", targetDesc: "Recommended daily intake for your goal",
       water: "Water Needs", waterDesc: "Recommended daily water intake",
+      bmi: "Body Mass Index (BMI)", bmiDesc: "Body weight category based on height and weight",
       macros: "Macro Breakdown",
       protein: "Protein", carbs: "Carbs", fat: "Fat",
       perDay: "/ day", liters: "liters", kcal: "kcal",
+      bmiUnder: "Underweight", bmiNormal: "Normal", bmiOver: "Overweight", bmiObese: "Obese",
       disclaimer: "These calculations use general formulas and are not a substitute for individual medical advice. Consult a dietitian for specific health conditions.",
       saveEntry: "Save to Today",
       saved: "Saved!",
@@ -211,8 +246,18 @@ const STR = {
       breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner", snack: "Snack",
       medicalNote: "This template is based on general clinical guidelines; medication interactions and individual lab values must always be considered.",
       backToList: "Back to List",
+      print: "Print / PDF",
     },
-    common: { close: "Close", back: "Back", next: "Next", optional: "optional" },
+    footer: {
+      desc: "Nutrition calculations for individuals, clinical tracking tools for dietitians.",
+      links: "Links",
+      calc: "Calculator",
+      track: "Tracking",
+      pro: "Pro",
+      rights: "All rights reserved.",
+      disclaimer: "This app does not provide medical advice. Consult a professional for health decisions.",
+    },
+    common: { close: "Close", back: "Back", next: "Next", optional: "optional", loading: "Loading..." },
   },
 };
 
@@ -220,11 +265,11 @@ const STR = {
    DESIGN TOKENS
 ============================================================ */
 const COLORS = {
-  ink: "#0E2A3D",      // deep petrol navy
+  ink: "#0E2A3D",
   inkSoft: "#1B3F56",
-  paper: "#FAF8F3",    // warm lime-white
+  paper: "#FAF8F3",
   paperDim: "#F1EDE3",
-  coral: "#E8623F",    // single living accent
+  coral: "#E8623F",
   coralSoft: "#FBE2D8",
   line: "#D8D2C4",
   sage: "#5C7A6E",
@@ -232,7 +277,7 @@ const COLORS = {
 };
 
 /* ============================================================
-   HEALTH CONDITION TEMPLATES (clinical reference)
+   HEALTH CONDITION TEMPLATES — 12 conditions
 ============================================================ */
 const CONDITIONS = [
   {
@@ -277,8 +322,8 @@ const CONDITIONS = [
     recommendedEn: ["Quality protein in controlled portions", "Low-potassium vegetables (cabbage, cauliflower)", "White bread (stage-dependent)", "Plant oils"],
     avoidTr: ["Muz, kayısı, kuru üzüm", "Tam tahıllı ürünler (ileri evrede)", "İşlenmiş et", "Kola ve koyu içecekler (fosfor)"],
     avoidEn: ["Banana, apricot, raisins", "Whole grain products (advanced stage)", "Processed meat", "Cola and dark beverages (phosphorus)"],
-    menuTr: { breakfast: "Haşlanmış yumurta + beyaz ekmek + salatalık", lunch: "Kontrollü porsiyon tavuk + pirinç + haşlanmış sebze", dinner: "Az protein + bulgur değil pirinç + salata", snack: "Elma dilimleri" },
-    menuEn: { breakfast: "Boiled egg + white bread + cucumber", lunch: "Controlled portion chicken + rice + boiled vegetables", dinner: "Low protein + rice instead of bulgur + salad", snack: "Apple slices" },
+    menuTr: { breakfast: "Haşlanmış yumurta + beyaz ekmek + salatalık", lunch: "Kontrollü porsiyon tavuk + pirinç + haşlanmış sebze", dinner: "Az protein + pirinç + salata", snack: "Elma dilimleri" },
+    menuEn: { breakfast: "Boiled egg + white bread + cucumber", lunch: "Controlled portion chicken + rice + boiled vegetables", dinner: "Low protein + rice + salad", snack: "Apple slices" },
     warning: true,
   },
   {
@@ -326,20 +371,105 @@ const CONDITIONS = [
     menuTr: { breakfast: "Yulaf + laktozsuz süt + muz", lunch: "Izgara tavuk + pirinç + havuç", dinner: "Balık + kabak + patates", snack: "Laktozsuz yoğurt" },
     menuEn: { breakfast: "Oats + lactose-free milk + banana", lunch: "Grilled chicken + rice + carrot", dinner: "Fish + zucchini + potato", snack: "Lactose-free yogurt" },
   },
+  {
+    id: "obesity",
+    nameTr: "Obezite", nameEn: "Obesity",
+    icon: "⚖️",
+    overviewTr: "Sürdürülebilir kilo kaybı için enerji kısıtlı, yüksek protein ve lif içerikli, doygunluğu artıran bir beslenme planı. Açlık hissi minimize edilmeli, sağlıklı alışkanlıklar önceliklendirilmelidir.",
+    overviewEn: "An energy-restricted, high-protein and high-fiber nutrition plan to promote satiety and sustainable weight loss. Hunger should be minimized and healthy habits prioritized.",
+    restrictionsTr: ["Yüksek kalorili işlenmiş gıdalar", "Şekerli içecekler ve alkol", "Yağlı fast food", "Aşırı porsiyon"],
+    restrictionsEn: ["High-calorie processed foods", "Sugary drinks and alcohol", "High-fat fast food", "Oversized portions"],
+    recommendedTr: ["Yüksek protein (tavuk, balık, baklagil, yumurta)", "Bol sebze ve yeşillik", "Tam tahıllar", "Düşük kalorili hacimli gıdalar", "Su ve çay"],
+    recommendedEn: ["High protein (chicken, fish, legumes, eggs)", "Plenty of vegetables and greens", "Whole grains", "Low-calorie volume foods", "Water and tea"],
+    avoidTr: ["Asitli ve şekerli içecekler", "Cips, kraker, bisküvi", "Hazır yemekler", "Kızartmalar"],
+    avoidEn: ["Acidic and sugary drinks", "Chips, crackers, biscuits", "Ready meals", "Fried foods"],
+    menuTr: { breakfast: "3 yumurta (haşlama/omlet) + domates + salatalık + 1 dilim tam tahıllı ekmek", lunch: "Izgara tavuk göğsü + bol yeşil salata + az zeytinyağı", dinner: "Buharda brokoli + az pilav veya bulgur + yoğurt", snack: "1 avuç badem veya havuç çubukları" },
+    menuEn: { breakfast: "3 eggs (boiled/omelet) + tomato + cucumber + 1 slice whole grain bread", lunch: "Grilled chicken breast + big green salad + a little olive oil", dinner: "Steamed broccoli + small portion rice or bulgur + yogurt", snack: "A handful of almonds or carrot sticks" },
+  },
+  {
+    id: "anemia",
+    nameTr: "Demir Eksikliği Anemisi", nameEn: "Iron Deficiency Anemia",
+    icon: "🩺",
+    overviewTr: "Demir emilimini artırmak için C vitamini ile birlikte demir açısından zengin gıdaların tüketimine odaklanan beslenme planı. Emilimi engelleyen faktörler minimize edilmelidir.",
+    overviewEn: "A nutrition plan focused on consuming iron-rich foods alongside vitamin C to enhance iron absorption. Factors that inhibit absorption should be minimized.",
+    restrictionsTr: ["Demirle birlikte çay/kahve", "Kalsiyum takviyeleri öğünle beraber", "İşlenmemiş kepek (aşırı)"],
+    restrictionsEn: ["Tea/coffee with iron-rich meals", "Calcium supplements with meals", "Unprocessed bran (excess)"],
+    recommendedTr: ["Kırmızı et, tavuk, hindi", "Yeşil yapraklı sebzeler (ıspanak, pazı)", "Baklagiller (mercimek, nohut)", "C vitamini kaynakları (limon, portakal, biber)", "Kuruyemiş (kabak çekirdeği)"],
+    recommendedEn: ["Red meat, chicken, turkey", "Leafy greens (spinach, chard)", "Legumes (lentils, chickpeas)", "Vitamin C sources (lemon, orange, bell pepper)", "Nuts (pumpkin seeds)"],
+    avoidTr: ["Öğünle birlikte çay/kahve içmek", "Fazla işlenmiş gıdalar", "Kola ve fosfatlı içecekler"],
+    avoidEn: ["Drinking tea/coffee with meals", "Heavily processed foods", "Cola and phosphate-rich drinks"],
+    menuTr: { breakfast: "Yumurta + pekmez + portakal suyu + tam tahıllı ekmek", lunch: "Kıymalı mercimek çorbası + taze limon + ıspanaklı salata", dinner: "Sote ıspanak + kırmızı et + pilav", snack: "Kuru kayısı + portakal" },
+    menuEn: { breakfast: "Eggs + molasses + orange juice + whole grain bread", lunch: "Minced meat lentil soup + fresh lemon + spinach salad", dinner: "Sautéed spinach + red meat + rice pilaf", snack: "Dried apricots + orange" },
+  },
+  {
+    id: "gout",
+    nameTr: "Gut Hastalığı", nameEn: "Gout",
+    icon: "🦵",
+    overviewTr: "Ürik asit seviyelerini düşürmeye yönelik, pürin açısından kısıtlı ve bol sıvı tüketimine dayalı bir beslenme planı.",
+    overviewEn: "A purine-restricted, high-fluid nutrition plan aimed at reducing uric acid levels.",
+    restrictionsTr: ["Sakatat (ciğer, böbrek)", "Deniz ürünleri (özellikle midye, hamsi)", "Alkol (özellikle bira)", "Fruktoz zengini gıdalar"],
+    restrictionsEn: ["Organ meats (liver, kidney)", "Seafood (especially mussels, anchovies)", "Alcohol (especially beer)", "Fructose-rich foods"],
+    recommendedTr: ["Bol su (günde 2-3 litre)", "Düşük yağlı süt ürünleri", "Sebzeler", "Yulaf, pirinç, bulgur", "Kiraz ve vişne (ürik asit düşürücü)"],
+    recommendedEn: ["Plenty of water (2-3 liters/day)", "Low-fat dairy", "Vegetables", "Oats, rice, bulgur", "Cherries and sour cherries (uric acid-lowering)"],
+    avoidTr: ["Kırmızı et (aşırı)", "Alkollü içecekler", "Şekerli meşrubatlar", "Sakatat"],
+    avoidEn: ["Red meat (excess)", "Alcoholic beverages", "Sugary soft drinks", "Organ meats"],
+    menuTr: { breakfast: "Yulaf ezmesi + az yağlı yoğurt + meyve", lunch: "Tavuk + pirinç + bol salata", dinner: "Sebze çorbası + peynirli tam tahıllı ekmek", snack: "Kiraz veya vişne + su" },
+    menuEn: { breakfast: "Oatmeal + low-fat yogurt + fruit", lunch: "Chicken + rice + plenty of salad", dinner: "Vegetable soup + cheese on whole grain bread", snack: "Cherries or sour cherries + water" },
+  },
+  {
+    id: "osteoporosis",
+    nameTr: "Osteoporoz", nameEn: "Osteoporosis",
+    icon: "🦴",
+    overviewTr: "Kemik yoğunluğunu korumak ve artırmak için kalsiyum, D vitamini ve K vitamini açısından zengin, asit yükü düşük bir beslenme planı.",
+    overviewEn: "A calcium, vitamin D and vitamin K-rich, low acid-load nutrition plan to maintain and improve bone density.",
+    restrictionsTr: ["Aşırı kafein (kemikten kalsiyum çıkarır)", "Aşırı tuz", "Alkol", "Yüksek fosforlu içecekler (kola)"],
+    restrictionsEn: ["Excess caffeine (leaches calcium from bones)", "Excess salt", "Alcohol", "High-phosphorus drinks (cola)"],
+    recommendedTr: ["Süt ürünleri (kalsiyum)", "Yeşil yapraklı sebzeler (K vitamini)", "Somon, sardalya (D vitamini + kalsiyum)", "Soya ürünleri", "Susam ve tahin"],
+    recommendedEn: ["Dairy products (calcium)", "Leafy greens (vitamin K)", "Salmon, sardines (vitamin D + calcium)", "Soy products", "Sesame and tahini"],
+    avoidTr: ["Aşırı kahve/çay", "Aşırı tuzlu gıdalar", "Alkol", "Kola"],
+    avoidEn: ["Excess coffee/tea", "Overly salty foods", "Alcohol", "Cola"],
+    menuTr: { breakfast: "Süzme yoğurt + tahin + meyve + kepekli ekmek", lunch: "Somon + brokoli + az yağlı peynir + salata", dinner: "Az yağlı peynirli omlet + ıspanak + tam tahıllı ekmek", snack: "Susam ezmesi + ayran" },
+    menuEn: { breakfast: "Strained yogurt + tahini + fruit + whole grain bread", lunch: "Salmon + broccoli + low-fat cheese + salad", dinner: "Low-fat cheese omelet + spinach + whole grain bread", snack: "Sesame paste + ayran (yogurt drink)" },
+  },
+  {
+    id: "hypothyroid",
+    nameTr: "Hipotiroidizm", nameEn: "Hypothyroidism",
+    icon: "🦋",
+    overviewTr: "Tiroid fonksiyonunu desteklemek için iyot, selenyum ve çinko açısından zengin, metabolizmayı destekleyen bir beslenme planı. Guatrojenik gıdalar pişirilerek tüketilmelidir.",
+    overviewEn: "A nutrition plan rich in iodine, selenium and zinc to support thyroid function and metabolism. Goitrogenic foods should be consumed cooked.",
+    restrictionsTr: ["Ham lahana, karnabahar, brokoli (soya ile birlikte değil)", "Aşırı soya ürünleri", "İşlenmiş gıdalar", "Aşırı gluten (eşzamanlı çölyak varsa)"],
+    restrictionsEn: ["Raw cabbage, cauliflower, broccoli (not with soy)", "Excessive soy products", "Processed foods", "Excess gluten (if concurrent celiac)"],
+    recommendedTr: ["Deniz ürünleri (iyot)", "Yumurta", "Kuruyemiş (selenyum için Brezilya fındığı)", "Et ve kümes hayvanları", "Tam tahıllar"],
+    recommendedEn: ["Seafood (iodine)", "Eggs", "Nuts (Brazil nuts for selenium)", "Meat and poultry", "Whole grains"],
+    avoidTr: ["İşlenmiş ve hazır gıdalar", "Aşırı karbonhidrat", "Soya sütü/tofu (aşırı)", "Alkol"],
+    avoidEn: ["Processed and ready-made foods", "Excess carbohydrates", "Soy milk/tofu (excess)", "Alcohol"],
+    menuTr: { breakfast: "Yumurta + peynir + tam tahıllı ekmek + domates", lunch: "Balık (levrek/somon) + pişmiş brokoli + pirinç", dinner: "Tavuk + mercimek + sebze", snack: "Brezilya fındığı (2-3 adet) + portakal" },
+    menuEn: { breakfast: "Eggs + cheese + whole grain bread + tomato", lunch: "Fish (sea bass/salmon) + cooked broccoli + rice", dinner: "Chicken + lentils + vegetables", snack: "Brazil nuts (2-3 pieces) + orange" },
+  },
+  {
+    id: "reflux",
+    nameTr: "Gastroözofageal Reflü (GERD)", nameEn: "Gastroesophageal Reflux (GERD)",
+    icon: "🔥",
+    overviewTr: "Asit reflüsünü azaltmak için düşük asitli, az yağlı ve küçük öğünlere dayalı bir beslenme planı. Yemek sonrası yatmaktan kaçınılmalıdır.",
+    overviewEn: "A low-acid, low-fat nutrition plan based on small meals to reduce acid reflux. Lying down after meals should be avoided.",
+    restrictionsTr: ["Asitli meyveler (portakal, limon, domates)", "Kafein ve çay", "Alkol", "Yağlı ve kızartılmış yiyecekler", "Baharat ve acı"],
+    restrictionsEn: ["Acidic fruits (orange, lemon, tomato)", "Caffeine and tea", "Alcohol", "Fatty and fried foods", "Spices and spicy foods"],
+    recommendedTr: ["Muz, elma, armut", "Yulaf ezmesi", "Az yağlı protein (tavuk, balık)", "Zencefil (az miktarda)", "Haşlanmış veya buharda pişmiş sebzeler"],
+    recommendedEn: ["Banana, apple, pear", "Oatmeal", "Low-fat protein (chicken, fish)", "Ginger (in small amounts)", "Boiled or steamed vegetables"],
+    avoidTr: ["Domates ve sosları", "Kahve ve çay", "Çikolata ve nane", "Kızartmalar ve hazır gıdalar", "Karbonatlı içecekler"],
+    avoidEn: ["Tomatoes and their sauces", "Coffee and tea", "Chocolate and mint", "Fried foods and ready meals", "Carbonated beverages"],
+    menuTr: { breakfast: "Yulaf ezmesi + muz + az yağlı süt", lunch: "Haşlanmış tavuk + pilav + buharda havuç", dinner: "Balık + patates püresi + haşlanmış kabak", snack: "Elma veya armut + az yağlı yoğurt" },
+    menuEn: { breakfast: "Oatmeal + banana + low-fat milk", lunch: "Boiled chicken + rice + steamed carrots", dinner: "Fish + mashed potato + steamed zucchini", snack: "Apple or pear + low-fat yogurt" },
+  },
 ];
 
 /* ============================================================
-   STORAGE HELPERS — localStorage-backed for production website
-   (window.storage is only available in the Claude.ai preview;
-   this implementation works in any real browser deployment)
+   STORAGE HELPERS
 ============================================================ */
 const LS_PREFIX = "nutribase:";
-
 async function storeGet(key) {
-  try {
-    const raw = localStorage.getItem(LS_PREFIX + key);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  try { const raw = localStorage.getItem(LS_PREFIX + key); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
 }
 async function storeSet(key, value) {
   try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(value)); return true; }
@@ -366,8 +496,18 @@ function calcBMR({ gender, age, height, weight }) {
   const base = 10 * weight + 6.25 * height - 5 * age;
   return gender === "male" ? base + 5 : base - 161;
 }
+function calcBMI(height, weight) {
+  const h = Number(height) / 100;
+  return (Number(weight) / (h * h)).toFixed(1);
+}
+function bmiCategory(bmi, t) {
+  const v = parseFloat(bmi);
+  if (v < 18.5) return { label: t.calc.bmiUnder, color: "#3B82F6" };
+  if (v < 25) return { label: t.calc.bmiNormal, color: "#5C7A6E" };
+  if (v < 30) return { label: t.calc.bmiOver, color: "#C9A14A" };
+  return { label: t.calc.bmiObese, color: "#E8623F" };
+}
 const ACTIVITY_FACTORS = [1.2, 1.375, 1.55, 1.725, 1.9];
-
 function calcAll({ gender, age, height, weight, activityIdx, goal }) {
   const bmr = calcBMR({ gender, age: Number(age), height: Number(height), weight: Number(weight) });
   const tdee = bmr * ACTIVITY_FACTORS[activityIdx];
@@ -378,11 +518,12 @@ function calcAll({ gender, age, height, weight, activityIdx, goal }) {
   const protein = Math.round((target * 0.30) / 4);
   const carbs = Math.round((target * 0.40) / 4);
   const fat = Math.round((target * 0.30) / 9);
-  return { bmr: Math.round(bmr), tdee: Math.round(tdee), target: Math.round(target), water, protein, carbs, fat };
+  const bmi = calcBMI(height, weight);
+  return { bmr: Math.round(bmr), tdee: Math.round(tdee), target: Math.round(target), water, protein, carbs, fat, bmi };
 }
 
 /* ============================================================
-   SMALL UI PRIMITIVES
+   UI PRIMITIVES
 ============================================================ */
 function Logo({ size = 28 }) {
   return (
@@ -393,12 +534,23 @@ function Logo({ size = 28 }) {
   );
 }
 
+function Spinner() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: "50%",
+        border: `3px solid ${COLORS.line}`, borderTopColor: COLORS.coral,
+        animation: "nb-spin 0.7s linear infinite",
+      }} />
+      <style>{`@keyframes nb-spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
 function Field({ label, children, hint }) {
   return (
     <label style={{ display: "block", marginBottom: 18 }}>
-      <span style={{ display: "block", fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase", color: COLORS.ink, opacity: 0.55, marginBottom: 7, fontWeight: 600 }}>
-        {label}
-      </span>
+      <span style={{ display: "block", fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase", color: COLORS.ink, opacity: 0.55, marginBottom: 7, fontWeight: 600 }}>{label}</span>
       {children}
       {hint && <span style={{ display: "block", fontSize: 12, color: COLORS.ink, opacity: 0.4, marginTop: 4 }}>{hint}</span>}
     </label>
@@ -427,20 +579,13 @@ function SegButton({ options, value, onChange }) {
   return (
     <div style={{ display: "flex", gap: 8 }}>
       {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          style={{
-            flex: 1, padding: "11px 10px", borderRadius: 8, fontSize: 14, fontWeight: 600,
-            border: `1.5px solid ${value === opt.value ? COLORS.ink : COLORS.line}`,
-            background: value === opt.value ? COLORS.ink : COLORS.paper,
-            color: value === opt.value ? COLORS.paper : COLORS.ink,
-            cursor: "pointer", transition: "all 0.15s",
-          }}
-        >
-          {opt.label}
-        </button>
+        <button key={opt.value} type="button" onClick={() => onChange(opt.value)} style={{
+          flex: 1, padding: "11px 10px", borderRadius: 8, fontSize: 14, fontWeight: 600,
+          border: `1.5px solid ${value === opt.value ? COLORS.ink : COLORS.line}`,
+          background: value === opt.value ? COLORS.ink : COLORS.paper,
+          color: value === opt.value ? COLORS.paper : COLORS.ink,
+          cursor: "pointer", transition: "all 0.15s",
+        }}>{opt.label}</button>
       ))}
     </div>
   );
@@ -448,37 +593,29 @@ function SegButton({ options, value, onChange }) {
 
 function Select({ value, onChange, options }) {
   return (
-    <select value={value} onChange={(e) => onChange(Number(e.target.value))} style={{ ...inputStyle, cursor: "pointer", appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230E2A3D' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}>
+    <select value={value} onChange={(e) => onChange(Number(e.target.value))} style={{
+      ...inputStyle, cursor: "pointer", appearance: "none",
+      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230E2A3D' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`,
+      backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center",
+    }}>
       {options.map((o, i) => <option key={i} value={i}>{o}</option>)}
     </select>
   );
 }
 
 function Button({ children, onClick, variant = "primary", style = {}, type = "button", disabled }) {
-  const base = {
-    padding: "13px 24px", borderRadius: 9, fontSize: 15, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer",
-    border: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-    fontFamily: "inherit", transition: "all 0.15s", opacity: disabled ? 0.5 : 1,
-  };
+  const base = { padding: "13px 24px", borderRadius: 9, fontSize: 15, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", border: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit", transition: "all 0.15s", opacity: disabled ? 0.5 : 1 };
   const variants = {
     primary: { background: COLORS.ink, color: COLORS.paper },
     coral: { background: COLORS.coral, color: "#fff" },
     ghost: { background: "transparent", color: COLORS.ink, border: `1.5px solid ${COLORS.line}` },
     text: { background: "transparent", color: COLORS.coral, padding: "8px 4px" },
   };
-  return (
-    <button type={type} onClick={onClick} disabled={disabled} style={{ ...base, ...variants[variant], ...style }}>
-      {children}
-    </button>
-  );
+  return <button type={type} onClick={onClick} disabled={disabled} style={{ ...base, ...variants[variant], ...style }}>{children}</button>;
 }
 
 function Card({ children, style = {} }) {
-  return (
-    <div style={{ background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 24, ...style }}>
-      {children}
-    </div>
-  );
+  return <div style={{ background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 24, ...style }}>{children}</div>;
 }
 
 function StatBlock({ icon, label, value, unit, sub, accent }) {
@@ -499,20 +636,19 @@ function StatBlock({ icon, label, value, unit, sub, accent }) {
 
 function ProBadgeTag({ small }) {
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.gold, color: "#3A2D0A",
-      fontSize: small ? 10 : 11, fontWeight: 800, padding: small ? "2px 7px" : "3px 9px", borderRadius: 20,
-      letterSpacing: "0.04em",
-    }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.gold, color: "#3A2D0A", fontSize: small ? 10 : 11, fontWeight: 800, padding: small ? "2px 7px" : "3px 9px", borderRadius: 20, letterSpacing: "0.04em" }}>
       <Crown size={small ? 10 : 12} /> PRO
     </span>
   );
 }
 
+/* ============================================================
+   APP ROOT
+============================================================ */
 export default function App() {
   const [lang, setLang] = useState("tr");
   const t = STR[lang];
-  const [page, setPage] = useState("landing"); // landing, calc, track, clients, templates, proLanding, proCheckout, proSuccess, clientProfile, templateDetail
+  const [page, setPage] = useState("landing");
   const [isPro, setIsPro] = useState(false);
   const [loadingPro, setLoadingPro] = useState(true);
   const [selectedClientId, setSelectedClientId] = useState(null);
@@ -534,10 +670,7 @@ export default function App() {
   const navigate = (p) => { setPage(p); window.scrollTo(0, 0); };
 
   return (
-    <div style={{
-      minHeight: "100vh", background: COLORS.paper, color: COLORS.ink,
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    }}>
+    <div style={{ minHeight: "100vh", background: COLORS.paper, color: COLORS.ink, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; }
@@ -548,39 +681,29 @@ export default function App() {
           .nb-grid-3 { grid-template-columns: 1fr !important; }
           .nb-hide-mobile { display: none !important; }
         }
+        .nb-page-enter { animation: fadeIn 0.22s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @media print {
+          .nb-no-print { display: none !important; }
+          body { background: white; }
+        }
       `}</style>
 
       <TopNav t={t} lang={lang} setLang={setLang} page={page} navigate={navigate} isPro={isPro} />
 
-      <main>
-        {page === "landing" && <Landing t={t} navigate={navigate} />}
+      <main className="nb-page-enter" key={page}>
+        {page === "landing" && <Landing t={t} navigate={navigate} lang={lang} />}
         {page === "calc" && <CalcPage t={t} lang={lang} navigate={navigate} />}
         {page === "track" && <TrackPage t={t} lang={lang} />}
-        {page === "clients" && (
-          isPro
-            ? <ClientsPage t={t} lang={lang} navigate={navigate} setSelectedClientId={setSelectedClientId} />
-            : <Upsell t={t} navigate={navigate} />
-        )}
-        {page === "clientProfile" && (
-          isPro
-            ? <ClientProfilePage t={t} lang={lang} clientId={selectedClientId} navigate={navigate} />
-            : <Upsell t={t} navigate={navigate} />
-        )}
-        {page === "templates" && (
-          isPro
-            ? <TemplatesPage t={t} lang={lang} navigate={navigate} setSelectedTemplateId={setSelectedTemplateId} />
-            : <Upsell t={t} navigate={navigate} />
-        )}
-        {page === "templateDetail" && (
-          isPro
-            ? <TemplateDetailPage t={t} lang={lang} templateId={selectedTemplateId} navigate={navigate} />
-            : <Upsell t={t} navigate={navigate} />
-        )}
+        {page === "clients" && (isPro ? <ClientsPage t={t} lang={lang} navigate={navigate} setSelectedClientId={setSelectedClientId} /> : <Upsell t={t} navigate={navigate} />)}
+        {page === "clientProfile" && (isPro ? <ClientProfilePage t={t} lang={lang} clientId={selectedClientId} navigate={navigate} /> : <Upsell t={t} navigate={navigate} />)}
+        {page === "templates" && (isPro ? <TemplatesPage t={t} lang={lang} navigate={navigate} setSelectedTemplateId={setSelectedTemplateId} /> : <Upsell t={t} navigate={navigate} />)}
+        {page === "templateDetail" && (isPro ? <TemplateDetailPage t={t} lang={lang} templateId={selectedTemplateId} navigate={navigate} /> : <Upsell t={t} navigate={navigate} />)}
         {page === "proLanding" && <ProLanding t={t} navigate={navigate} isPro={isPro} />}
         {page === "proCheckout" && <ProCheckout t={t} navigate={navigate} goPro={goPro} />}
       </main>
 
-      <Footer t={t} />
+      <Footer t={t} navigate={navigate} />
     </div>
   );
 }
@@ -589,7 +712,6 @@ export default function App() {
    NAV
 ============================================================ */
 function TopNav({ t, lang, setLang, page, navigate, isPro }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const navItems = [
     { key: "calc", label: t.nav.calc, icon: <Calculator size={15} /> },
     { key: "track", label: t.nav.track, icon: <TrendingUp size={15} /> },
@@ -610,7 +732,7 @@ function TopNav({ t, lang, setLang, page, navigate, isPro }) {
             <button key={item.key} onClick={() => navigate(item.key)} style={{
               display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8,
               border: "none", background: page === item.key ? COLORS.paperDim : "transparent",
-              color: COLORS.ink, fontSize: 13.5, fontWeight: 600, cursor: "pointer", position: "relative",
+              color: COLORS.ink, fontSize: 13.5, fontWeight: 600, cursor: "pointer",
             }}>
               {item.icon}{item.label}
               {item.pro && !isPro && <Lock size={10} style={{ marginLeft: 2, opacity: 0.5 }} />}
@@ -619,10 +741,7 @@ function TopNav({ t, lang, setLang, page, navigate, isPro }) {
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button onClick={() => setLang(lang === "tr" ? "en" : "tr")} style={{
-            display: "flex", alignItems: "center", gap: 5, padding: "7px 11px", borderRadius: 7,
-            border: `1px solid ${COLORS.line}`, background: "#fff", fontSize: 12.5, fontWeight: 700, cursor: "pointer", color: COLORS.ink,
-          }}>
+          <button onClick={() => setLang(lang === "tr" ? "en" : "tr")} style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 11px", borderRadius: 7, border: `1px solid ${COLORS.line}`, background: "#fff", fontSize: 12.5, fontWeight: 700, cursor: "pointer", color: COLORS.ink }}>
             <Globe size={13} /> {lang === "tr" ? "EN" : "TR"}
           </button>
           {!isPro && (
@@ -630,12 +749,9 @@ function TopNav({ t, lang, setLang, page, navigate, isPro }) {
               <Crown size={13} /> {t.nav.upgrade}
             </Button>
           )}
-          <button className="nb-hide-mobile" style={{ display: "none" }} />
-          <button onClick={() => setMobileOpen(!mobileOpen)} style={{ display: "none", background: "none", border: "none" }} />
         </div>
       </div>
 
-      {/* Mobile nav row */}
       <div style={{ display: "flex", overflowX: "auto", gap: 6, padding: "0 16px 12px", borderTop: `1px solid ${COLORS.line}`, paddingTop: 10 }} className="nb-mobile-nav">
         {navItems.map((item) => (
           <button key={item.key} onClick={() => navigate(item.key)} style={{
@@ -648,19 +764,54 @@ function TopNav({ t, lang, setLang, page, navigate, isPro }) {
           </button>
         ))}
       </div>
-      <style>{`
-        @media (min-width: 721px) { .nb-mobile-nav { display: none !important; } }
-      `}</style>
+      <style>{`@media (min-width: 721px) { .nb-mobile-nav { display: none !important; } }`}</style>
     </header>
   );
 }
 
-function Footer({ t }) {
+/* ============================================================
+   FOOTER
+============================================================ */
+function Footer({ t, navigate }) {
   return (
-    <footer style={{ borderTop: `1px solid ${COLORS.line}`, padding: "32px 24px", marginTop: 60 }}>
-      <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 16, fontSize: 12.5, color: COLORS.ink, opacity: 0.45 }}>
-        <span>{t.appName} — {t.tagline}</span>
-        <span>© 2026</span>
+    <footer style={{ borderTop: `1px solid ${COLORS.line}`, background: COLORS.paper, padding: "48px 24px 32px", marginTop: 60 }}>
+      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 40, marginBottom: 40 }} className="nb-grid-3">
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <Logo size={24} />
+              <span style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 800, fontSize: 17 }}>{t.appName}</span>
+            </div>
+            <p style={{ fontSize: 13.5, lineHeight: 1.65, color: COLORS.ink, opacity: 0.6, margin: 0, maxWidth: 300 }}>{t.footer.desc}</p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: COLORS.ink, opacity: 0.5, margin: "0 0 14px" }}>{t.footer.links}</h4>
+            {[
+              { label: t.footer.calc, page: "calc" },
+              { label: t.footer.track, page: "track" },
+              { label: t.footer.pro, page: "proLanding" },
+            ].map((l) => (
+              <button key={l.page} onClick={() => navigate(l.page)} style={{ display: "block", background: "none", border: "none", cursor: "pointer", fontSize: 13.5, color: COLORS.ink, opacity: 0.65, padding: "4px 0", fontFamily: "inherit", textAlign: "left" }}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <div>
+            <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: COLORS.ink, opacity: 0.5, margin: "0 0 14px" }}>Pro</h4>
+            {[
+              { label: t.nav.clients, page: "clients" },
+              { label: t.nav.templates, page: "templates" },
+            ].map((l) => (
+              <button key={l.page} onClick={() => navigate(l.page)} style={{ display: "block", background: "none", border: "none", cursor: "pointer", fontSize: 13.5, color: COLORS.ink, opacity: 0.65, padding: "4px 0", fontFamily: "inherit", textAlign: "left" }}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ borderTop: `1px solid ${COLORS.line}`, paddingTop: 20, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10, fontSize: 12, color: COLORS.ink, opacity: 0.4 }}>
+          <span>© 2026 {t.appName}. {t.footer.rights}</span>
+          <span>{t.footer.disclaimer}</span>
+        </div>
       </div>
     </footer>
   );
@@ -669,9 +820,10 @@ function Footer({ t }) {
 /* ============================================================
    LANDING
 ============================================================ */
-function Landing({ t, navigate }) {
+function Landing({ t, navigate, lang }) {
   return (
     <div>
+      {/* Hero */}
       <section style={{ maxWidth: 1180, margin: "0 auto", padding: "80px 24px 60px", display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 60, alignItems: "center" }} className="nb-grid-2">
         <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.coral, marginBottom: 18 }}>
@@ -692,17 +844,55 @@ function Landing({ t, navigate }) {
             </Button>
           </div>
         </div>
+        <div><LandingVisual /></div>
+      </section>
 
-        <div style={{ position: "relative" }}>
-          <LandingVisual />
+      {/* Stats strip */}
+      <section style={{ background: COLORS.ink, padding: "28px 24px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, textAlign: "center" }} className="nb-grid-2">
+          {[
+            { value: "12+", label: t.stats.templates },
+            { value: "2", label: t.stats.languages },
+            { value: "1", label: t.stats.formula },
+            { value: "100%", label: t.stats.free },
+          ].map((s, i) => (
+            <div key={i}>
+              <div style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 32, fontWeight: 800, color: "#fff" }}>{s.value}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.paperDim, opacity: 0.7, marginTop: 4, letterSpacing: "0.04em" }}>{s.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section style={{ maxWidth: 1180, margin: "0 auto", padding: "20px 24px 80px" }}>
+      {/* Features */}
+      <section style={{ maxWidth: 1180, margin: "0 auto", padding: "60px 24px 20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }} className="nb-grid-3">
-          <FeatureTile icon={<Calculator size={20} />} title={t === STR.tr ? "Doğru Hesaplama" : "Accurate Calculation"} desc={t === STR.tr ? "Bilimsel formüllerle BMR, TDEE, su ve makro ihtiyacı." : "BMR, TDEE, water and macro needs via scientific formulas."} />
-          <FeatureTile icon={<Users size={20} />} title={t === STR.tr ? "Danışan Yönetimi" : "Client Management"} desc={t === STR.tr ? "Diyetisyenler için kalıcı danışan kayıtları ve geçmiş." : "Persistent client records and history for dietitians."} pro />
-          <FeatureTile icon={<FileText size={20} />} title={t === STR.tr ? "Klinik Şablonlar" : "Clinical Templates"} desc={t === STR.tr ? "12+ hastalık için referans diyet planları." : "Reference diet plans for 12+ conditions."} pro />
+          <FeatureTile icon={<Calculator size={20} />} title={lang === "tr" ? "Doğru Hesaplama" : "Accurate Calculation"} desc={lang === "tr" ? "Bilimsel formüllerle BMR, TDEE, BMİ, su ve makro ihtiyacı." : "BMR, TDEE, BMI, water and macro needs via scientific formulas."} />
+          <FeatureTile icon={<Users size={20} />} title={lang === "tr" ? "Danışan Yönetimi" : "Client Management"} desc={lang === "tr" ? "Diyetisyenler için kalıcı danışan kayıtları ve geçmiş." : "Persistent client records and history for dietitians."} pro />
+          <FeatureTile icon={<FileText size={20} />} title={lang === "tr" ? "Klinik Şablonlar" : "Clinical Templates"} desc={lang === "tr" ? "12+ hastalık için referans diyet planları, yazdırma desteği." : "Reference diet plans for 12+ conditions with print support."} pro />
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section style={{ maxWidth: 1180, margin: "0 auto", padding: "60px 24px 80px" }}>
+        <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 700, margin: "0 0 40px", textAlign: "center" }}>{t.howItWorks.title}</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }} className="nb-grid-3">
+          {[
+            { num: "01", title: t.howItWorks.step1Title, desc: t.howItWorks.step1Desc, icon: <Scale size={22} /> },
+            { num: "02", title: t.howItWorks.step2Title, desc: t.howItWorks.step2Desc, icon: <Calculator size={22} /> },
+            { num: "03", title: t.howItWorks.step3Title, desc: t.howItWorks.step3Desc, icon: <TrendingUp size={22} /> },
+          ].map((step, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: COLORS.coral, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                  {step.icon}
+                </div>
+                <span style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 28, fontWeight: 800, color: COLORS.line }}>{step.num}</span>
+              </div>
+              <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 8px" }}>{step.title}</h3>
+              <p style={{ fontSize: 13.5, color: COLORS.ink, opacity: 0.6, lineHeight: 1.6, margin: 0 }}>{step.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>
@@ -713,9 +903,7 @@ function FeatureTile({ icon, title, desc, pro }) {
   return (
     <Card>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ width: 38, height: 38, borderRadius: 10, background: COLORS.paperDim, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.coral }}>
-          {icon}
-        </div>
+        <div style={{ width: 38, height: 38, borderRadius: 10, background: COLORS.paperDim, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.coral }}>{icon}</div>
         {pro && <ProBadgeTag small />}
       </div>
       <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 6px" }}>{title}</h3>
@@ -729,22 +917,15 @@ function LandingVisual() {
     <svg viewBox="0 0 420 420" style={{ width: "100%", height: "auto" }}>
       <circle cx="210" cy="210" r="200" fill={COLORS.paperDim} />
       <circle cx="210" cy="210" r="150" fill="none" stroke={COLORS.line} strokeWidth="1" strokeDasharray="3 6" />
-      {/* Plate */}
       <circle cx="210" cy="210" r="118" fill="#fff" stroke={COLORS.line} strokeWidth="1.5" />
-      {/* Macro segments - donut */}
       <circle cx="210" cy="210" r="95" fill="none" stroke={COLORS.ink} strokeWidth="26" strokeDasharray="180 597" strokeDashoffset="0" transform="rotate(-90 210 210)" />
       <circle cx="210" cy="210" r="95" fill="none" stroke={COLORS.coral} strokeWidth="26" strokeDasharray="240 597" strokeDashoffset="-180" transform="rotate(-90 210 210)" />
       <circle cx="210" cy="210" r="95" fill="none" stroke={COLORS.sage} strokeWidth="26" strokeDasharray="177 597" strokeDashoffset="-420" transform="rotate(-90 210 210)" />
       <circle cx="210" cy="210" r="68" fill={COLORS.paper} />
       <text x="210" y="203" textAnchor="middle" fontFamily="'Source Serif 4', Georgia, serif" fontSize="30" fontWeight="800" fill={COLORS.ink}>2150</text>
       <text x="210" y="224" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fill={COLORS.ink} opacity="0.5" letterSpacing="1">KCAL / GÜN</text>
-      {/* Floating droplet */}
-      <g transform="translate(70,80)">
-        <path d="M14 0 C20 12 28 20 28 30 A14 14 0 1 1 0 30 C0 20 8 12 14 0 Z" fill={COLORS.sage} opacity="0.85" />
-      </g>
-      <g transform="translate(330,90)">
-        <rect x="0" y="0" width="30" height="38" rx="6" fill={COLORS.gold} opacity="0.85" />
-      </g>
+      <g transform="translate(70,80)"><path d="M14 0 C20 12 28 20 28 30 A14 14 0 1 1 0 30 C0 20 8 12 14 0 Z" fill={COLORS.sage} opacity="0.85" /></g>
+      <g transform="translate(330,90)"><rect x="0" y="0" width="30" height="38" rx="6" fill={COLORS.gold} opacity="0.85" /></g>
     </svg>
   );
 }
@@ -756,7 +937,6 @@ function CalcPage({ t, lang, navigate }) {
   const [form, setForm] = useState({ gender: "female", age: "30", height: "165", weight: "65", activityIdx: 1, goal: "maintain" });
   const [result, setResult] = useState(null);
   const [saved, setSaved] = useState(false);
-
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleCalc = () => {
@@ -773,16 +953,11 @@ function CalcPage({ t, lang, navigate }) {
     setSaved(true);
   };
 
-  const goalOptions = [
-    { value: "lose", label: t.calc.goalLose },
-    { value: "maintain", label: t.calc.goalMaintain },
-    { value: "gain", label: t.calc.goalGain },
-  ];
-  const genderOptions = [
-    { value: "female", label: t.calc.female },
-    { value: "male", label: t.calc.male },
-  ];
+  const goalOptions = [{ value: "lose", label: t.calc.goalLose }, { value: "maintain", label: t.calc.goalMaintain }, { value: "gain", label: t.calc.goalGain }];
+  const genderOptions = [{ value: "female", label: t.calc.female }, { value: "male", label: t.calc.male }];
   const activityLabels = [t.calc.act1, t.calc.act2, t.calc.act3, t.calc.act4, t.calc.act5];
+
+  const bmiData = result ? bmiCategory(result.bmi, t) : null;
 
   return (
     <section style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -793,26 +968,14 @@ function CalcPage({ t, lang, navigate }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 28 }} className="nb-grid-2">
         <Card>
-          <Field label={t.calc.gender}>
-            <SegButton options={genderOptions} value={form.gender} onChange={(v) => update("gender", v)} />
-          </Field>
+          <Field label={t.calc.gender}><SegButton options={genderOptions} value={form.gender} onChange={(v) => update("gender", v)} /></Field>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <Field label={t.calc.age}>
-              <TextInput type="number" value={form.age} onChange={(e) => update("age", e.target.value)} placeholder="30" />
-            </Field>
-            <Field label={t.calc.height}>
-              <TextInput type="number" value={form.height} onChange={(e) => update("height", e.target.value)} placeholder="165" />
-            </Field>
+            <Field label={t.calc.age}><TextInput type="number" value={form.age} onChange={(e) => update("age", e.target.value)} placeholder="30" /></Field>
+            <Field label={t.calc.height}><TextInput type="number" value={form.height} onChange={(e) => update("height", e.target.value)} placeholder="165" /></Field>
           </div>
-          <Field label={t.calc.weight}>
-            <TextInput type="number" value={form.weight} onChange={(e) => update("weight", e.target.value)} placeholder="65" />
-          </Field>
-          <Field label={t.calc.activity}>
-            <Select value={form.activityIdx} onChange={(v) => update("activityIdx", v)} options={activityLabels} />
-          </Field>
-          <Field label={t.calc.goal}>
-            <SegButton options={goalOptions} value={form.goal} onChange={(v) => update("goal", v)} />
-          </Field>
+          <Field label={t.calc.weight}><TextInput type="number" value={form.weight} onChange={(e) => update("weight", e.target.value)} placeholder="65" /></Field>
+          <Field label={t.calc.activity}><Select value={form.activityIdx} onChange={(v) => update("activityIdx", v)} options={activityLabels} /></Field>
+          <Field label={t.calc.goal}><SegButton options={goalOptions} value={form.goal} onChange={(v) => update("goal", v)} /></Field>
           <Button variant="primary" onClick={handleCalc} style={{ width: "100%", marginTop: 6, padding: "14px" }}>
             <Calculator size={16} /> {t.calc.calculate}
           </Button>
@@ -837,6 +1000,34 @@ function CalcPage({ t, lang, navigate }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                 <StatBlock icon={<Apple size={14} />} label={t.calc.target} value={result.target} unit={t.calc.kcal} sub={t.calc.targetDesc} accent />
                 <StatBlock icon={<Droplets size={14} />} label={t.calc.water} value={result.water} unit={t.calc.liters} sub={t.calc.waterDesc} />
+              </div>
+
+              {/* BMI Card */}
+              <div style={{ background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: "18px 20px", marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: COLORS.sage }}>
+                  <Scale size={14} />
+                  <span style={{ fontSize: 11.5, letterSpacing: "0.07em", textTransform: "uppercase", fontWeight: 700 }}>{t.calc.bmi}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div>
+                    <span style={{ fontSize: 34, fontWeight: 800, color: COLORS.ink, fontFamily: "'Source Serif 4', Georgia, serif" }}>{result.bmi}</span>
+                  </div>
+                  <div>
+                    <span style={{ display: "inline-block", background: bmiData.color + "20", color: bmiData.color, fontWeight: 700, fontSize: 13, padding: "4px 12px", borderRadius: 20, border: `1.5px solid ${bmiData.color}40` }}>{bmiData.label}</span>
+                    <div style={{ fontSize: 12, color: COLORS.ink, opacity: 0.45, marginTop: 4 }}>{t.calc.bmiDesc}</div>
+                  </div>
+                </div>
+                {/* BMI scale */}
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ display: "flex", height: 6, borderRadius: 4, overflow: "hidden", gap: 2 }}>
+                    {[["#3B82F6", "18.5"], ["#5C7A6E", "25"], ["#C9A14A", "30"], ["#E8623F", "∞"]].map(([col], i) => (
+                      <div key={i} style={{ flex: 1, background: col, opacity: 0.7 }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: COLORS.ink, opacity: 0.4, marginTop: 3 }}>
+                    <span>{t.calc.bmiUnder}</span><span>{t.calc.bmiNormal}</span><span>{t.calc.bmiOver}</span><span>{t.calc.bmiObese}</span>
+                  </div>
+                </div>
               </div>
 
               <Card style={{ marginBottom: 14 }}>
@@ -883,6 +1074,7 @@ function MacroBar({ protein, carbs, fat, t }) {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ width: 9, height: 9, borderRadius: 3, background: r.color, display: "inline-block" }} />
             <span style={{ fontSize: 14, fontWeight: 600 }}>{r.label}</span>
+            <span style={{ fontSize: 12, color: COLORS.ink, opacity: 0.4 }}>{r.pct.toFixed(0)}%</span>
           </div>
           <span style={{ fontSize: 14, fontWeight: 700 }}>{r.value}g</span>
         </div>
@@ -902,10 +1094,7 @@ function TrackPage({ t, lang }) {
     setLoading(true);
     const keys = await storeList("entry:");
     const items = [];
-    for (const k of keys) {
-      const v = await storeGet(k);
-      if (v) items.push({ ...v, key: k });
-    }
+    for (const k of keys) { const v = await storeGet(k); if (v) items.push({ ...v, key: k }); }
     items.sort((a, b) => b.ts - a.ts);
     setEntries(items);
     setLoading(false);
@@ -913,10 +1102,7 @@ function TrackPage({ t, lang }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async (key) => {
-    await storeDelete(key);
-    load();
-  };
+  const handleDelete = async (key) => { await storeDelete(key); load(); };
 
   return (
     <section style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -924,16 +1110,13 @@ function TrackPage({ t, lang }) {
         <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 32, fontWeight: 700, margin: "0 0 8px" }}>{t.track.title}</h1>
         <p style={{ color: COLORS.ink, opacity: 0.6, fontSize: 15, margin: 0 }}>{t.track.sub}</p>
       </div>
-
-      {loading && <p style={{ opacity: 0.5 }}>...</p>}
-
+      {loading && <Spinner />}
       {!loading && entries.length === 0 && (
         <div style={{ border: `1.5px dashed ${COLORS.line}`, borderRadius: 14, padding: 50, textAlign: "center", color: COLORS.ink, opacity: 0.45 }}>
           <ClipboardList size={28} style={{ marginBottom: 10 }} />
           <p style={{ margin: 0, fontSize: 14 }}>{t.track.empty}</p>
         </div>
       )}
-
       {!loading && entries.length > 0 && (
         <>
           {entries.length > 1 && <WeightChart entries={entries} t={t} />}
@@ -954,9 +1137,7 @@ function TrackPage({ t, lang }) {
                     <td style={{ padding: "12px 18px", fontSize: 14 }}>{e.target} {t.calc.kcal}</td>
                     <td style={{ padding: "12px 18px", fontSize: 14 }}>{e.water} L</td>
                     <td style={{ padding: "12px 18px", textAlign: "right" }}>
-                      <button onClick={() => handleDelete(e.key)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.ink, opacity: 0.35 }}>
-                        <Trash2 size={15} />
-                      </button>
+                      <button onClick={() => handleDelete(e.key)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.ink, opacity: 0.35 }}><Trash2 size={15} /></button>
                     </td>
                   </tr>
                 ))}
@@ -976,13 +1157,11 @@ function WeightChart({ entries, t }) {
   const max = Math.max(...weights) + 1;
   const range = max - min || 1;
   const w = 800, h = 160, pad = 20;
-
   const points = sorted.map((e, i) => {
     const x = pad + (i / Math.max(sorted.length - 1, 1)) * (w - pad * 2);
     const y = h - pad - ((Number(e.weight) - min) / range) * (h - pad * 2);
     return `${x},${y}`;
   });
-
   return (
     <Card style={{ marginBottom: 20 }}>
       <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: COLORS.ink, opacity: 0.5, margin: "0 0 16px" }}>{t.track.weightTrend}</h3>
@@ -999,7 +1178,7 @@ function WeightChart({ entries, t }) {
 }
 
 /* ============================================================
-   UPSELL (shown when free user hits Pro feature)
+   UPSELL
 ============================================================ */
 function Upsell({ t, navigate }) {
   return (
@@ -1028,18 +1207,14 @@ function ProLanding({ t, navigate, isPro }) {
         <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 36, fontWeight: 700, margin: "16px 0 12px" }}>{t.pro.landingTitle}</h1>
         <p style={{ color: COLORS.ink, opacity: 0.6, fontSize: 16, maxWidth: 480, margin: "0 auto" }}>{t.pro.landingSub}</p>
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 44 }} className="nb-grid-2">
         {features.map((f, i) => (
           <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start", background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 18 }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: COLORS.ink, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Check size={14} />
-            </div>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: COLORS.ink, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Check size={14} /></div>
             <span style={{ fontSize: 14.5, lineHeight: 1.5 }}>{f}</span>
           </div>
         ))}
       </div>
-
       {!isPro ? (
         <div style={{ textAlign: "center" }}>
           <Button variant="coral" onClick={() => navigate("proCheckout")} style={{ padding: "16px 32px", fontSize: 16 }}>
@@ -1058,7 +1233,7 @@ function ProLanding({ t, navigate, isPro }) {
 }
 
 /* ============================================================
-   PRO CHECKOUT (demo)
+   PRO CHECKOUT
 ============================================================ */
 function ProCheckout({ t, navigate, goPro }) {
   const [plan, setPlan] = useState("yearly");
@@ -1069,11 +1244,7 @@ function ProCheckout({ t, navigate, goPro }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setProcessing(true);
-    setTimeout(async () => {
-      await goPro();
-      setProcessing(false);
-      setDone(true);
-    }, 1400);
+    setTimeout(async () => { await goPro(); setProcessing(false); setDone(true); }, 1400);
   };
 
   if (done) {
@@ -1098,35 +1269,21 @@ function ProCheckout({ t, navigate, goPro }) {
         <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 26, fontWeight: 700, margin: "14px 0 6px" }}>{t.pro.subscribe}</h1>
         <p style={{ fontSize: 12.5, color: COLORS.gold, fontWeight: 600 }}>{t.pro.demoNote}</p>
       </div>
-
       <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
         {[{ k: "monthly", label: t.pro.priceMonthly, price: "₺149" }, { k: "yearly", label: t.pro.priceYearly, price: "₺1.490" }].map((p) => (
-          <button key={p.k} onClick={() => setPlan(p.k)} style={{
-            flex: 1, padding: "16px 14px", borderRadius: 12, cursor: "pointer", textAlign: "left",
-            border: `2px solid ${plan === p.k ? COLORS.coral : COLORS.line}`,
-            background: plan === p.k ? COLORS.coralSoft : "#fff",
-          }}>
+          <button key={p.k} onClick={() => setPlan(p.k)} style={{ flex: 1, padding: "16px 14px", borderRadius: 12, cursor: "pointer", textAlign: "left", border: `2px solid ${plan === p.k ? COLORS.coral : COLORS.line}`, background: plan === p.k ? COLORS.coralSoft : "#fff" }}>
             <div style={{ fontSize: 12.5, fontWeight: 700, opacity: 0.7, marginBottom: 4 }}>{p.label}</div>
             <div style={{ fontSize: 20, fontWeight: 800, fontFamily: "'Source Serif 4', Georgia, serif" }}>{p.price}</div>
           </button>
         ))}
       </div>
-
       <Card>
         <form onSubmit={handleSubmit}>
-          <Field label={t.pro.name}>
-            <TextInput required value={card.name} onChange={(e) => setCard({ ...card, name: e.target.value })} placeholder="Ada Yılmaz" />
-          </Field>
-          <Field label={t.pro.cardNumber}>
-            <TextInput required value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" maxLength={19} />
-          </Field>
+          <Field label={t.pro.name}><TextInput required value={card.name} onChange={(e) => setCard({ ...card, name: e.target.value })} placeholder="Ada Yılmaz" /></Field>
+          <Field label={t.pro.cardNumber}><TextInput required value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" maxLength={19} /></Field>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <Field label={t.pro.expiry}>
-              <TextInput required value={card.expiry} onChange={(e) => setCard({ ...card, expiry: e.target.value })} placeholder="12/28" />
-            </Field>
-            <Field label={t.pro.cvc}>
-              <TextInput required value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} placeholder="123" maxLength={4} />
-            </Field>
+            <Field label={t.pro.expiry}><TextInput required value={card.expiry} onChange={(e) => setCard({ ...card, expiry: e.target.value })} placeholder="12/28" /></Field>
+            <Field label={t.pro.cvc}><TextInput required value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} placeholder="123" maxLength={4} /></Field>
           </div>
           <Button type="submit" variant="coral" disabled={processing} style={{ width: "100%", padding: "15px", marginTop: 8 }}>
             {processing ? t.pro.processing : <>{t.pro.confirm} <ArrowRight size={15} /></>}
@@ -1151,10 +1308,7 @@ function ClientsPage({ t, lang, navigate, setSelectedClientId }) {
     setLoading(true);
     const keys = await storeList("client:");
     const items = [];
-    for (const k of keys) {
-      const v = await storeGet(k);
-      if (v) items.push({ ...v, key: k });
-    }
+    for (const k of keys) { const v = await storeGet(k); if (v) items.push({ ...v, key: k }); }
     items.sort((a, b) => b.createdAt - a.createdAt);
     setClients(items);
     setLoading(false);
@@ -1183,41 +1337,25 @@ function ClientsPage({ t, lang, navigate, setSelectedClientId }) {
   return (
     <section style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px 80px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
-        <div>
-          <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 700, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
-            {t.clients.title} <ProBadgeTag small />
-          </h1>
-        </div>
-        <Button variant="coral" onClick={() => setShowForm(!showForm)}>
-          <UserPlus size={16} /> {t.clients.add}
-        </Button>
+        <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 10 }}>
+          {t.clients.title} <ProBadgeTag small />
+        </h1>
+        <Button variant="coral" onClick={() => setShowForm(!showForm)}><UserPlus size={16} /> {t.clients.add}</Button>
       </div>
 
       {showForm && (
         <Card style={{ marginBottom: 24 }}>
           <form onSubmit={handleAdd}>
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
-              <Field label={t.clients.name}>
-                <TextInput required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={lang === "tr" ? "örn. Danışan-014" : "e.g. Client-014"} />
-              </Field>
-              <Field label={t.clients.age}>
-                <TextInput type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
-              </Field>
+              <Field label={t.clients.name}><TextInput required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={lang === "tr" ? "örn. Danışan-014" : "e.g. Client-014"} /></Field>
+              <Field label={t.clients.age}><TextInput type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} /></Field>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-              <Field label={t.clients.gender}>
-                <SegButton options={[{ value: "female", label: t.calc.female }, { value: "male", label: t.calc.male }]} value={form.gender} onChange={(v) => setForm({ ...form, gender: v })} />
-              </Field>
-              <Field label={t.clients.height}>
-                <TextInput type="number" value={form.height} onChange={(e) => setForm({ ...form, height: e.target.value })} />
-              </Field>
-              <Field label={t.clients.weight}>
-                <TextInput type="number" value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} />
-              </Field>
+              <Field label={t.clients.gender}><SegButton options={[{ value: "female", label: t.calc.female }, { value: "male", label: t.calc.male }]} value={form.gender} onChange={(v) => setForm({ ...form, gender: v })} /></Field>
+              <Field label={t.clients.height}><TextInput type="number" value={form.height} onChange={(e) => setForm({ ...form, height: e.target.value })} /></Field>
+              <Field label={t.clients.weight}><TextInput type="number" value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} /></Field>
             </div>
-            <Field label={t.clients.condition}>
-              <TextInput value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })} placeholder={t.clients.conditionNone} />
-            </Field>
+            <Field label={t.clients.condition}><TextInput value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })} placeholder={t.clients.conditionNone} /></Field>
             <Field label={t.clients.notes}>
               <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }} />
             </Field>
@@ -1239,13 +1377,12 @@ function ClientsPage({ t, lang, navigate, setSelectedClientId }) {
         </div>
       </Field>
 
+      {loading && <Spinner />}
       {!loading && filtered.length === 0 && (
         <div style={{ border: `1.5px dashed ${COLORS.line}`, borderRadius: 14, padding: 50, textAlign: "center", color: COLORS.ink, opacity: 0.45 }}>
-          <Users size={28} style={{ marginBottom: 10 }} />
-          <p style={{ margin: 0, fontSize: 14 }}>{t.clients.empty}</p>
+          <Users size={28} style={{ marginBottom: 10 }} /><p style={{ margin: 0, fontSize: 14 }}>{t.clients.empty}</p>
         </div>
       )}
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }} className="nb-grid-2">
         {filtered.map((c) => (
           <Card key={c.key}>
@@ -1255,17 +1392,11 @@ function ClientsPage({ t, lang, navigate, setSelectedClientId }) {
                 <p style={{ fontSize: 13, color: COLORS.ink, opacity: 0.55, margin: 0 }}>
                   {c.age && `${c.age} ${lang === "tr" ? "yaş" : "yrs"}`}{c.weight && ` · ${c.weight} kg`}{c.height && ` · ${c.height} cm`}
                 </p>
-                {c.condition && (
-                  <span style={{ display: "inline-block", marginTop: 8, fontSize: 11.5, fontWeight: 600, background: COLORS.coralSoft, color: COLORS.coral, padding: "3px 9px", borderRadius: 20 }}>
-                    {c.condition}
-                  </span>
-                )}
+                {c.condition && <span style={{ display: "inline-block", marginTop: 8, fontSize: 11.5, fontWeight: 600, background: COLORS.coralSoft, color: COLORS.coral, padding: "3px 9px", borderRadius: 20 }}>{c.condition}</span>}
               </div>
-              <button onClick={() => handleDelete(c.key)} style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.3 }}>
-                <Trash2 size={15} />
-              </button>
+              <button onClick={() => handleDelete(c.key)} style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.3 }}><Trash2 size={15} /></button>
             </div>
-            <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+            <div style={{ marginTop: 16 }}>
               <Button variant="ghost" onClick={() => { setSelectedClientId(c.key); navigate("clientProfile"); }} style={{ fontSize: 13, padding: "8px 14px" }}>
                 {t.clients.viewProfile} <ChevronRight size={14} />
               </Button>
@@ -1292,10 +1423,7 @@ function ClientProfilePage({ t, lang, clientId, navigate }) {
     setClient(c);
     const keys = await storeList(`${clientId}:history:`);
     const items = [];
-    for (const k of keys) {
-      const v = await storeGet(k);
-      if (v) items.push({ ...v, key: k });
-    }
+    for (const k of keys) { const v = await storeGet(k); if (v) items.push({ ...v, key: k }); }
     items.sort((a, b) => b.ts - a.ts);
     setHistory(items);
   }, [clientId]);
@@ -1312,16 +1440,13 @@ function ClientProfilePage({ t, lang, clientId, navigate }) {
     load();
   };
 
-  if (!client) {
-    return <section style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}>...</section>;
-  }
+  if (!client) return <section style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}><Spinner /></section>;
 
   return (
     <section style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px 80px" }}>
       <button onClick={() => navigate("clients")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: COLORS.ink, opacity: 0.55, marginBottom: 20, padding: 0, fontWeight: 600 }}>
         ← {t.common.back}
       </button>
-
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
         <div>
           <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 28, fontWeight: 700, margin: "0 0 6px" }}>{client.name}</h1>
@@ -1329,45 +1454,32 @@ function ClientProfilePage({ t, lang, clientId, navigate }) {
             {client.age && `${client.age} ${lang === "tr" ? "yaş" : "yrs"}`} · {client.gender === "male" ? t.calc.male : t.calc.female} · {client.height} cm
           </p>
         </div>
-        {client.condition && (
-          <span style={{ fontSize: 12.5, fontWeight: 600, background: COLORS.coralSoft, color: COLORS.coral, padding: "5px 12px", borderRadius: 20 }}>
-            {client.condition}
-          </span>
-        )}
+        {client.condition && <span style={{ fontSize: 12.5, fontWeight: 600, background: COLORS.coralSoft, color: COLORS.coral, padding: "5px 12px", borderRadius: 20 }}>{client.condition}</span>}
       </div>
-
       {client.notes && (
         <Card style={{ marginBottom: 20, background: COLORS.paperDim, border: "none" }}>
           <h4 style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", opacity: 0.5, margin: "0 0 8px" }}>{t.clients.notes}</h4>
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{client.notes}</p>
         </Card>
       )}
-
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>{t.clients.history}</h3>
         <Button variant="ghost" onClick={() => setShowAdd(!showAdd)} style={{ fontSize: 13, padding: "8px 14px" }}>
           <Plus size={14} /> {t.clients.newEntry}
         </Button>
       </div>
-
       {showAdd && (
         <Card style={{ marginBottom: 16 }}>
           <form onSubmit={handleAddEntry}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 14 }}>
-              <Field label={t.clients.weight}>
-                <TextInput type="number" required value={newEntry.weight} onChange={(e) => setNewEntry({ ...newEntry, weight: e.target.value })} />
-              </Field>
-              <Field label={t.clients.notes}>
-                <TextInput value={newEntry.note} onChange={(e) => setNewEntry({ ...newEntry, note: e.target.value })} />
-              </Field>
+              <Field label={t.clients.weight}><TextInput type="number" required value={newEntry.weight} onChange={(e) => setNewEntry({ ...newEntry, weight: e.target.value })} /></Field>
+              <Field label={t.clients.notes}><TextInput value={newEntry.note} onChange={(e) => setNewEntry({ ...newEntry, note: e.target.value })} /></Field>
             </div>
             <Button type="submit" variant="primary">{t.clients.save}</Button>
           </form>
         </Card>
       )}
-
       {history.length > 1 && <WeightChart entries={history} t={t} />}
-
       <Card style={{ padding: 0, overflow: "hidden" }}>
         {history.length === 0 && <p style={{ padding: 24, fontSize: 14, opacity: 0.5, margin: 0 }}>{t.track.empty}</p>}
         {history.map((h, i) => (
@@ -1394,21 +1506,22 @@ function TemplatesPage({ t, lang, navigate, setSelectedTemplateId }) {
         </h1>
         <p style={{ color: COLORS.ink, opacity: 0.6, fontSize: 14.5, margin: 0 }}>{t.templates.sub}</p>
       </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }} className="nb-grid-2">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }} className="nb-grid-3">
         {CONDITIONS.map((c) => (
-          <Card key={c.id} style={{ cursor: "pointer" }}>
+          <Card key={c.id} style={{ cursor: "pointer", transition: "box-shadow 0.15s" }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(14,42,61,0.1)"}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
             <div onClick={() => { setSelectedTemplateId(c.id); navigate("templateDetail"); }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <span style={{ fontSize: 28 }}>{c.icon}</span>
-                {c.warning && <Heart size={15} color={COLORS.coral} />}
+                {c.warning && <AlertCircle size={15} color={COLORS.coral} />}
               </div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, margin: "12px 0 6px" }}>{lang === "tr" ? c.nameTr : c.nameEn}</h3>
-              <p style={{ fontSize: 13, color: COLORS.ink, opacity: 0.55, lineHeight: 1.5, margin: "0 0 14px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, margin: "12px 0 6px" }}>{lang === "tr" ? c.nameTr : c.nameEn}</h3>
+              <p style={{ fontSize: 12.5, color: COLORS.ink, opacity: 0.55, lineHeight: 1.5, margin: "0 0 14px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                 {lang === "tr" ? c.overviewTr : c.overviewEn}
               </p>
-              <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.coral, display: "flex", alignItems: "center", gap: 4 }}>
-                {t.templates.use} <ChevronRight size={14} />
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.coral, display: "flex", alignItems: "center", gap: 4 }}>
+                {t.templates.use} <ChevronRight size={13} />
               </span>
             </div>
           </Card>
@@ -1430,16 +1543,23 @@ function TemplateDetailPage({ t, lang, templateId, navigate }) {
   const avoid = lang === "tr" ? c.avoidTr : c.avoidEn;
   const menu = lang === "tr" ? c.menuTr : c.menuEn;
 
+  const handlePrint = () => window.print();
+
   return (
     <section style={{ maxWidth: 820, margin: "0 auto", padding: "40px 24px 90px" }}>
-      <button onClick={() => navigate("templates")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: COLORS.ink, opacity: 0.55, marginBottom: 24, padding: 0, fontWeight: 600 }}>
-        ← {t.templates.backToList}
-      </button>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }} className="nb-no-print">
+        <button onClick={() => navigate("templates")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: COLORS.ink, opacity: 0.55, padding: 0, fontWeight: 600 }}>
+          ← {t.templates.backToList}
+        </button>
+        <Button variant="ghost" onClick={handlePrint} style={{ fontSize: 13, padding: "8px 14px" }}>
+          <Printer size={14} /> {t.templates.print}
+        </Button>
+      </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
         <span style={{ fontSize: 44 }}>{c.icon}</span>
         <div>
-          <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 28, fontWeight: 700, margin: 0 }}>{lang === "tr" ? c.nameTr : c.nameEn}</h1>
+          <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 28, fontWeight: 700, margin: "0 0 6px" }}>{lang === "tr" ? c.nameTr : c.nameEn}</h1>
           <ProBadgeTag small />
         </div>
       </div>
@@ -1471,9 +1591,7 @@ function TemplateDetailPage({ t, lang, templateId, navigate }) {
       <Card style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", opacity: 0.5, margin: "0 0 14px" }}>{t.templates.restrictions}</h3>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {restrictions.map((r, i) => (
-            <span key={i} style={{ fontSize: 12.5, fontWeight: 600, background: COLORS.paperDim, padding: "6px 12px", borderRadius: 20 }}>{r}</span>
-          ))}
+          {restrictions.map((r, i) => <span key={i} style={{ fontSize: 12.5, fontWeight: 600, background: COLORS.paperDim, padding: "6px 12px", borderRadius: 20 }}>{r}</span>)}
         </div>
       </Card>
 
