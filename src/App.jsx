@@ -324,15 +324,14 @@ export default function App(){
   const[lang,setLang]=useState("tr");
   const t=STR[lang];
   const[page,setPage]=useState("landing");
-  const[isPro,setIsPro]=useState(false);
-  const[isDark,setIsDark]=useState(false);
+  const[isPro,setIsPro]=useState(()=>{
+    try{const v=localStorage.getItem("nb:user:isPro");return v?JSON.parse(v):true;}catch{return true;}
+  });
+  const[isDark,setIsDark]=useState(()=>{
+    try{const v=localStorage.getItem("nb:user:dark");return v?JSON.parse(v):false;}catch{return false;}
+  });
   const[selClient,setSelClient]=useState(null);
   const[selTpl,setSelTpl]=useState(null);
-
-  useEffect(()=>{(async()=>{
-    const p=await sg("user:isPro");setIsPro(!!p);
-    const d=await sg("user:dark");setIsDark(!!d);
-  })();},[]);
 
   const toggleDark=async()=>{const nd=!isDark;setIsDark(nd);await ss("user:dark",nd);};
   const goPro=useCallback(async()=>{setIsPro(true);await ss("user:isPro",true);},[]);
@@ -386,7 +385,7 @@ function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,T}){
             {isDark?"☀️":"🌙"}
           </button>
           <button onClick={()=>setLang(lang==="tr"?"en":"tr")} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 11px",borderRadius:7,border:`1px solid ${T.line}`,background:T.paperDim,fontSize:12.5,fontWeight:700,cursor:"pointer",color:T.ink}}><Globe size={13}/> {lang==="tr"?"EN":"TR"}</button>
-          {!isPro&&<Btn ch={<><Crown size={13}/> {t.nav.upgrade}</>} vr="coral" onClick={()=>nav("proLanding")} st={{padding:"9px 16px",fontSize:13}} className="hm"/>}
+          {!isPro&&false&&<Btn ch={<><Crown size={13}/> {t.nav.upgrade}</>} vr="coral" onClick={()=>nav("proLanding")} st={{padding:"9px 16px",fontSize:13}} className="hm"/>}
         </div>
       </div>
       <div style={{display:"flex",overflowX:"auto",gap:6,padding:"10px 16px 12px",borderTop:`1px solid ${T.line}`}} className="mnav">
