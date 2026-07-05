@@ -520,7 +520,16 @@ function FoodPage({t,lang,isPro,T=C}){
   const[comp,setComp]=useState(null);
   const[compAmt,setCompAmt]=useState("100");
   const[compQuery,setCompQuery]=useState("");
-  const[tab,setTab]=useState("search"); // search | compare
+  const[tab,setTab]=useState("search"); // search | compare | tarif | tracker
+  const[recipe,setRecipe]=useState([]);
+  const[recipeName,setRecipeName]=useState("");
+  const[savedRecipes,setSavedRecipes]=useState([]);
+  const[rQuery,setRQuery]=useState("");
+  const[rSel,setRSel]=useState(null);
+  const[rAmt,setRAmt]=useState("100");
+  const[viewRecipe,setViewRecipe]=useState(null);
+
+  useEffect(()=>{(async()=>{const rks=await sl("recipe:");const rs=[];for(const k of rks){const v=await sg(k);if(v)rs.push({...v,key:k});}rs.sort((a,b)=>b.ts-a.ts);setSavedRecipes(rs);})();},[]);
   const[meals,setMeals]=useState({b:[],l:[],d:[],s:[]});
   const[addingTo,setAddingTo]=useState(null);
   const[mQuery,setMQuery]=useState("");
@@ -578,7 +587,7 @@ function FoodPage({t,lang,isPro,T=C}){
 
       {/* Tab switcher */}
       <div style={{display:"flex",gap:8,marginBottom:28}}>
-        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search Food"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
+        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tarif",l:lang==="tr"?"🍳 Tarif Oluştur":"🍳 Recipe Builder"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
           <button key={tb.k} onClick={()=>setTab(tb.k)} style={{padding:"9px 18px",borderRadius:20,border:`1.5px solid ${tab===tb.k?T.coral:T.line}`,background:tab===tb.k?T.coral:"transparent",color:tab===tb.k?"#fff":T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>{tb.l}</button>
         ))}
       </div>
@@ -662,6 +671,84 @@ function FoodPage({t,lang,isPro,T=C}){
         </div>}
       </div>}
 
+      {/* RECIPE BUILDER TAB */}
+      {tab==="tarif"&&<div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start"}} className="g2">
+          <div>
+            <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 16px",color:T.ink}}>{lang==="tr"?"🍳 Yeni Tarif":"🍳 New Recipe"}</h3>
+            <Fld label={lang==="tr"?"Tarif Adı":"Recipe Name"}>
+              <TIn value={recipeName} onChange={e=>setRecipeName(e.target.value)} placeholder={lang==="tr"?"örn. Protein Salatası":"e.g. Protein Salad"} style={{background:T.paper,color:T.ink,borderColor:T.line}}/>
+            </Fld>
+            {/* Ingredient search */}
+            <div style={{position:"relative",marginBottom:10}}><Search size={15} style={{position:"absolute",left:12,top:12,opacity:0.4}}/><TIn value={rQuery} onChange={e=>{setRQuery(e.target.value);setRSel(null);}} placeholder={lang==="tr"?"Malzeme ara...":"Search ingredient..."} style={{paddingLeft:36,fontSize:14,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
+            {rQuery.length>=2&&!rSel&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
+              {FOODS.filter(f=>{const q=rQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q);}).slice(0,8).map((f,i)=>(
+                <div key={f.id} onClick={()=>{setRSel(f);setRAmt("100");setRQuery("");}} style={{padding:"9px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",cursor:"pointer",fontSize:13.5,display:"flex",justifyContent:"space-between",color:T.ink}}>
+                  <span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]} kcal</span>
+                </div>
+              ))}
+            </div>}
+            {rSel&&<div style={{display:"flex",gap:8,marginBottom:10,alignItems:"center"}}>
+              <div style={{flex:1,background:T.paperDim,borderRadius:8,padding:"9px 12px",fontSize:13.5,fontWeight:600,color:T.ink}}>{lang==="tr"?rSel.tr:rSel.en}</div>
+              <TIn type="number" value={rAmt} onChange={e=>setRAmt(e.target.value)} style={{width:70,padding:"8px 10px",fontSize:13,background:T.paper,color:T.ink,borderColor:T.line}} placeholder="g"/>
+              <button onClick={()=>{setRecipe(r=>[...r,{food:rSel,amount:+rAmt||100}]);setRSel(null);setRAmt("100");}} style={{padding:"9px 16px",background:C.coral,color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer"}}>{lang==="tr"?"Ekle":"Add"}</button>
+            </div>}
+            {/* Ingredients list */}
+            {recipe.length>0&&<div style={{marginBottom:16}}>
+              <h4 style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 10px"}}>{lang==="tr"?"Malzemeler":"Ingredients"}</h4>
+              {recipe.map((item,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:T.paperDim,borderRadius:8,marginBottom:6}}>
+                  <span style={{fontSize:13.5,fontWeight:600,color:T.ink}}>{lang==="tr"?item.food.tr:item.food.en}</span>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <span style={{fontSize:12,color:T.ink,opacity:0.55}}>{item.amount}g</span>
+                    <span style={{fontSize:12,fontWeight:700,color:C.coral}}>{Math.round(item.food.v[0]*item.amount/100)} kcal</span>
+                    <button onClick={()=>setRecipe(r=>r.filter((_,ri)=>ri!==i))} style={{background:"none",border:"none",cursor:"pointer",opacity:0.35}}><X size={13}/></button>
+                  </div>
+                </div>
+              ))}
+            </div>}
+            {recipe.length>0&&recipeName&&<Btn ch={lang==="tr"?"💾 Tarifi Kaydet":"💾 Save Recipe"} vr="primary" onClick={async()=>{const ts=Date.now();const nutrients=recipe.reduce((acc,item)=>{item.food.v.forEach((v,i)=>{acc[i]=(acc[i]||0)+v*item.amount/100;});return acc;},Array(26).fill(0));await ss(`recipe:${ts}`,{name:recipeName,ingredients:recipe.map(r=>({id:r.food.id,name:lang==="tr"?r.food.tr:r.food.en,amount:r.amount})),nutrients,ts});setRecipeName("");setRecipe([]);const rks=await sl("recipe:");const rs=[];for(const k of rks){const v=await sg(k);if(v)rs.push({...v,key:k});}rs.sort((a,b)=>b.ts-a.ts);setSavedRecipes(rs);}} st={{width:"100%",marginTop:8}}/>}
+            {recipe.length===0&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:32,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14}}>🥗 {lang==="tr"?"Malzeme ekleyerek tarif oluşturun":"Add ingredients to build a recipe"}</div>}
+          </div>
+          <div>
+            {/* Live nutrition total */}
+            {recipe.length>0&&<div>
+              <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 14px"}}>{lang==="tr"?"Tarifin Besin Değerleri":"Recipe Nutrition"} ({recipe.reduce((s,i)=>s+i.amount,0)}g)</h4>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+                {(isPro?NUTRIENTS:NUTRIENTS.filter(n=>n.imp)).map(n=>{
+                  const val=parseFloat(recipe.reduce((s,item)=>s+item.food.v[n.i]*item.amount/100,0).toFixed(1));
+                  const p=DRI[n.i]?Math.min(Math.round(val/DRI[n.i]*100),999):null;
+                  return(<div key={n.i} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:8,padding:"10px 12px"}}>
+                    <div style={{fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.5,marginBottom:3}}>{lang==="tr"?n.tr:n.en}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:15,fontWeight:700,color:T.ink}}>{val}</span><span style={{fontSize:11,color:T.ink,opacity:0.4}}>{n.unit}</span></div>
+                    {p!==null&&DRI[n.i]&&<div style={{marginTop:4,height:3,background:T.line,borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(p,100)}%`,background:p>100?C.coral:p>50?C.sage:C.gold}}/></div>}
+                  </div>);
+                })}
+              </div>
+            </div>}
+            {/* Saved recipes */}
+            {savedRecipes.length>0&&<div style={{marginTop:recipe.length>0?28:0}}>
+              <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 12px"}}>{lang==="tr"?"Kayıtlı Tarifler":"Saved Recipes"}</h4>
+              {savedRecipes.map((r,i)=>(
+                <div key={r.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,padding:"12px 16px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setViewRecipe(viewRecipe?.key===r.key?null:r)}>
+                  <div><div style={{fontSize:14,fontWeight:700,color:T.ink}}>{r.name}</div><div style={{fontSize:12,color:T.ink,opacity:0.5}}>{r.ingredients?.length||"?"} {lang==="tr"?"malzeme":"ingredients"} · {Math.round(r.nutrients[0])} kcal</div></div>
+                  <button onClick={e=>{e.stopPropagation();sd(r.key).then(()=>{setSavedRecipes(rs=>rs.filter(x=>x.key!==r.key));if(viewRecipe?.key===r.key)setViewRecipe(null);});}} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3}}><Trash2 size={14}/></button>
+                </div>
+              ))}
+              {viewRecipe&&<Card st={{marginTop:12,background:T.paperDim,borderColor:T.line}}>
+                <h4 style={{fontSize:15,fontWeight:700,margin:"0 0 12px",color:T.ink}}>🍳 {viewRecipe.name}</h4>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
+                  {viewRecipe.ingredients?.map((ing,i)=><span key={i} style={{fontSize:12,fontWeight:600,background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"3px 10px",color:T.ink}}>{ing.name} {ing.amount}g</span>)}
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}} className="g3">
+                  {[{l:"Kcal",v:Math.round(viewRecipe.nutrients[0])},{l:"Protein",v:Math.round(viewRecipe.nutrients[1])+"g"},{l:"Karb",v:Math.round(viewRecipe.nutrients[3])+"g"},{l:"Yağ",v:Math.round(viewRecipe.nutrients[2])+"g"},{l:"Lif",v:Math.round(viewRecipe.nutrients[4])+"g"}].map((x,i)=><div key={i} style={{background:T.paper,borderRadius:8,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:10,opacity:0.5,marginBottom:2,color:T.ink}}>{x.l}</div><div style={{fontSize:16,fontWeight:800,color:i===0?C.coral:T.ink}}>{x.v}</div></div>)}
+                </div>
+              </Card>}
+            </div>}
+          </div>
+        </div>
+      </div>}
+
       {/* DAILY TRACKER TAB */}
       {tab==="tracker"&&<div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -702,26 +789,100 @@ function FoodPage({t,lang,isPro,T=C}){
   );
 }
 
-function TrackPage({t}){
-  const[entries,setEntries]=useState([]);const[loading,setLoading]=useState(true);
-  const load=useCallback(async()=>{setLoading(true);const ks=await sl("entry:");const items=[];for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}items.sort((a,b)=>b.ts-a.ts);setEntries(items);setLoading(false);},[]);
+function TrackPage({t,T=C}){
+  const[entries,setEntries]=useState([]);
+  const[loading,setLoading]=useState(true);
+  const[waterMl,setWaterMl]=useState(0);
+  const[waterGoal,setWaterGoal]=useState(2000);
+  const today=new Date().toISOString().slice(0,10);
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const ks=await sl("entry:");const items=[];
+    for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}
+    items.sort((a,b)=>b.ts-a.ts);setEntries(items);
+    const wSaved=await sg(`water:${today}`);
+    if(wSaved){setWaterMl(wSaved.ml||0);setWaterGoal(wSaved.goal||2000);}
+    setLoading(false);
+  },[today]);
+
   useEffect(()=>{load();},[load]);
+
   const del=async k=>{await sd(k);load();};
+  const addWater=async(ml)=>{
+    const nw=Math.max(0,waterMl+ml);
+    setWaterMl(nw);
+    await ss(`water:${today}`,{ml:nw,goal:waterGoal,date:today});
+  };
+  const changeGoal=async(g)=>{
+    setWaterGoal(g);
+    await ss(`water:${today}`,{ml:waterMl,goal:g,date:today});
+  };
+
+  const cups=Math.round(waterMl/250);
+  const totalCups=Math.round(waterGoal/250);
+  const pct=Math.min(Math.round(waterMl/waterGoal*100),100);
+
   return(
     <section style={{maxWidth:900,margin:"0 auto",padding:"48px 24px 80px"}}>
-      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px"}}>{t.track.title}</h1>
-      <p style={{color:C.ink,opacity:0.6,fontSize:15,margin:"0 0 32px"}}>{t.track.sub}</p>
+      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px",color:T.ink}}>{t.track.title}</h1>
+      <p style={{color:T.ink,opacity:0.6,fontSize:15,margin:"0 0 32px"}}>{t.track.sub}</p>
+
+      {/* Water Tracker */}
+      <Card st={{marginBottom:28,background:T.paper,borderColor:T.line}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
+          <div>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,fontWeight:700,margin:"0 0 4px",color:T.ink}}>💧 {t.lang==="tr"?"Su Takibi":"Water Tracker"}{t.track&&" "}{typeof t.track==="object"&&t.track.waterTitle}</h2>
+            <p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{today}</p>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:13,color:T.ink,opacity:0.5}}>{t.lang==="tr"||typeof t.track.goal==="string"?t.track.goal||"Hedef":"Goal"}:</span>
+            <select value={waterGoal} onChange={e=>changeGoal(Number(e.target.value))} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+              {[1500,2000,2500,3000,3500].map(g=><option key={g} value={g}>{g}ml ({g/1000}L)</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* Visual cups */}
+        <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:20}}>
+          {Array(totalCups).fill(0).map((_,i)=>(
+            <div key={i} onClick={()=>i<cups?addWater(-250):addWater(250)} style={{width:44,height:52,borderRadius:"0 0 8px 8px",border:`2px solid ${i<cups?"#3B82F6":T.line}`,background:i<cups?"#3B82F620":T.paperDim,cursor:"pointer",display:"flex",flexDirection:"column",justifyContent:"flex-end",overflow:"hidden",transition:"all 0.2s",position:"relative"}}>
+              {i<cups&&<div style={{position:"absolute",bottom:0,left:0,right:0,height:"75%",background:"#3B82F640",borderRadius:"0 0 6px 6px"}}/>}
+              <div style={{position:"absolute",bottom:4,left:0,right:0,textAlign:"center",fontSize:10,fontWeight:700,color:i<cups?"#3B82F6":T.ink,opacity:i<cups?1:0.3}}>☕</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Progress */}
+        <div style={{marginBottom:20}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,fontSize:13}}>
+            <span style={{fontWeight:700,color:T.ink}}>{waterMl}ml <span style={{opacity:0.5,fontWeight:400}}>/ {waterGoal}ml</span></span>
+            <span style={{fontWeight:700,color:"#3B82F6"}}>{pct}%</span>
+          </div>
+          <div style={{height:10,background:T.line,borderRadius:5,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#60A5FA,#3B82F6)",borderRadius:5,transition:"width 0.3s"}}/>
+          </div>
+          {pct>=100&&<div style={{marginTop:8,fontSize:13,color:"#3B82F6",fontWeight:700}}>🎉 {typeof t.track.goalReached==="string"?t.track.goalReached:"Günlük hedefine ulaştın!"}</div>}
+        </div>
+
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {[250,500,750].map(ml=>(
+            <button key={ml} onClick={()=>addWater(ml)} style={{padding:"9px 16px",borderRadius:8,border:`1.5px solid ${"#3B82F6"}`,background:"#3B82F610",color:"#3B82F6",fontSize:13.5,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>+{ml}ml</button>
+          ))}
+          <button onClick={()=>addWater(-250)} style={{padding:"9px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,opacity:0.5,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>-250ml</button>
+          <button onClick={async()=>{setWaterMl(0);await ss(`water:${today}`,{ml:0,goal:waterGoal,date:today});}} style={{padding:"9px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,opacity:0.5,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Sıfırla</button>
+        </div>
+      </Card>
+
       {loading&&<Spin/>}
-      {!loading&&entries.length===0&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:50,textAlign:"center",color:C.ink,opacity:0.45}}><ClipboardList size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{t.track.empty}</p></div>}
+      {!loading&&entries.length===0&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:50,textAlign:"center",color:T.ink,opacity:0.45}}><ClipboardList size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{t.track.empty}</p></div>}
       {!loading&&entries.length>0&&<>
         {entries.length>1&&<WC entries={entries} t={t}/>}
-        <Card st={{padding:0,overflow:"hidden"}}>
-          
-            <table style={{width:"100%",borderCollapse:"collapse"}}>
-              <thead><tr style={{background:C.paperDim}}>{[t.track.date,t.track.weight,t.track.target,t.track.water,""].map((h,i)=><th key={i} style={{textAlign:"left",padding:"12px 18px",fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:C.ink,opacity:0.55}}>{h}</th>)}</tr></thead>
-              <tbody>{entries.map(e=><tr key={e.key} style={{borderTop:`1px solid ${C.paperDim}`}}><td style={{padding:"12px 18px",fontSize:14,fontWeight:600}}>{e.date}</td><td style={{padding:"12px 18px",fontSize:14}}>{e.weight} kg</td><td style={{padding:"12px 18px",fontSize:14}}>{e.target} kcal</td><td style={{padding:"12px 18px",fontSize:14}}>{e.water} L</td><td style={{padding:"12px 18px",textAlign:"right"}}><button onClick={()=>del(e.key)} style={{background:"none",border:"none",cursor:"pointer",color:C.ink,opacity:0.35}}><Trash2 size={15}/></button></td></tr>)}</tbody>
-            </table>
-          
+        <Card st={{padding:0,overflow:"hidden",background:T.paper,borderColor:T.line}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr style={{background:T.paperDim}}>{[t.track.date,t.track.weight,t.track.target,t.track.water,""].map((h,i)=><th key={i} style={{textAlign:"left",padding:"12px 18px",fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:T.ink,opacity:0.55}}>{h}</th>)}</tr></thead>
+            <tbody>{entries.map(e=><tr key={e.key} style={{borderTop:`1px solid ${T.paperDim}`}}><td style={{padding:"12px 18px",fontSize:14,fontWeight:600,color:T.ink}}>{e.date}</td><td style={{padding:"12px 18px",fontSize:14,color:T.ink}}>{e.weight} kg</td><td style={{padding:"12px 18px",fontSize:14,color:T.ink}}>{e.target} kcal</td><td style={{padding:"12px 18px",fontSize:14,color:T.ink}}>{e.water} L</td><td style={{padding:"12px 18px",textAlign:"right"}}><button onClick={()=>del(e.key)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.35}}><Trash2 size={15}/></button></td></tr>)}</tbody>
+          </table>
         </Card>
       </>}
     </section>
@@ -773,10 +934,25 @@ function ClientsPage({t,lang,nav,setSel}){
 function ClientProfile({t,lang,clientId,nav}){
   const[client,setClient]=useState(null);const[hist,setHist]=useState([]);const[showAdd,setShowAdd]=useState(false);const[entry,setEntry]=useState({weight:"",note:""});
   const[showN,setShowN]=useState(false);const[nEntry,setNEntry]=useState(Array(26).fill(""));const[nHist,setNHist]=useState([]);const[exp,setExp]=useState(null);
-  const load=useCallback(async()=>{if(!clientId)return;const c=await sg(clientId);setClient(c);const ks=await sl(`${clientId}:history:`);const items=[];for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}items.sort((a,b)=>b.ts-a.ts);setHist(items);const nks=await sl(`${clientId}:nutri:`);const ni=[];for(const k of nks){const v=await sg(k);if(v)ni.push({...v,key:k});}ni.sort((a,b)=>b.ts-a.ts);setNHist(ni);},[clientId]);
+  const[clinNotes,setClinNotes]=useState([]);const[showNoteForm,setShowNoteForm]=useState(false);const[noteText,setNoteText]=useState("");
+  const load=useCallback(async()=>{
+    if(!clientId)return;
+    const c=await sg(clientId);setClient(c);
+    const ks=await sl(`${clientId}:history:`);const items=[];
+    for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}
+    items.sort((a,b)=>b.ts-a.ts);setHist(items);
+    const nks=await sl(`${clientId}:nutri:`);const ni=[];
+    for(const k of nks){const v=await sg(k);if(v)ni.push({...v,key:k});}
+    ni.sort((a,b)=>b.ts-a.ts);setNHist(ni);
+    const cks=await sl(`${clientId}:clinNote:`);const cn=[];
+    for(const k of cks){const v=await sg(k);if(v)cn.push({...v,key:k});}
+    cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
+  },[clientId]);
   useEffect(()=>{load();},[load]);
   const addM=async e=>{e.preventDefault();if(!entry.weight)return;const ts=Date.now();await ss(`${clientId}:history:${ts}`,{weight:entry.weight,note:entry.note,ts,date:new Date().toISOString().slice(0,10)});setEntry({weight:"",note:""});setShowAdd(false);load();};
   const addN=async e=>{e.preventDefault();const ts=Date.now();const vals=nEntry.map(v=>v===""?null:parseFloat(v));await ss(`${clientId}:nutri:${ts}`,{vals,ts,date:new Date().toISOString().slice(0,10)});setNEntry(Array(26).fill(""));setShowN(false);load();};
+  const addClinNote=async()=>{if(!noteText.trim())return;const ts=Date.now();const now=new Date();await ss(`${clientId}:clinNote:${ts}`,{text:noteText,ts,date:now.toISOString().slice(0,10),time:now.toLocaleTimeString(lang==="tr"?"tr-TR":"en-US",{hour:"2-digit",minute:"2-digit"})});setNoteText("");setShowNoteForm(false);load();};
+  const delClinNote=async(key)=>{await sd(key);load();};
   if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
   return<section style={{maxWidth:900,margin:"0 auto",padding:"40px 24px 80px"}}>
     <style>{`@media print{.np{display:none!important;}.nb-rh{display:flex!important;border-bottom:2px solid #0E2A3D;padding-bottom:16px;margin-bottom:24px;}@page{size:A4;margin:20mm;}}`}</style>
@@ -859,6 +1035,37 @@ function ClientProfile({t,lang,clientId,nav}){
     {showN&&<Card st={{marginBottom:16}}><h4 style={{fontSize:13,fontWeight:700,margin:"0 0 16px"}}>{lang==="tr"?"Günlük Besin Değerleri":"Enter Daily Nutritional Values"}</h4><form onSubmit={addN}><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}} className="g3">{NUTRIENTS.map((n,i)=><div key={i}><label style={{display:"block",fontSize:11,fontWeight:600,color:C.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase"}}>{lang==="tr"?n.tr:n.en} ({n.unit})</label><TIn type="number" value={nEntry[i]} onChange={e=>{const a=[...nEntry];a[i]=e.target.value;setNEntry(a);}} placeholder="—" style={{padding:"8px 10px",fontSize:13}}/></div>)}</div><div style={{marginTop:16,display:"flex",gap:10}}><Btn tp="submit" ch={t.clients.save} vr="primary"/><Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowN(false)}/></div></form></Card>}
     {nHist.length===0&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:30,textAlign:"center",color:C.ink,opacity:0.4,fontSize:14}}>{lang==="tr"?"Henüz besin kaydı yok.":"No nutrition records yet."}</div>}
     {nHist.length>0&&<Card st={{padding:0,overflow:"hidden"}}>{nHist.map((rec,ri)=><div key={rec.key} style={{borderTop:ri>0?`1px solid ${C.paperDim}`:"none"}}><div onClick={()=>setExp(exp===ri?null:ri)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 20px",cursor:"pointer"}}><span style={{fontSize:14,fontWeight:600}}>{rec.date}</span><div style={{display:"flex",alignItems:"center",gap:16}}>{rec.vals[0]!=null&&<span style={{fontSize:13,fontWeight:700,color:C.coral}}>{rec.vals[0]} kcal</span>}{rec.vals[1]!=null&&<span style={{fontSize:13,color:C.ink,opacity:0.6}}>P:{rec.vals[1]}g</span>}{rec.vals[3]!=null&&<span style={{fontSize:13,color:C.ink,opacity:0.6}}>K:{rec.vals[3]}g</span>}{exp===ri?<ChevronUp size={16} style={{opacity:0.4}}/>:<ChevronDown size={16} style={{opacity:0.4}}/>}</div></div>{exp===ri&&<div style={{padding:"0 20px 20px"}}><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}} className="g3">{NUTRIENTS.map((n,i)=>rec.vals[i]!=null?<div key={i} style={{background:C.paperDim,borderRadius:8,padding:"8px 12px"}}><div style={{fontSize:10.5,fontWeight:600,color:C.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?n.tr:n.en}</div><span style={{fontSize:14,fontWeight:700}}>{rec.vals[i]}</span><span style={{fontSize:11,color:C.ink,opacity:0.4,marginLeft:2}}>{n.unit}</span></div>:null)}</div></div>}</div>)}</Card>}
+
+    {/* Clinical Notes */}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"32px 0 14px"}}>
+      <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>📝 {lang==="tr"?"Klinik Notlar":"Clinical Notes"}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{lang==="tr"?"Zaman damgalı klinik gözlemler":"Timestamped clinical observations"}</span></div>
+      <Btn ch={<><Plus size={14}/> {lang==="tr"?"Not Ekle":"Add Note"}</>} vr="ghost" onClick={()=>setShowNoteForm(!showNoteForm)} st={{fontSize:13,padding:"8px 14px"}}/>
+    </div>
+    {showNoteForm&&<Card st={{marginBottom:16}}>
+      <Fld label={lang==="tr"?"Klinik Not":"Clinical Note"}>
+        <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={4} placeholder={lang==="tr"?"Klinik gözlem, öneri, ilaç notu...":"Clinical observation, recommendation, medication note..."} style={{...iSt,resize:"vertical",fontFamily:"inherit"}}/>
+      </Fld>
+      <div style={{display:"flex",gap:10}}>
+        <Btn ch={<><Check size={14}/> {lang==="tr"?"Kaydet":"Save"}</>} vr="primary" onClick={addClinNote}/>
+        <Btn ch={lang==="tr"?"Vazgeç":"Cancel"} vr="ghost" onClick={()=>{setShowNoteForm(false);setNoteText("");}}/>
+      </div>
+    </Card>}
+    {clinNotes.length===0&&!showNoteForm&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:30,textAlign:"center",color:C.ink,opacity:0.4,fontSize:14}}>{lang==="tr"?"Henüz klinik not yok.":"No clinical notes yet."}</div>}
+    {clinNotes.length>0&&<div style={{position:"relative"}}>
+      <div style={{position:"absolute",left:19,top:0,bottom:0,width:2,background:C.line}}/>
+      {clinNotes.map((note,i)=>(
+        <div key={note.key} style={{display:"flex",gap:16,marginBottom:16,position:"relative"}}>
+          <div style={{width:40,height:40,borderRadius:"50%",background:C.ink,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,zIndex:1,fontSize:14}}>📝</div>
+          <div style={{flex:1,background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"14px 16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.55}}>{note.date} · {note.time}</span>
+              <button onClick={()=>delClinNote(note.key)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3}}><Trash2 size={13}/></button>
+            </div>
+            <p style={{margin:0,fontSize:14,lineHeight:1.6,color:C.ink,whiteSpace:"pre-wrap"}}>{note.text}</p>
+          </div>
+        </div>
+      ))}
+    </div>}
   </section>;
 }
 
