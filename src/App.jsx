@@ -831,11 +831,11 @@ function TrackPage({t,T=C}){
       <Card st={{marginBottom:28,background:T.paper,borderColor:T.line}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
           <div>
-            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,fontWeight:700,margin:"0 0 4px",color:T.ink}}>💧 {t.lang==="tr"?"Su Takibi":"Water Tracker"}{t.track&&" "}{typeof t.track==="object"&&t.track.waterTitle}</h2>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,fontWeight:700,margin:"0 0 4px",color:T.ink}}>💧 {lang==="tr"?"Su Takibi":"Water Tracker"}{t.track&&" "}{typeof t.track==="object"&&t.track.waterTitle}</h2>
             <p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{today}</p>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:13,color:T.ink,opacity:0.5}}>{t.lang==="tr"||typeof t.track.goal==="string"?t.track.goal||"Hedef":"Goal"}:</span>
+            <span style={{fontSize:13,color:T.ink,opacity:0.5}}>{lang==="tr"?"Hedef":"Goal"}:</span>
             <select value={waterGoal} onChange={e=>changeGoal(Number(e.target.value))} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
               {[1500,2000,2500,3000,3500].map(g=><option key={g} value={g}>{g}ml ({g/1000}L)</option>)}
             </select>
@@ -915,96 +915,142 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[search,setSearch]=useState("");
   const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
 
-  const load=useCallback(async()=>{
-    setLoading(true);
-    const ks=await sl("client:");const items=[];
-    for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}
-    items.sort((a,b)=>b.createdAt-a.createdAt);
-    setClients(items);setLoading(false);
+  useEffect(()=>{
+    (async()=>{
+      try{
+        const ks=await sl("client:");
+        const items=[];
+        for(const k of ks){
+          const v=await sg(k);
+          if(v&&v.name)items.push({...v,key:k});
+        }
+        items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+        setClients(items);
+      }catch(e){console.error("load error",e);}
+      setLoading(false);
+    })();
   },[]);
 
-  useEffect(()=>{load();},[load]);
+  const reload=async()=>{
+    setLoading(true);
+    try{
+      const ks=await sl("client:");
+      const items=[];
+      for(const k of ks){const v=await sg(k);if(v&&v.name)items.push({...v,key:k});}
+      items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      setClients(items);
+    }catch(e){console.error(e);}
+    setLoading(false);
+  };
 
-  const add=async e=>{
-    e.preventDefault();if(!form.name)return;
-    const id=`client:${Date.now()}`;
+  const add=async(e)=>{
+    e.preventDefault();
+    if(!form.name.trim())return;
+    const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
     setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
-    setShowForm(false);load();
+    setShowForm(false);
+    reload();
   };
-  const del=async k=>{if(!window.confirm(t.clients.confirmDel))return;await sd(k);load();};
+
+  const del=async(key)=>{
+    if(!window.confirm(lang==="tr"?"Bu danışanı silmek istediğine emin misin?":"Are you sure you want to delete this client?"))return;
+    await sd(key);
+    reload();
+  };
+
   const filtered=clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
 
   return(
     <section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:14}}>
-        <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,color:T.ink,display:"flex",alignItems:"center",gap:10}}>{t.clients.title} <PBadge sm/></h1>
-        <Btn ch={<><UserPlus size={16}/> {t.clients.add}</>} vr="coral" onClick={()=>setShowForm(f=>!f)}/>
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,flexWrap:"wrap",gap:14}}>
+        <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,color:T.ink,display:"flex",alignItems:"center",gap:10}}>
+          {lang==="tr"?"Danışanlarım":"My Clients"} <PBadge sm/>
+        </h1>
+        <button onClick={()=>setShowForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:8,padding:"11px 20px",borderRadius:9,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>
+          <Plus size={16}/> {lang==="tr"?"Yeni Danışan":"New Client"}
+        </button>
       </div>
 
+      {/* Add form */}
       {showForm&&(
         <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24,marginBottom:24}}>
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 20px",color:T.ink}}>{lang==="tr"?"Yeni Danışan Ekle":"Add New Client"}</h3>
           <form onSubmit={add}>
-            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14}} className="g2">
-              <Fld label={t.clients.nameL}><TIn required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={lang==="tr"?"örn. Danışan-014":"e.g. Client-014"} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
-              <Fld label={t.clients.age}><TIn type="number" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14,marginBottom:14}} className="g2">
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Ad / Kod *":"Name / Code *"}</label><input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={lang==="tr"?"örn. Danışan-001":"e.g. Client-001"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Yaş":"Age"}</label><input type="number" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}} className="g3">
-              <Fld label={t.clients.gender}><SegBtn opts={[{v:"female",l:t.calc.female},{v:"male",l:t.calc.male}]} val={form.gender} onChg={v=>setForm(f=>({...f,gender:v}))}/></Fld>
-              <Fld label={t.clients.height}><TIn type="number" value={form.height} onChange={e=>setForm(f=>({...f,height:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
-              <Fld label={t.clients.weight}><TIn type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Boy (cm)":"Height (cm)"}</label><input type="number" value={form.height} onChange={e=>setForm(f=>({...f,height:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Kilo (kg)":"Weight (kg)"}</label><input type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Sağlık Durumu":"Condition"}</label><input value={form.condition} onChange={e=>setForm(f=>({...f,condition:e.target.value}))} placeholder={lang==="tr"?"örn. Tip 2 Diyabet":"e.g. Type 2 Diabetes"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
-            <Fld label={t.clients.condition}><TIn value={form.condition} onChange={e=>setForm(f=>({...f,condition:e.target.value}))} placeholder={t.clients.condNone} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
-              <Fld label={lang==="tr"?"Hedef Kalori (kcal)":"Target Calories (kcal)"}><TIn type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
-              <Fld label={lang==="tr"?"Hedef Su (litre)":"Target Water (liters)"}><TIn type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}} className="g2">
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}</label><input type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Su (L)":"Target Water (L)"}</label><input type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
-            <Fld label={t.clients.notes}><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={3} style={{width:"100%",padding:"12px 14px",fontSize:16,borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"vertical"}}/></Fld>
-            <p style={{fontSize:12,color:C.gold,opacity:0.9,marginBottom:16,display:"flex",gap:6}}><AlertCircle size={13} style={{flexShrink:0,marginTop:1}}/> {t.clients.privacy}</p>
-            <div style={{display:"flex",gap:10}}>
-              <Btn tp="submit" ch={t.clients.save} vr="primary"/>
-              <Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowForm(false)}/>
+            <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Klinik Notlar":"Clinical Notes"}</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={2} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical"}}/></div>
+            <div style={{display:"flex",gap:10,marginTop:16}}>
+              <button type="submit" style={{padding:"11px 22px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
+              <button type="button" onClick={()=>setShowForm(false)} style={{padding:"11px 22px",borderRadius:8,background:"transparent",color:T.ink,border:`1.5px solid ${T.line}`,cursor:"pointer",fontSize:14,fontWeight:600,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
             </div>
           </form>
         </div>
       )}
 
-      <div style={{position:"relative",marginBottom:20}}>
+      {/* Search */}
+      <div style={{position:"relative",marginBottom:24}}>
         <Search size={16} style={{position:"absolute",left:14,top:13,color:T.ink,opacity:0.4}}/>
-        <TIn value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.clients.search} style={{paddingLeft:38,background:T.paper,color:T.ink,borderColor:T.line}}/>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="tr"?"Danışan ara...":"Search clients..."} style={{width:"100%",padding:"11px 14px 11px 38px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
       </div>
 
-      {loading&&<Spin/>}
+      {/* Loading */}
+      {loading&&<div style={{display:"flex",justifyContent:"center",padding:40}}><div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${T.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/></div>}
+
+      {/* Empty */}
       {!loading&&filtered.length===0&&(
         <div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:50,textAlign:"center",color:T.ink,opacity:0.55}}>
-          <Users size={28} style={{marginBottom:10}}/>
-          <p style={{margin:0,fontSize:14}}>{t.clients.empty}</p>
+          <Users size={28} style={{marginBottom:12,display:"block",margin:"0 auto 12px"}}/>
+          <p style={{margin:0,fontSize:14}}>{lang==="tr"?"Henüz danışan eklenmedi.":"No clients added yet."}</p>
         </div>
       )}
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}} className="g2">
-        {filtered.map(c=>(
-          <div key={c.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-              <div>
-                <h3 style={{fontSize:17,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{c.name}</h3>
-                <p style={{fontSize:13,color:T.ink,opacity:0.55,margin:0}}>
-                  {c.age&&`${c.age} ${lang==="tr"?"yaş":"yrs"}`}
-                  {c.weight&&` · ${c.weight} kg`}
-                  {c.height&&` · ${c.height} cm`}
-                </p>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
-                  {c.condition&&<span style={{fontSize:11.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"3px 9px",borderRadius:20}}>{c.condition}</span>}
-                  {c.targetKcal&&<span style={{fontSize:11.5,fontWeight:600,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 9px",borderRadius:20}}>{c.targetKcal} kcal</span>}
-                  {c.targetWater&&<span style={{fontSize:11.5,fontWeight:600,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 9px",borderRadius:20}}>💧 {c.targetWater}L</span>}
+      {/* Client cards */}
+      {!loading&&filtered.length>0&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}} className="g2">
+          {filtered.map(c=>(
+            <div key={c.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+                <div>
+                  <h3 style={{fontSize:17,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{c.name}</h3>
+                  <p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>
+                    {c.age?c.age+(lang==="tr"?" yaş":" yrs"):""}
+                    {c.weight?" · "+c.weight+" kg":""}
+                    {c.height?" · "+c.height+" cm":""}
+                  </p>
+                  {c.condition&&(
+                    <span style={{display:"inline-block",marginTop:6,fontSize:11.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"3px 10px",borderRadius:20}}>{c.condition}</span>
+                  )}
                 </div>
+                <button onClick={()=>del(c.key)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3,padding:4}}>
+                  <Trash2 size={15}/>
+                </button>
               </div>
-              <button onClick={()=>del(c.key)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><Trash2 size={15}/></button>
+              {(c.targetKcal||c.targetWater)&&(
+                <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap"}}>
+                  {c.targetKcal&&<span style={{fontSize:12,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 10px",borderRadius:12,fontWeight:600}}>🎯 {c.targetKcal} kcal</span>}
+                  {c.targetWater&&<span style={{fontSize:12,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 10px",borderRadius:12,fontWeight:600}}>💧 {c.targetWater}L</span>}
+                </div>
+              )}
+              <button onClick={()=>{setSel(c.key);nav("clientProfile");}} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,background:"transparent",color:T.ink,border:`1.5px solid ${T.line}`,cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit"}}>
+                {lang==="tr"?"Profili Gör":"View Profile"} <ChevronRight size={14}/>
+              </button>
             </div>
-            <Btn ch={<>{t.clients.view} <ChevronRight size={14}/></>} vr="ghost" onClick={()=>{setSel(c.key);nav("clientProfile");}} st={{fontSize:13,padding:"8px 14px"}}/>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
