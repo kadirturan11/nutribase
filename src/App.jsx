@@ -300,7 +300,7 @@ function calcAll({gender,age,height,weight,actIdx,goal}){
 }
 function bmiCat(bmi,t){const v=parseFloat(bmi);if(v<18.5)return{l:t.calc.bmiUnder,col:"#3B82F6"};if(v<25)return{l:t.calc.bmiNormal,col:C.sage};if(v<30)return{l:t.calc.bmiOver,col:C.gold};return{l:t.calc.bmiObese,col:C.coral};}
 
-function Logo({sz=28}){return<svg width={sz} height={sz} viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke={C.ink} strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke={C.coral} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
+function Logo({sz=28,T=C}){return<svg width={sz} height={sz} viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke={T.ink} strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke={T.coral} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
 function Spin(){return<div style={{display:"flex",justifyContent:"center",padding:40}}><div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${C.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/><style>{"@keyframes nbsp{to{transform:rotate(360deg)}}"}</style></div>;}
 function PBadge({sm}){return<span style={{display:"inline-flex",alignItems:"center",gap:4,background:C.gold,color:"#3A2D0A",fontSize:sm?10:11,fontWeight:800,padding:sm?"2px 7px":"3px 9px",borderRadius:20}}><Crown size={sm?10:12}/> PRO</span>;}
 const iSt={width:"100%",padding:"12px 14px",fontSize:16,borderRadius:8,border:`1.5px solid ${C.line}`,background:C.paper,color:C.ink,outline:"none",fontFamily:"inherit",boxSizing:"border-box"};
@@ -312,60 +312,91 @@ function Btn({ch,onClick,vr="primary",st={},tp="button",dis}){const b={padding:"
 function Card({children,st={}}){return<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:14,padding:24,...st}}>{children}</div>;}
 function SBk({icon,label,val,unit,sub,acc}){return<div style={{background:acc?C.ink:"#fff",border:`1px solid ${acc?C.ink:C.line}`,borderRadius:14,padding:"22px 20px"}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,color:acc?C.coralSoft:C.sage}}>{icon}<span style={{fontSize:11.5,letterSpacing:"0.07em",textTransform:"uppercase",fontWeight:700}}>{label}</span></div><div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:34,fontWeight:800,color:acc?"#fff":C.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{val}</span><span style={{fontSize:14,color:acc?C.paperDim:C.ink,opacity:0.6,fontWeight:600}}>{unit}</span></div>{sub&&<div style={{fontSize:12.5,color:acc?C.paperDim:C.ink,opacity:acc?0.75:0.45,marginTop:6}}>{sub}</div>}</div>;}
 
+const DARK = {
+  ink:"#E8DFD0",paper:"#0F1923",paperDim:"#162130",
+  coral:"#F07050",coralSoft:"#2A1510",line:"#243040",sage:"#6E9A8A",gold:"#D4A85A",
+};
+
 export default function App(){
   const[lang,setLang]=useState("tr");
   const t=STR[lang];
   const[page,setPage]=useState("landing");
   const[isPro,setIsPro]=useState(false);
+  const[isDark,setIsDark]=useState(false);
   const[selClient,setSelClient]=useState(null);
   const[selTpl,setSelTpl]=useState(null);
-  useEffect(()=>{(async()=>{const p=await sg("user:isPro");setIsPro(!!p);})();},[]);
+
+  useEffect(()=>{(async()=>{
+    const p=await sg("user:isPro");setIsPro(!!p);
+    const d=await sg("user:dark");setIsDark(!!d);
+  })();},[]);
+
+  const toggleDark=async()=>{const nd=!isDark;setIsDark(nd);await ss("user:dark",nd);};
   const goPro=useCallback(async()=>{setIsPro(true);await ss("user:isPro",true);},[]);
   const nav=p=>{setPage(p);window.scrollTo(0,0);};
+
+  // Dynamic colors based on theme
+  const T=isDark?DARK:C;
+
   return(
-    <div style={{minHeight:"100vh",background:C.paper,color:C.ink,fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif"}}>
-      <style>{`*{box-sizing:border-box;}body{margin:0;}::selection{background:${C.coral};color:#fff;}@keyframes nbF{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}.nbP{animation:nbF 0.2s ease both;}@media(max-width:720px){.g2{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr!important;}.hm{display:none!important;}}@media print{.np{display:none!important;}}`}</style>
-      <NavBar t={t} lang={lang} setLang={setLang} page={page} nav={nav} isPro={isPro}/>
+    <div style={{minHeight:"100vh",background:T.paper,color:T.ink,fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.2s,color 0.2s"}}>
+      <style>{`*{box-sizing:border-box;}body{margin:0;background:${T.paper};}::selection{background:${T.coral};color:#fff;}@keyframes nbF{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}.nbP{animation:nbF 0.2s ease both;}@media(max-width:720px){.g2{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr!important;}.hm{display:none!important;}}@media print{.np{display:none!important;}}`}</style>
+      <NavBar t={t} lang={lang} setLang={setLang} page={page} nav={nav} isPro={isPro} isDark={isDark} toggleDark={toggleDark} T={T}/>
       <main className="nbP" key={page}>
-        {page==="landing"&&<Landing t={t} nav={nav} lang={lang}/>}
-        {page==="calc"&&<CalcPage t={t} lang={lang}/>}
-        {page==="food"&&<FoodPage t={t} lang={lang} isPro={isPro}/>}
-        {page==="track"&&<TrackPage t={t}/>}
-        {page==="clients"&&(isPro?<ClientsPage t={t} lang={lang} nav={nav} setSel={setSelClient}/>:<Upsell t={t} nav={nav}/>)}
-        {page==="clientProfile"&&(isPro?<ClientProfile t={t} lang={lang} clientId={selClient} nav={nav}/>:<Upsell t={t} nav={nav}/>)}
-        {page==="templates"&&(isPro?<TemplatesPage t={t} lang={lang} nav={nav} setSel={setSelTpl}/>:<Upsell t={t} nav={nav}/>)}
-        {page==="templateDetail"&&(isPro?<TemplateDetail t={t} lang={lang} id={selTpl} nav={nav}/>:<Upsell t={t} nav={nav}/>)}
-        {page==="proLanding"&&<ProLanding t={t} nav={nav} isPro={isPro}/>}
-        {page==="proCheckout"&&<ProCheckout t={t} nav={nav} goPro={goPro}/>}
+        {page==="landing"&&<Landing t={t} nav={nav} lang={lang} T={T}/>}
+        {page==="calc"&&<CalcPage t={t} lang={lang} T={T}/>}
+        {page==="food"&&<FoodPage t={t} lang={lang} isPro={isPro} T={T}/>}
+        {page==="track"&&<TrackPage t={t} T={T}/>}
+        {page==="clients"&&(isPro?<ClientsPage t={t} lang={lang} nav={nav} setSel={setSelClient} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="clientProfile"&&(isPro?<ClientProfile t={t} lang={lang} clientId={selClient} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="templates"&&(isPro?<TemplatesPage t={t} lang={lang} nav={nav} setSel={setSelTpl} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="templateDetail"&&(isPro?<TemplateDetail t={t} lang={lang} id={selTpl} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="weeklyPlan"&&(isPro?<WeeklyPlanPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="proLanding"&&<ProLanding t={t} nav={nav} isPro={isPro} T={T}/>}
+        {page==="proCheckout"&&<ProCheckout t={t} nav={nav} goPro={goPro} T={T}/>}
       </main>
-      <FooterBar t={t} nav={nav}/>
+      <FooterBar t={t} nav={nav} T={T}/>
     </div>
   );
 }
 
-function NavBar({t,lang,setLang,page,nav,isPro}){
-  const items=[{k:"calc",l:t.nav.calc,icon:<Calculator size={15}/>},{k:"food",l:t.nav.food,icon:<Search size={15}/>},{k:"track",l:t.nav.track,icon:<TrendingUp size={15}/>},{k:"clients",l:t.nav.clients,icon:<Users size={15}/>,pro:true},{k:"templates",l:t.nav.templates,icon:<FileText size={15}/>,pro:true}];
+function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,T}){
+  const items=[
+    {k:"calc",l:t.nav.calc,icon:<Calculator size={15}/>},
+    {k:"food",l:t.nav.food,icon:<Search size={15}/>},
+    {k:"track",l:t.nav.track,icon:<TrendingUp size={15}/>},
+    {k:"clients",l:t.nav.clients,icon:<Users size={15}/>,pro:true},
+    {k:"templates",l:t.nav.templates,icon:<FileText size={15}/>,pro:true},
+    {k:"weeklyPlan",l:lang==="tr"?"Haftalık Plan":"Weekly Plan",icon:<FileText size={15}/>,pro:true},
+  ];
   return(
-    <header style={{borderBottom:`1px solid ${C.line}`,background:C.paper,position:"sticky",top:0,zIndex:40}}>
+    <header style={{borderBottom:`1px solid ${T.line}`,background:T.paper,position:"sticky",top:0,zIndex:40,transition:"background 0.2s"}}>
       <div style={{maxWidth:1180,margin:"0 auto",padding:"16px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>nav("landing")}><Logo/><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:19}}>{t.appName}</span>{isPro&&<PBadge sm/>}</div>
-        <nav className="hm" style={{display:"flex",alignItems:"center",gap:4}}>{items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:page===i.k?C.paperDim:"transparent",color:C.ink,fontSize:13.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={10} style={{marginLeft:2,opacity:0.5}}/>}</button>)}</nav>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <button onClick={()=>setLang(lang==="tr"?"en":"tr")} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 11px",borderRadius:7,border:`1px solid ${C.line}`,background:"#fff",fontSize:12.5,fontWeight:700,cursor:"pointer",color:C.ink}}><Globe size={13}/> {lang==="tr"?"EN":"TR"}</button>
+        <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>nav("landing")}>
+          <Logo T={T}/><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:19,color:T.ink}}>{t.appName}</span>{isPro&&<PBadge sm/>}
+        </div>
+        <nav className="hm" style={{display:"flex",alignItems:"center",gap:4}}>
+          {items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:page===i.k?T.paperDim:"transparent",color:T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={10} style={{marginLeft:2,opacity:0.5}}/>}</button>)}
+        </nav>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={toggleDark} title={isDark?"Light mode":"Dark mode"} style={{display:"flex",alignItems:"center",justifyContent:"center",width:34,height:34,borderRadius:8,border:`1px solid ${T.line}`,background:T.paperDim,cursor:"pointer",fontSize:16,color:T.ink}}>
+            {isDark?"☀️":"🌙"}
+          </button>
+          <button onClick={()=>setLang(lang==="tr"?"en":"tr")} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 11px",borderRadius:7,border:`1px solid ${T.line}`,background:T.paperDim,fontSize:12.5,fontWeight:700,cursor:"pointer",color:T.ink}}><Globe size={13}/> {lang==="tr"?"EN":"TR"}</button>
           {!isPro&&<Btn ch={<><Crown size={13}/> {t.nav.upgrade}</>} vr="coral" onClick={()=>nav("proLanding")} st={{padding:"9px 16px",fontSize:13}} className="hm"/>}
         </div>
       </div>
-      <div style={{display:"flex",overflowX:"auto",gap:6,padding:"10px 16px 12px",borderTop:`1px solid ${C.line}`}} className="mnav">
-        {items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 12px",borderRadius:20,whiteSpace:"nowrap",border:`1px solid ${page===i.k?C.ink:C.line}`,background:page===i.k?C.ink:"#fff",color:page===i.k?"#fff":C.ink,fontSize:12.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={9}/>}</button>)}
+      <div style={{display:"flex",overflowX:"auto",gap:6,padding:"10px 16px 12px",borderTop:`1px solid ${T.line}`}} className="mnav">
+        {items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 12px",borderRadius:20,whiteSpace:"nowrap",border:`1px solid ${page===i.k?T.coral:T.line}`,background:page===i.k?T.coral:"transparent",color:page===i.k?"#fff":T.ink,fontSize:12.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={9}/>}</button>)}
       </div>
       <style>{"@media(min-width:721px){.mnav{display:none!important;}}"}</style>
     </header>
   );
 }
 
-function FooterBar({t,nav}){
+function FooterBar({t,nav,T=C}){
   return(
-    <footer style={{borderTop:`1px solid ${C.line}`,background:C.paper,padding:"48px 24px 32px",marginTop:60}}>
+    <footer style={{borderTop:`1px solid ${T.line}`,background:T.paper,padding:"48px 24px 32px",marginTop:60}}>
       <div style={{maxWidth:1180,margin:"0 auto"}}>
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:40,marginBottom:40}} className="g3">
           <div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Logo sz={24}/><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:17}}>{t.appName}</span></div><p style={{fontSize:13.5,lineHeight:1.65,color:C.ink,opacity:0.6,margin:0,maxWidth:300}}>{t.footer.desc}</p></div>
@@ -705,9 +736,44 @@ function ClientProfile({t,lang,clientId,nav}){
 
     {client.notes&&<Card st={{marginBottom:20,background:C.paperDim,border:"none"}}><h4 style={{fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",opacity:0.5,margin:"0 0 8px"}}>{t.clients.notes}</h4><p style={{margin:0,fontSize:14,lineHeight:1.6}}>{client.notes}</p></Card>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><h3 style={{fontSize:15,fontWeight:700,margin:0}}>{t.clients.hist}</h3><Btn ch={<><Plus size={14}/> {t.clients.newM}</>} vr="ghost" onClick={()=>setShowAdd(!showAdd)} st={{fontSize:13,padding:"8px 14px"}}/></div>
-    {showAdd&&<Card st={{marginBottom:16}}><form onSubmit={addM}><div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:14}} className="g2"><Fld label={t.clients.weight}><TIn type="number" required value={entry.weight} onChange={e=>setEntry({...entry,weight:e.target.value})}/></Fld><Fld label={t.clients.notes}><TIn value={entry.note} onChange={e=>setEntry({...entry,note:e.target.value})}/></Fld></div><Btn tp="submit" ch={t.clients.save} vr="primary"/></form></Card>}
+    {showAdd&&<Card st={{marginBottom:16}}>
+      <form onSubmit={addM}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+          <Fld label={lang==="tr"?"Kilo (kg)":"Weight (kg)"}><TIn type="number" required value={entry.weight} onChange={e=>setEntry({...entry,weight:e.target.value})} placeholder="65"/></Fld>
+          <Fld label={lang==="tr"?"Bel (cm)":"Waist (cm)"}><TIn type="number" value={entry.waist||""} onChange={e=>setEntry({...entry,waist:e.target.value})} placeholder="—"/></Fld>
+          <Fld label={lang==="tr"?"Kalça (cm)":"Hip (cm)"}><TIn type="number" value={entry.hip||""} onChange={e=>setEntry({...entry,hip:e.target.value})} placeholder="—"/></Fld>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+          <Fld label={lang==="tr"?"Göğüs (cm)":"Chest (cm)"}><TIn type="number" value={entry.chest||""} onChange={e=>setEntry({...entry,chest:e.target.value})} placeholder="—"/></Fld>
+          <Fld label={lang==="tr"?"Kol (cm)":"Arm (cm)"}><TIn type="number" value={entry.arm||""} onChange={e=>setEntry({...entry,arm:e.target.value})} placeholder="—"/></Fld>
+          <Fld label={lang==="tr"?"Not":"Note"}><TIn value={entry.note||""} onChange={e=>setEntry({...entry,note:e.target.value})}/></Fld>
+        </div>
+        <Btn tp="submit" ch={t.clients.save} vr="primary"/>
+      </form>
+    </Card>}
     {hist.length>1&&<WC entries={hist} t={t}/>}
-    <Card st={{padding:0,overflow:"hidden",marginBottom:32}}>{hist.length===0&&<p style={{padding:24,fontSize:14,opacity:0.5,margin:0}}>{t.track.empty}</p>}{hist.map((h,i)=><div key={h.key} style={{display:"flex",justifyContent:"space-between",padding:"14px 20px",borderTop:i>0?`1px solid ${C.paperDim}`:"none"}}><span style={{fontSize:13.5,fontWeight:600}}>{h.date}</span><span style={{fontSize:13.5}}>{h.weight} kg</span><span style={{fontSize:13,opacity:0.5}}>{h.note}</span></div>)}</Card>
+    <Card st={{padding:0,overflow:"hidden",marginBottom:32}}>
+      {hist.length===0&&<p style={{padding:24,fontSize:14,opacity:0.5,margin:0}}>{t.track.empty}</p>}
+      {hist.map((h,i)=>(
+        <div key={h.key} style={{padding:"12px 20px",borderTop:i>0?`1px solid ${C.paperDim}`:"none"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:h.waist||h.hip?6:0}}>
+            <span style={{fontSize:13.5,fontWeight:600}}>{h.date}</span>
+            <div style={{display:"flex",gap:16,alignItems:"center"}}>
+              <span style={{fontSize:14,fontWeight:700,color:C.coral}}>{h.weight} kg</span>
+              {h.note&&<span style={{fontSize:12,opacity:0.5}}>{h.note}</span>}
+            </div>
+          </div>
+          {(h.waist||h.hip||h.chest||h.arm)&&(
+            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              {h.waist&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Bel {h.waist}cm</span>}
+              {h.hip&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Kalça {h.hip}cm</span>}
+              {h.chest&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Göğüs {h.chest}cm</span>}
+              {h.arm&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Kol {h.arm}cm</span>}
+            </div>
+          )}
+        </div>
+      ))}
+    </Card>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>{t.clients.nutriHist}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{lang==="tr"?"26 parametreli günlük besin takibi":"Daily nutrition tracking with 26 parameters"}</span></div>
       <Btn ch={<><Plus size={14}/> {t.clients.newN}</>} vr="ghost" onClick={()=>setShowN(!showN)} st={{fontSize:13,padding:"8px 14px"}}/>
@@ -784,4 +850,76 @@ function TemplateDetail({t,lang,id,nav}){
     </Card>
     <div style={{display:"flex",gap:10,padding:16,background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:10}}><AlertCircle size={16} color={C.gold} style={{flexShrink:0,marginTop:1}}/><p style={{margin:0,fontSize:13,lineHeight:1.6,color:C.ink,opacity:0.75}}>{t.tpl.note}</p></div>
   </section>;
+}
+
+function getWeekNum(d){const date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));const ys=new Date(Date.UTC(date.getUTCFullYear(),0,1));return Math.ceil((((date-ys)/86400000)+1)/7);}
+
+function WeeklyPlanPage({t,lang,nav,T=C}){
+  const days=lang==="tr"?["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"]:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const slots=lang==="tr"?["🌅 Kahvaltı","☀️ Öğle","🌙 Akşam","🍎 Ara Öğün"]:["🌅 Breakfast","☀️ Lunch","🌙 Dinner","🍎 Snack"];
+  const today=new Date();
+  const weekNum=getWeekNum(today);
+  const todayIdx=(today.getDay()+6)%7; // 0=Mon
+  const [plan,setPlan]=useState(()=>Array(7).fill(null).map(()=>Array(4).fill("")));
+  const [edit,setEdit]=useState(null);
+  const [editTxt,setEditTxt]=useState("");
+
+  useEffect(()=>{(async()=>{const saved=await sg(`weekplan:${weekNum}`);if(saved)setPlan(saved);})();},[weekNum]);
+
+  const saveCell=async()=>{
+    if(!edit)return;
+    const np=plan.map((day,di)=>di===edit.d?day.map((s,si)=>si===edit.s?editTxt:s):day);
+    setPlan(np);await ss(`weekplan:${weekNum}`,np);setEdit(null);
+  };
+  const clearPlan=async()=>{const e=Array(7).fill(null).map(()=>Array(4).fill(""));setPlan(e);await ss(`weekplan:${weekNum}`,e);};
+
+  return(
+    <section style={{maxWidth:1200,margin:"0 auto",padding:"48px 24px 80px"}}>
+      <style>{`@media print{.np{display:none!important;}.nb-ph{display:flex!important;}@page{size:A4 landscape;margin:15mm;}}`}</style>
+      <div className="nb-ph" style={{display:"none",justifyContent:"space-between",alignItems:"center",marginBottom:20,paddingBottom:16,borderBottom:`2px solid ${T.ink}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}><Logo sz={24} T={T}/><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:T.ink}}>NutriBase</span></div>
+        <div style={{fontSize:12,color:T.ink,textAlign:"right"}}><div style={{fontWeight:700}}>{lang==="tr"?"Haftalık Öğün Planı":"Weekly Meal Plan"}</div><div>{lang==="tr"?`Hafta ${weekNum}`:`Week ${weekNum}`} · {today.getFullYear()}</div></div>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,flexWrap:"wrap",gap:12}} className="np">
+        <div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 4px",color:T.ink,display:"flex",alignItems:"center",gap:10}}>{lang==="tr"?"Haftalık Öğün Planı":"Weekly Meal Plan"} <PBadge sm/></h1><p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?`Hafta ${weekNum}`:`Week ${weekNum}`} · {today.getFullYear()}</p></div>
+        <div style={{display:"flex",gap:10}}>
+          <button onClick={clearPlan} style={{padding:"9px 16px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",fontSize:13,cursor:"pointer",color:T.ink,opacity:0.6,fontFamily:"inherit",fontWeight:600}}>{lang==="tr"?"Temizle":"Clear"}</button>
+          <button onClick={()=>window.print()} style={{padding:"9px 16px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",fontSize:13,cursor:"pointer",color:T.ink,fontFamily:"inherit",fontWeight:600,display:"flex",alignItems:"center",gap:6}}><Printer size={14}/> {lang==="tr"?"Yazdır":"Print"}</button>
+        </div>
+      </div>
+      <div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
+          <thead>
+            <tr>
+              <th style={{width:110,padding:"10px 14px",fontSize:12,fontWeight:700,textAlign:"left",color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",background:T.paperDim,borderRadius:"8px 0 0 0",border:`1px solid ${T.line}`}}>{lang==="tr"?"Öğün":"Meal"}</th>
+              {days.map((day,i)=><th key={i} style={{padding:"12px 10px",fontSize:13,fontWeight:700,color:i===todayIdx?C.coral:T.ink,background:i===todayIdx?C.coralSoft:T.paperDim,border:`1px solid ${T.line}`,textAlign:"center",borderRadius:i===6?"0 8px 0 0":"0"}}>{day}{i===todayIdx&&<div style={{fontSize:10,fontWeight:700,color:C.coral,opacity:0.8}}>{lang==="tr"?"Bugün":"Today"}</div>}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {slots.map((slot,si)=>(<tr key={si}>
+              <td style={{padding:"10px 14px",fontSize:12.5,fontWeight:700,color:T.ink,opacity:0.7,border:`1px solid ${T.line}`,background:T.paperDim,whiteSpace:"nowrap"}}>{slot}</td>
+              {days.map((_,di)=>(
+                <td key={di} onClick={()=>{if(edit?.d===di&&edit?.s===si)return;setEdit({d:di,s:si});setEditTxt(plan[di][si]);}} style={{padding:0,border:`1px solid ${T.line}`,verticalAlign:"top",cursor:"pointer",background:plan[di][si]?T.paperDim:T.paper,minWidth:110,minHeight:72,position:"relative"}}>
+                  {edit?.d===di&&edit?.s===si ? (
+                    <div onClick={e=>e.stopPropagation()} style={{padding:6}}>
+                      <textarea value={editTxt} onChange={e=>setEditTxt(e.target.value)} autoFocus rows={3} placeholder={lang==="tr"?"Öğün yaz...":"Enter meal..."} style={{width:"100%",fontSize:12,border:`1.5px solid ${C.coral}`,borderRadius:6,padding:6,resize:"none",fontFamily:"inherit",outline:"none",background:T.paper,color:T.ink,boxSizing:"border-box"}}/>
+                      <div style={{display:"flex",gap:4,marginTop:4}}>
+                        <button onClick={saveCell} style={{flex:1,background:C.coral,color:"#fff",border:"none",borderRadius:5,padding:"5px",fontSize:11,fontWeight:700,cursor:"pointer"}}><Check size={12}/></button>
+                        <button onClick={()=>{setEdit(null);}} style={{flex:1,background:T.line,color:T.ink,border:"none",borderRadius:5,padding:"5px",fontSize:11,cursor:"pointer"}}><X size={12}/></button>
+                      </div>
+                    </div>
+                  ):(
+                    <div style={{padding:"10px 12px",fontSize:12.5,lineHeight:1.5,color:plan[di][si]?T.ink:T.ink,opacity:plan[di][si]?1:0.2,minHeight:72}}>
+                      {plan[di][si]||"+"}
+                    </div>
+                  )}
+                </td>
+              ))}
+            </tr>))}
+          </tbody>
+        </table>
+      </div>
+      <p style={{fontSize:12,color:T.ink,opacity:0.4,marginTop:16}}>{lang==="tr"?"Her hücreye tıklayarak öğün içeriğini yazabilirsin. Haftalık plan otomatik kaydedilir.":"Click any cell to enter meal content. The weekly plan is saved automatically."}</p>
+    </section>
+  );
 }
