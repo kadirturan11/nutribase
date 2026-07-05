@@ -909,32 +909,119 @@ function ProCheckout({t,nav,goPro}){
   return<section style={{maxWidth:480,margin:"0 auto",padding:"60px 24px 90px"}}><div style={{textAlign:"center",marginBottom:28}}><PBadge/><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:26,fontWeight:700,margin:"14px 0 6px"}}>{t.pro.demo}</h1><p style={{fontSize:12.5,color:C.gold,fontWeight:600}}>{t.pro.demoNote}</p></div><div style={{display:"flex",gap:10,marginBottom:22}}>{[{k:"monthly",l:t.pro.pM,p:"₺149"},{k:"yearly",l:t.pro.pY,p:"₺1.490"}].map(pl=><button key={pl.k} onClick={()=>setPlan(pl.k)} style={{flex:1,padding:"16px 14px",borderRadius:12,cursor:"pointer",textAlign:"left",border:`2px solid ${plan===pl.k?C.coral:C.line}`,background:plan===pl.k?C.coralSoft:"#fff"}}><div style={{fontSize:12.5,fontWeight:700,opacity:0.7,marginBottom:4}}>{pl.l}</div><div style={{fontSize:20,fontWeight:800,fontFamily:"'Source Serif 4',Georgia,serif"}}>{pl.p}</div></button>)}</div><Card st={{}}><form onSubmit={sub}><Fld label={t.pro.cardName}><TIn required value={card.name} onChange={e=>setCard({...card,name:e.target.value})} placeholder="Ada Yılmaz"/></Fld><Fld label={t.pro.cardNum}><TIn required value={card.number} onChange={e=>setCard({...card,number:e.target.value})} placeholder="4242 4242 4242 4242" maxLength={19}/></Fld><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}><Fld label={t.pro.expiry}><TIn required value={card.expiry} onChange={e=>setCard({...card,expiry:e.target.value})} placeholder="12/28"/></Fld><Fld label={t.pro.cvc}><TIn required value={card.cvc} onChange={e=>setCard({...card,cvc:e.target.value})} placeholder="123" maxLength={4}/></Fld></div><Btn tp="submit" ch={proc?t.pro.proc:<>{t.pro.confirm} <ArrowRight size={15}/></>} vr="coral" dis={proc} st={{width:"100%",padding:"15px",marginTop:8}}/></form></Card></section>;
 }
 
-function ClientsPage({t,lang,nav,setSel}){
-  const[clients,setClients]=useState([]);const[loading,setLoading]=useState(true);const[showForm,setShowForm]=useState(false);const[search,setSearch]=useState("");const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
-  const load=useCallback(async()=>{setLoading(true);const ks=await sl("client:");const items=[];for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}items.sort((a,b)=>b.createdAt-a.createdAt);setClients(items);setLoading(false);},[]);
+function ClientsPage({t,lang,nav,setSel,T=C}){
+  const[clients,setClients]=useState([]);
+  const[loading,setLoading]=useState(true);
+  const[showForm,setShowForm]=useState(false);
+  const[search,setSearch]=useState("");
+  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const ks=await sl("client:");const items=[];
+    for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}
+    items.sort((a,b)=>b.createdAt-a.createdAt);
+    setClients(items);setLoading(false);
+  },[]);
+
   useEffect(()=>{load();},[load]);
-  const add=async e=>{e.preventDefault();if(!form.name)return;const id=`client:${Date.now()}`;await ss(id,{...form,createdAt:Date.now(),id});setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});setShowForm(false);load();};
+
+  const add=async e=>{
+    e.preventDefault();if(!form.name)return;
+    const id=`client:${Date.now()}`;
+    await ss(id,{...form,createdAt:Date.now(),id});
+    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
+    setShowForm(false);load();
+  };
   const del=async k=>{if(!window.confirm(t.clients.confirmDel))return;await sd(k);load();};
   const filtered=clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
-  return<section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:14}}><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,display:"flex",alignItems:"center",gap:10}}>{t.clients.title} <PBadge sm/></h1><Btn ch={<><UserPlus size={16}/> {t.clients.add}</>} vr="coral" onClick={()=>setShowForm(!showForm)}/></div>
-    {showForm&&<Card st={{marginBottom:24}}><form onSubmit={add}><div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14}} className="g2"><Fld label={t.clients.nameL}><TIn required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder={lang==="tr"?"örn. Danışan-014":"e.g. Client-014"}/></Fld><Fld label={t.clients.age}><TIn type="number" value={form.age} onChange={e=>setForm({...form,age:e.target.value})}/></Fld></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}} className="g3"><Fld label={t.clients.gender}><SegBtn opts={[{v:"female",l:t.calc.female},{v:"male",l:t.calc.male}]} val={form.gender} onChg={v=>setForm({...form,gender:v})}/></Fld><Fld label={t.clients.height}><TIn type="number" value={form.height} onChange={e=>setForm({...form,height:e.target.value})}/></Fld><Fld label={t.clients.weight}><TIn type="number" value={form.weight} onChange={e=>setForm({...form,weight:e.target.value})}/></Fld></div><Fld label={t.clients.condition}><TIn value={form.condition} onChange={e=>setForm({...form,condition:e.target.value})} placeholder={t.clients.condNone}/></Fld>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
-  <Fld label={lang==="tr"?"Hedef Kalori (kcal)":"Target Calories (kcal)"}><TIn type="number" value={form.targetKcal} onChange={e=>setForm({...form,targetKcal:e.target.value})} placeholder="örn. 1800"/></Fld>
-  <Fld label={lang==="tr"?"Hedef Su (litre)":"Target Water (liters)"}><TIn type="number" value={form.targetWater} onChange={e=>setForm({...form,targetWater:e.target.value})} placeholder="örn. 2.5"/></Fld>
-</div>
-<Fld label={t.clients.notes}><textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={3} style={{...iSt,resize:"vertical",fontFamily:"inherit"}}/></Fld><p style={{fontSize:12,color:C.gold,opacity:0.9,marginBottom:16,display:"flex",gap:6}}><AlertCircle size={13} style={{flexShrink:0,marginTop:1}}/> {t.clients.privacy}</p><div style={{display:"flex",gap:10}}><Btn tp="submit" ch={t.clients.save} vr="primary"/><Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowForm(false)}/></div></form></Card>}
-    <Fld label=""><div style={{position:"relative"}}><Search size={16} style={{position:"absolute",left:14,top:13,opacity:0.4}}/><TIn value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.clients.search} style={{paddingLeft:38}}/></div></Fld>
-    {loading&&<Spin/>}
-    {!loading&&filtered.length===0&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:50,textAlign:"center",color:C.ink,opacity:0.45}}><Users size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{t.clients.empty}</p></div>}
-    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}} className="g2">{filtered.map(c=><Card key={c.key} st={{}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}><div><h3 style={{fontSize:17,fontWeight:700,margin:"0 0 4px"}}>{c.name}</h3><p style={{fontSize:13,color:C.ink,opacity:0.55,margin:0}}>{c.age&&`${c.age} ${lang==="tr"?"yaş":"yrs"}`}{c.weight&&` · ${c.weight} kg`}{c.height&&` · ${c.height} cm`}</p>{c.condition&&<span style={{display:"inline-block",marginTop:8,fontSize:11.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"3px 9px",borderRadius:20}}>{c.condition}</span>}</div><button onClick={()=>del(c.key)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3}}><Trash2 size={15}/></button></div><div style={{marginTop:16}}><Btn ch={<>{t.clients.view} <ChevronRight size={14}/></>} vr="ghost" onClick={()=>{setSel(c.key);nav("clientProfile");}} st={{fontSize:13,padding:"8px 14px"}}/></div></Card>)}</div>
-  </section>;
-}
 
-function ClientProfile({t,lang,clientId,nav}){
-  const[client,setClient]=useState(null);const[hist,setHist]=useState([]);const[showAdd,setShowAdd]=useState(false);const[entry,setEntry]=useState({weight:"",note:""});
-  const[showN,setShowN]=useState(false);const[nEntry,setNEntry]=useState(Array(26).fill(""));const[nHist,setNHist]=useState([]);const[exp,setExp]=useState(null);
-  const[clinNotes,setClinNotes]=useState([]);const[showNoteForm,setShowNoteForm]=useState(false);const[noteText,setNoteText]=useState("");
+  return(
+    <section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:14}}>
+        <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,color:T.ink,display:"flex",alignItems:"center",gap:10}}>{t.clients.title} <PBadge sm/></h1>
+        <Btn ch={<><UserPlus size={16}/> {t.clients.add}</>} vr="coral" onClick={()=>setShowForm(f=>!f)}/>
+      </div>
+
+      {showForm&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24,marginBottom:24}}>
+          <form onSubmit={add}>
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14}} className="g2">
+              <Fld label={t.clients.nameL}><TIn required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={lang==="tr"?"örn. Danışan-014":"e.g. Client-014"} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={t.clients.age}><TIn type="number" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}} className="g3">
+              <Fld label={t.clients.gender}><SegBtn opts={[{v:"female",l:t.calc.female},{v:"male",l:t.calc.male}]} val={form.gender} onChg={v=>setForm(f=>({...f,gender:v}))}/></Fld>
+              <Fld label={t.clients.height}><TIn type="number" value={form.height} onChange={e=>setForm(f=>({...f,height:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={t.clients.weight}><TIn type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            </div>
+            <Fld label={t.clients.condition}><TIn value={form.condition} onChange={e=>setForm(f=>({...f,condition:e.target.value}))} placeholder={t.clients.condNone} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
+              <Fld label={lang==="tr"?"Hedef Kalori (kcal)":"Target Calories (kcal)"}><TIn type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={lang==="tr"?"Hedef Su (litre)":"Target Water (liters)"}><TIn type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            </div>
+            <Fld label={t.clients.notes}><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={3} style={{width:"100%",padding:"12px 14px",fontSize:16,borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"vertical"}}/></Fld>
+            <p style={{fontSize:12,color:C.gold,opacity:0.9,marginBottom:16,display:"flex",gap:6}}><AlertCircle size={13} style={{flexShrink:0,marginTop:1}}/> {t.clients.privacy}</p>
+            <div style={{display:"flex",gap:10}}>
+              <Btn tp="submit" ch={t.clients.save} vr="primary"/>
+              <Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowForm(false)}/>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div style={{position:"relative",marginBottom:20}}>
+        <Search size={16} style={{position:"absolute",left:14,top:13,color:T.ink,opacity:0.4}}/>
+        <TIn value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.clients.search} style={{paddingLeft:38,background:T.paper,color:T.ink,borderColor:T.line}}/>
+      </div>
+
+      {loading&&<Spin/>}
+      {!loading&&filtered.length===0&&(
+        <div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:50,textAlign:"center",color:T.ink,opacity:0.55}}>
+          <Users size={28} style={{marginBottom:10}}/>
+          <p style={{margin:0,fontSize:14}}>{t.clients.empty}</p>
+        </div>
+      )}
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}} className="g2">
+        {filtered.map(c=>(
+          <div key={c.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+              <div>
+                <h3 style={{fontSize:17,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{c.name}</h3>
+                <p style={{fontSize:13,color:T.ink,opacity:0.55,margin:0}}>
+                  {c.age&&`${c.age} ${lang==="tr"?"yaş":"yrs"}`}
+                  {c.weight&&` · ${c.weight} kg`}
+                  {c.height&&` · ${c.height} cm`}
+                </p>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
+                  {c.condition&&<span style={{fontSize:11.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"3px 9px",borderRadius:20}}>{c.condition}</span>}
+                  {c.targetKcal&&<span style={{fontSize:11.5,fontWeight:600,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 9px",borderRadius:20}}>{c.targetKcal} kcal</span>}
+                  {c.targetWater&&<span style={{fontSize:11.5,fontWeight:600,background:T.paperDim,color:T.ink,opacity:0.7,padding:"3px 9px",borderRadius:20}}>💧 {c.targetWater}L</span>}
+                </div>
+              </div>
+              <button onClick={()=>del(c.key)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><Trash2 size={15}/></button>
+            </div>
+            <Btn ch={<>{t.clients.view} <ChevronRight size={14}/></>} vr="ghost" onClick={()=>{setSel(c.key);nav("clientProfile");}} st={{fontSize:13,padding:"8px 14px"}}/>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+function ClientProfile({t,lang,clientId,nav,T=C}){
+  const[client,setClient]=useState(null);
+  const[hist,setHist]=useState([]);
+  const[showAdd,setShowAdd]=useState(false);
+  const[entry,setEntry]=useState({weight:"",waist:"",hip:"",chest:"",arm:"",note:""});
+  const[showN,setShowN]=useState(false);
+  const[nEntry,setNEntry]=useState(Array(26).fill(""));
+  const[nHist,setNHist]=useState([]);
+  const[exp,setExp]=useState(null);
+  const[clinNotes,setClinNotes]=useState([]);
+  const[showNoteForm,setShowNoteForm]=useState(false);
+  const[noteText,setNoteText]=useState("");
+
   const load=useCallback(async()=>{
     if(!clientId)return;
     const c=await sg(clientId);setClient(c);
@@ -948,127 +1035,242 @@ function ClientProfile({t,lang,clientId,nav}){
     for(const k of cks){const v=await sg(k);if(v)cn.push({...v,key:k});}
     cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
   },[clientId]);
-  useEffect(()=>{load();},[load]);
-  const addM=async e=>{e.preventDefault();if(!entry.weight)return;const ts=Date.now();await ss(`${clientId}:history:${ts}`,{weight:entry.weight,note:entry.note,ts,date:new Date().toISOString().slice(0,10)});setEntry({weight:"",note:""});setShowAdd(false);load();};
-  const addN=async e=>{e.preventDefault();const ts=Date.now();const vals=nEntry.map(v=>v===""?null:parseFloat(v));await ss(`${clientId}:nutri:${ts}`,{vals,ts,date:new Date().toISOString().slice(0,10)});setNEntry(Array(26).fill(""));setShowN(false);load();};
-  const addClinNote=async()=>{if(!noteText.trim())return;const ts=Date.now();const now=new Date();await ss(`${clientId}:clinNote:${ts}`,{text:noteText,ts,date:now.toISOString().slice(0,10),time:now.toLocaleTimeString(lang==="tr"?"tr-TR":"en-US",{hour:"2-digit",minute:"2-digit"})});setNoteText("");setShowNoteForm(false);load();};
-  const delClinNote=async(key)=>{await sd(key);load();};
-  if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
-  return<section style={{maxWidth:900,margin:"0 auto",padding:"40px 24px 80px"}}>
-    <style>{`@media print{.np{display:none!important;}.nb-rh{display:flex!important;border-bottom:2px solid #0E2A3D;padding-bottom:16px;margin-bottom:24px;}@page{size:A4;margin:20mm;}}`}</style>
-    {/* Print report header */}
-    <div className="nb-rh" style={{display:"none",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
-      <div>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:16,color:"#0E2A3D"}}>NutriBase PRO</span></div>
-        <div style={{fontSize:12,color:"#0E2A3D",opacity:0.6}}>{lang==="tr"?"Danışan Klinik Raporu":"Client Clinical Report"}</div>
-      </div>
-      <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
-        <div>{new Date().toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long",year:"numeric"})}</div>
-        <div style={{fontWeight:700,marginTop:2}}>{client.name}</div>
-      </div>
-    </div>
-    <button onClick={()=>nav("clients")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.ink,opacity:0.55,marginBottom:20,padding:0,fontWeight:600}}>← {t.common.back}</button>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:12}}>
-      <div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px"}}>{client.name}</h1><p style={{fontSize:14,color:C.ink,opacity:0.55,margin:0}}>{client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female} · {client.height} cm</p></div>
-      <div style={{display:"flex",gap:10,alignItems:"center"}}>
-        {client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}
-        <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"9px 16px",borderRadius:8,border:`1px solid ${C.line}`,background:"#fff",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={14}/> {lang==="tr"?"Rapor Yazdır":"Print Report"}</button>
-      </div>
-    </div>
-    {/* Goals */}
-    {(client.targetKcal||client.targetWater)&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}} className="g2">
-      {client.targetKcal&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"16px 20px"}}>
-        <div style={{fontSize:11,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:8}}>{lang==="tr"?"Hedef Kalori":"Target Calories"}</div>
-        <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:10}}><span style={{fontSize:28,fontWeight:800,color:C.coral,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetKcal}</span><span style={{fontSize:13,color:C.ink,opacity:0.5,fontWeight:600}}>kcal / {lang==="tr"?"gün":"day"}</span></div>
-        {hist.length>0&&hist[0]&&<div><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.ink,opacity:0.45,marginBottom:4}}><span>{lang==="tr"?"Son Kilo":"Last Weight"}: {hist[0].weight} kg</span></div></div>}
-      </div>}
-      {client.targetWater&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"16px 20px"}}>
-        <div style={{fontSize:11,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:8}}>{lang==="tr"?"Hedef Su":"Target Water"}</div>
-        <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:C.sage,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetWater}</span><span style={{fontSize:13,color:C.ink,opacity:0.5,fontWeight:600}}>L / {lang==="tr"?"gün":"day"}</span></div>
-      </div>}
-    </div>}
 
-    {client.notes&&<Card st={{marginBottom:20,background:C.paperDim,border:"none"}}><h4 style={{fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",opacity:0.5,margin:"0 0 8px"}}>{t.clients.notes}</h4><p style={{margin:0,fontSize:14,lineHeight:1.6}}>{client.notes}</p></Card>}
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><h3 style={{fontSize:15,fontWeight:700,margin:0}}>{t.clients.hist}</h3><Btn ch={<><Plus size={14}/> {t.clients.newM}</>} vr="ghost" onClick={()=>setShowAdd(!showAdd)} st={{fontSize:13,padding:"8px 14px"}}/></div>
-    {showAdd&&<Card st={{marginBottom:16}}>
-      <form onSubmit={addM}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
-          <Fld label={lang==="tr"?"Kilo (kg)":"Weight (kg)"}><TIn type="number" required value={entry.weight} onChange={e=>setEntry({...entry,weight:e.target.value})} placeholder="65"/></Fld>
-          <Fld label={lang==="tr"?"Bel (cm)":"Waist (cm)"}><TIn type="number" value={entry.waist||""} onChange={e=>setEntry({...entry,waist:e.target.value})} placeholder="—"/></Fld>
-          <Fld label={lang==="tr"?"Kalça (cm)":"Hip (cm)"}><TIn type="number" value={entry.hip||""} onChange={e=>setEntry({...entry,hip:e.target.value})} placeholder="—"/></Fld>
+  useEffect(()=>{load();},[load]);
+
+  const addM=async e=>{
+    e.preventDefault();if(!entry.weight)return;
+    const ts=Date.now();
+    await ss(`${clientId}:history:${ts}`,{...entry,ts,date:new Date().toISOString().slice(0,10)});
+    setEntry({weight:"",waist:"",hip:"",chest:"",arm:"",note:""});
+    setShowAdd(false);load();
+  };
+  const addN=async e=>{
+    e.preventDefault();const ts=Date.now();
+    const vals=nEntry.map(v=>v===""?null:parseFloat(v));
+    await ss(`${clientId}:nutri:${ts}`,{vals,ts,date:new Date().toISOString().slice(0,10)});
+    setNEntry(Array(26).fill(""));setShowN(false);load();
+  };
+  const addClinNote=async()=>{
+    if(!noteText.trim())return;const ts=Date.now();const now=new Date();
+    await ss(`${clientId}:clinNote:${ts}`,{text:noteText,ts,date:now.toISOString().slice(0,10),time:now.toLocaleTimeString(lang==="tr"?"tr-TR":"en-US",{hour:"2-digit",minute:"2-digit"})});
+    setNoteText("");setShowNoteForm(false);load();
+  };
+  const delClinNote=async key=>{await sd(key);load();};
+
+  if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
+
+  return(
+    <section style={{maxWidth:900,margin:"0 auto",padding:"40px 24px 80px"}}>
+      <style>{`@media print{.np{display:none!important;}.nb-rh{display:flex!important;}@page{size:A4;margin:20mm;}}`}</style>
+      {/* Print header */}
+      <div className="nb-rh" style={{display:"none",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24,paddingBottom:16,borderBottom:"2px solid #0E2A3D"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:16,color:"#0E2A3D"}}>NutriBase PRO</span>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
-          <Fld label={lang==="tr"?"Göğüs (cm)":"Chest (cm)"}><TIn type="number" value={entry.chest||""} onChange={e=>setEntry({...entry,chest:e.target.value})} placeholder="—"/></Fld>
-          <Fld label={lang==="tr"?"Kol (cm)":"Arm (cm)"}><TIn type="number" value={entry.arm||""} onChange={e=>setEntry({...entry,arm:e.target.value})} placeholder="—"/></Fld>
-          <Fld label={lang==="tr"?"Not":"Note"}><TIn value={entry.note||""} onChange={e=>setEntry({...entry,note:e.target.value})}/></Fld>
+        <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
+          <div>{new Date().toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long",year:"numeric"})}</div>
+          <div style={{fontWeight:700,marginTop:2}}>{client.name}</div>
         </div>
-        <Btn tp="submit" ch={t.clients.save} vr="primary"/>
-      </form>
-    </Card>}
-    {hist.length>1&&<WC entries={hist} t={t}/>}
-    <Card st={{padding:0,overflow:"hidden",marginBottom:32}}>
-      {hist.length===0&&<p style={{padding:24,fontSize:14,opacity:0.5,margin:0}}>{t.track.empty}</p>}
-      {hist.map((h,i)=>(
-        <div key={h.key} style={{padding:"12px 20px",borderTop:i>0?`1px solid ${C.paperDim}`:"none"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:h.waist||h.hip?6:0}}>
-            <span style={{fontSize:13.5,fontWeight:600}}>{h.date}</span>
-            <div style={{display:"flex",gap:16,alignItems:"center"}}>
-              <span style={{fontSize:14,fontWeight:700,color:C.coral}}>{h.weight} kg</span>
-              {h.note&&<span style={{fontSize:12,opacity:0.5}}>{h.note}</span>}
+      </div>
+
+      <button onClick={()=>nav("clients")} className="np" style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:13,color:T.ink,opacity:0.55,marginBottom:20,padding:0,fontWeight:600}}>← {t.common.back}</button>
+
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24,flexWrap:"wrap",gap:12}}>
+        <div>
+          <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px",color:T.ink}}>{client.name}</h1>
+          <p style={{fontSize:14,color:T.ink,opacity:0.55,margin:0}}>
+            {client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female}{client.height&&` · ${client.height} cm`}
+          </p>
+        </div>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          {client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}
+          <button onClick={()=>window.print()} className="np" style={{display:"flex",alignItems:"center",gap:6,padding:"9px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={14}/> {lang==="tr"?"Rapor Yazdır":"Print Report"}</button>
+        </div>
+      </div>
+
+      {/* Goals */}
+      {(client.targetKcal||client.targetWater)&&(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}} className="g2">
+          {client.targetKcal&&(
+            <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 20px"}}>
+              <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>{lang==="tr"?"Hedef Kalori":"Target Calories"}</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:C.coral,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetKcal}</span><span style={{fontSize:12,color:T.ink,opacity:0.5}}>kcal/{lang==="tr"?"gün":"day"}</span></div>
             </div>
-          </div>
-          {(h.waist||h.hip||h.chest||h.arm)&&(
-            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-              {h.waist&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Bel {h.waist}cm</span>}
-              {h.hip&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Kalça {h.hip}cm</span>}
-              {h.chest&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Göğüs {h.chest}cm</span>}
-              {h.arm&&<span style={{fontSize:11.5,color:C.ink,opacity:0.6,background:C.paperDim,padding:"2px 8px",borderRadius:12}}>Kol {h.arm}cm</span>}
+          )}
+          {client.targetWater&&(
+            <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 20px"}}>
+              <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>{lang==="tr"?"Hedef Su":"Target Water"}</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:"#3B82F6",fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetWater}</span><span style={{fontSize:12,color:T.ink,opacity:0.5}}>L/{lang==="tr"?"gün":"day"}</span></div>
             </div>
           )}
         </div>
-      ))}
-    </Card>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-      <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>{t.clients.nutriHist}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{lang==="tr"?"26 parametreli günlük besin takibi":"Daily nutrition tracking with 26 parameters"}</span></div>
-      <Btn ch={<><Plus size={14}/> {t.clients.newN}</>} vr="ghost" onClick={()=>setShowN(!showN)} st={{fontSize:13,padding:"8px 14px"}}/>
-    </div>
-    {showN&&<Card st={{marginBottom:16}}><h4 style={{fontSize:13,fontWeight:700,margin:"0 0 16px"}}>{lang==="tr"?"Günlük Besin Değerleri":"Enter Daily Nutritional Values"}</h4><form onSubmit={addN}><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}} className="g3">{NUTRIENTS.map((n,i)=><div key={i}><label style={{display:"block",fontSize:11,fontWeight:600,color:C.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase"}}>{lang==="tr"?n.tr:n.en} ({n.unit})</label><TIn type="number" value={nEntry[i]} onChange={e=>{const a=[...nEntry];a[i]=e.target.value;setNEntry(a);}} placeholder="—" style={{padding:"8px 10px",fontSize:13}}/></div>)}</div><div style={{marginTop:16,display:"flex",gap:10}}><Btn tp="submit" ch={t.clients.save} vr="primary"/><Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowN(false)}/></div></form></Card>}
-    {nHist.length===0&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:30,textAlign:"center",color:C.ink,opacity:0.4,fontSize:14}}>{lang==="tr"?"Henüz besin kaydı yok.":"No nutrition records yet."}</div>}
-    {nHist.length>0&&<Card st={{padding:0,overflow:"hidden"}}>{nHist.map((rec,ri)=><div key={rec.key} style={{borderTop:ri>0?`1px solid ${C.paperDim}`:"none"}}><div onClick={()=>setExp(exp===ri?null:ri)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 20px",cursor:"pointer"}}><span style={{fontSize:14,fontWeight:600}}>{rec.date}</span><div style={{display:"flex",alignItems:"center",gap:16}}>{rec.vals[0]!=null&&<span style={{fontSize:13,fontWeight:700,color:C.coral}}>{rec.vals[0]} kcal</span>}{rec.vals[1]!=null&&<span style={{fontSize:13,color:C.ink,opacity:0.6}}>P:{rec.vals[1]}g</span>}{rec.vals[3]!=null&&<span style={{fontSize:13,color:C.ink,opacity:0.6}}>K:{rec.vals[3]}g</span>}{exp===ri?<ChevronUp size={16} style={{opacity:0.4}}/>:<ChevronDown size={16} style={{opacity:0.4}}/>}</div></div>{exp===ri&&<div style={{padding:"0 20px 20px"}}><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}} className="g3">{NUTRIENTS.map((n,i)=>rec.vals[i]!=null?<div key={i} style={{background:C.paperDim,borderRadius:8,padding:"8px 12px"}}><div style={{fontSize:10.5,fontWeight:600,color:C.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?n.tr:n.en}</div><span style={{fontSize:14,fontWeight:700}}>{rec.vals[i]}</span><span style={{fontSize:11,color:C.ink,opacity:0.4,marginLeft:2}}>{n.unit}</span></div>:null)}</div></div>}</div>)}</Card>}
+      )}
 
-    {/* Clinical Notes */}
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"32px 0 14px"}}>
-      <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>📝 {lang==="tr"?"Klinik Notlar":"Clinical Notes"}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{lang==="tr"?"Zaman damgalı klinik gözlemler":"Timestamped clinical observations"}</span></div>
-      <Btn ch={<><Plus size={14}/> {lang==="tr"?"Not Ekle":"Add Note"}</>} vr="ghost" onClick={()=>setShowNoteForm(!showNoteForm)} st={{fontSize:13,padding:"8px 14px"}}/>
-    </div>
-    {showNoteForm&&<Card st={{marginBottom:16}}>
-      <Fld label={lang==="tr"?"Klinik Not":"Clinical Note"}>
-        <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={4} placeholder={lang==="tr"?"Klinik gözlem, öneri, ilaç notu...":"Clinical observation, recommendation, medication note..."} style={{...iSt,resize:"vertical",fontFamily:"inherit"}}/>
-      </Fld>
-      <div style={{display:"flex",gap:10}}>
-        <Btn ch={<><Check size={14}/> {lang==="tr"?"Kaydet":"Save"}</>} vr="primary" onClick={addClinNote}/>
-        <Btn ch={lang==="tr"?"Vazgeç":"Cancel"} vr="ghost" onClick={()=>{setShowNoteForm(false);setNoteText("");}}/>
+      {client.notes&&(
+        <div style={{background:T.paperDim,borderRadius:12,padding:"14px 18px",marginBottom:20}}>
+          <h4 style={{fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",opacity:0.5,margin:"0 0 8px",color:T.ink}}>{t.clients.notes}</h4>
+          <p style={{margin:0,fontSize:14,lineHeight:1.6,color:T.ink}}>{client.notes}</p>
+        </div>
+      )}
+
+      {/* Weight measurements */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <h3 style={{fontSize:15,fontWeight:700,margin:0,color:T.ink}}>{t.clients.hist}</h3>
+        <Btn ch={<><Plus size={14}/> {t.clients.newM}</>} vr="ghost" onClick={()=>setShowAdd(f=>!f)} st={{fontSize:13,padding:"8px 14px"}}/>
       </div>
-    </Card>}
-    {clinNotes.length===0&&!showNoteForm&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:30,textAlign:"center",color:C.ink,opacity:0.4,fontSize:14}}>{lang==="tr"?"Henüz klinik not yok.":"No clinical notes yet."}</div>}
-    {clinNotes.length>0&&<div style={{position:"relative"}}>
-      <div style={{position:"absolute",left:19,top:0,bottom:0,width:2,background:C.line}}/>
-      {clinNotes.map((note,i)=>(
-        <div key={note.key} style={{display:"flex",gap:16,marginBottom:16,position:"relative"}}>
-          <div style={{width:40,height:40,borderRadius:"50%",background:C.ink,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,zIndex:1,fontSize:14}}>📝</div>
-          <div style={{flex:1,background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"14px 16px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-              <span style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.55}}>{note.date} · {note.time}</span>
-              <button onClick={()=>delClinNote(note.key)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3}}><Trash2 size={13}/></button>
+
+      {showAdd&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:16}}>
+          <form onSubmit={addM}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+              <Fld label={lang==="tr"?"Kilo (kg)*":"Weight (kg)*"}><TIn type="number" required value={entry.weight} onChange={e=>setEntry(f=>({...f,weight:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={lang==="tr"?"Bel (cm)":"Waist (cm)"}><TIn type="number" value={entry.waist} onChange={e=>setEntry(f=>({...f,waist:e.target.value}))} placeholder="—" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={lang==="tr"?"Kalça (cm)":"Hip (cm)"}><TIn type="number" value={entry.hip} onChange={e=>setEntry(f=>({...f,hip:e.target.value}))} placeholder="—" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
             </div>
-            <p style={{margin:0,fontSize:14,lineHeight:1.6,color:C.ink,whiteSpace:"pre-wrap"}}>{note.text}</p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+              <Fld label={lang==="tr"?"Göğüs (cm)":"Chest (cm)"}><TIn type="number" value={entry.chest} onChange={e=>setEntry(f=>({...f,chest:e.target.value}))} placeholder="—" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={lang==="tr"?"Kol (cm)":"Arm (cm)"}><TIn type="number" value={entry.arm} onChange={e=>setEntry(f=>({...f,arm:e.target.value}))} placeholder="—" style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+              <Fld label={lang==="tr"?"Not":"Note"}><TIn value={entry.note} onChange={e=>setEntry(f=>({...f,note:e.target.value}))} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            </div>
+            <Btn tp="submit" ch={t.clients.save} vr="primary"/>
+          </form>
+        </div>
+      )}
+
+      {hist.length>1&&<WC entries={hist} t={t}/>}
+
+      <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,overflow:"hidden",marginBottom:28}}>
+        {hist.length===0&&<p style={{padding:24,fontSize:14,color:T.ink,opacity:0.5,margin:0}}>{t.track.empty}</p>}
+        {hist.map((h,i)=>(
+          <div key={h.key} style={{padding:"12px 20px",borderTop:i>0?`1px solid ${T.line}`:"none"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:h.waist||h.hip?6:0}}>
+              <span style={{fontSize:13.5,fontWeight:600,color:T.ink}}>{h.date}</span>
+              <div style={{display:"flex",gap:14,alignItems:"center"}}>
+                <span style={{fontSize:14,fontWeight:800,color:C.coral}}>{h.weight} kg</span>
+                {h.note&&<span style={{fontSize:12,color:T.ink,opacity:0.5}}>{h.note}</span>}
+              </div>
+            </div>
+            {(h.waist||h.hip||h.chest||h.arm)&&(
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {h.waist&&<span style={{fontSize:11.5,color:T.ink,opacity:0.6,background:T.paperDim,padding:"2px 8px",borderRadius:10}}>Bel {h.waist}cm</span>}
+                {h.hip&&<span style={{fontSize:11.5,color:T.ink,opacity:0.6,background:T.paperDim,padding:"2px 8px",borderRadius:10}}>Kalça {h.hip}cm</span>}
+                {h.chest&&<span style={{fontSize:11.5,color:T.ink,opacity:0.6,background:T.paperDim,padding:"2px 8px",borderRadius:10}}>Göğüs {h.chest}cm</span>}
+                {h.arm&&<span style={{fontSize:11.5,color:T.ink,opacity:0.6,background:T.paperDim,padding:"2px 8px",borderRadius:10}}>Kol {h.arm}cm</span>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* 26-value nutrition */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div>
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{t.clients.nutriHist}</h3>
+          <span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"26 parametreli günlük besin takibi":"Daily nutrition tracking — 26 parameters"}</span>
+        </div>
+        <Btn ch={<><Plus size={14}/> {t.clients.newN}</>} vr="ghost" onClick={()=>setShowN(f=>!f)} st={{fontSize:13,padding:"8px 14px"}}/>
+      </div>
+
+      {showN&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:16}}>
+          <h4 style={{fontSize:13,fontWeight:700,margin:"0 0 16px",color:T.ink}}>{lang==="tr"?"Günlük Besin Değerleri":"Enter Daily Nutritional Values"}</h4>
+          <form onSubmit={addN}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}} className="g3">
+              {NUTRIENTS.map((n,i)=>(
+                <div key={i}>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:T.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?n.tr:n.en} ({n.unit})</label>
+                  <TIn type="number" value={nEntry[i]} onChange={e=>{const a=[...nEntry];a[i]=e.target.value;setNEntry(a);}} placeholder="—" style={{padding:"8px 10px",fontSize:13,background:T.paper,color:T.ink,borderColor:T.line}}/>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:16,display:"flex",gap:10}}>
+              <Btn tp="submit" ch={t.clients.save} vr="primary"/>
+              <Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowN(false)}/>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {nHist.length===0&&!showN&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:28,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz besin kaydı yok.":"No nutrition records yet."}</div>}
+      {nHist.length>0&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,overflow:"hidden",marginBottom:28}}>
+          {nHist.map((rec,ri)=>(
+            <div key={rec.key} style={{borderTop:ri>0?`1px solid ${T.line}`:"none"}}>
+              <div onClick={()=>setExp(exp===ri?null:ri)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 20px",cursor:"pointer"}}>
+                <span style={{fontSize:14,fontWeight:600,color:T.ink}}>{rec.date}</span>
+                <div style={{display:"flex",alignItems:"center",gap:14}}>
+                  {rec.vals[0]!=null&&<span style={{fontSize:13,fontWeight:700,color:C.coral}}>{rec.vals[0]} kcal</span>}
+                  {rec.vals[1]!=null&&<span style={{fontSize:13,color:T.ink,opacity:0.6}}>P:{rec.vals[1]}g</span>}
+                  {rec.vals[3]!=null&&<span style={{fontSize:13,color:T.ink,opacity:0.6}}>K:{rec.vals[3]}g</span>}
+                  {exp===ri?<ChevronUp size={16} style={{opacity:0.4,color:T.ink}}/>:<ChevronDown size={16} style={{opacity:0.4,color:T.ink}}/>}
+                </div>
+              </div>
+              {exp===ri&&(
+                <div style={{padding:"0 20px 20px"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}} className="g3">
+                    {NUTRIENTS.map((n,i)=>rec.vals[i]!=null?(
+                      <div key={i} style={{background:T.paperDim,borderRadius:8,padding:"8px 12px"}}>
+                        <div style={{fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?n.tr:n.en}</div>
+                        <span style={{fontSize:14,fontWeight:700,color:T.ink}}>{rec.vals[i]}</span>
+                        <span style={{fontSize:11,color:T.ink,opacity:0.4,marginLeft:2}}>{n.unit}</span>
+                      </div>
+                    ):null)}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Clinical Notes */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div>
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>📝 {lang==="tr"?"Klinik Notlar":"Clinical Notes"}</h3>
+          <span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Zaman damgalı klinik gözlemler":"Timestamped clinical observations"}</span>
+        </div>
+        <Btn ch={<><Plus size={14}/> {lang==="tr"?"Not Ekle":"Add Note"}</>} vr="ghost" onClick={()=>setShowNoteForm(f=>!f)} st={{fontSize:13,padding:"8px 14px"}}/>
+      </div>
+
+      {showNoteForm&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:16}}>
+          <Fld label={lang==="tr"?"Klinik Not":"Clinical Note"}>
+            <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={4} placeholder={lang==="tr"?"Klinik gözlem, öneri, ilaç notu...":"Clinical observation, recommendation, medication note..."} style={{width:"100%",padding:"12px 14px",fontSize:14,borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"vertical"}}/>
+          </Fld>
+          <div style={{display:"flex",gap:10}}>
+            <Btn ch={<><Check size={14}/> {lang==="tr"?"Kaydet":"Save"}</>} vr="primary" onClick={addClinNote}/>
+            <Btn ch={lang==="tr"?"Vazgeç":"Cancel"} vr="ghost" onClick={()=>{setShowNoteForm(false);setNoteText("");}}/>
           </div>
         </div>
-      ))}
-    </div>}
-  </section>;
-}
+      )}
 
+      {clinNotes.length===0&&!showNoteForm&&(
+        <div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:28,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14}}>{lang==="tr"?"Henüz klinik not yok.":"No clinical notes yet."}</div>
+      )}
+
+      {clinNotes.length>0&&(
+        <div style={{position:"relative"}}>
+          <div style={{position:"absolute",left:19,top:8,bottom:8,width:2,background:T.line}}/>
+          {clinNotes.map((note,i)=>(
+            <div key={note.key} style={{display:"flex",gap:14,marginBottom:14,position:"relative"}}>
+              <div style={{width:40,height:40,borderRadius:"50%",background:C.sage,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,zIndex:1,fontSize:14}}>📝</div>
+              <div style={{flex:1,background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"14px 16px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <span style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.55}}>{note.date} · {note.time}</span>
+                  <button onClick={()=>delClinNote(note.key)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><Trash2 size={13}/></button>
+                </div>
+                <p style={{margin:0,fontSize:14,lineHeight:1.6,color:T.ink,whiteSpace:"pre-wrap"}}>{note.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 function TemplatesPage({t,lang,nav,setSel}){
   return<section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
     <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",display:"flex",alignItems:"center",gap:10}}>{t.tpl.title} <PBadge sm/></h1>
