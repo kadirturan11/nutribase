@@ -100,6 +100,9 @@ const FOODS = [
   {id:56,tr:"Humus",                 en:"Hummus",                cat:"baklagil",   v:[166,7.9,9.6,14.3,6,65,0.3,1.4,5.2,2.4,0,0,379,228,38,2.4,36,176,1.5,0,3.9,0,0.6,0,72,0.2]},
 ];
 
+// Daily Reference Intakes (adult, 2000 kcal diet — WHO/FDA/EFSA)
+const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,420,700,11,900,90,20,15,2.4,400,1.7];
+
 const COND = [
   {id:"diabetes2",tr:"Tip 2 Diyabet",en:"Type 2 Diabetes",icon:"🩸",
    ovTr:"Kan şekeri regülasyonunu desteklemek için düşük glisemik indeksli, kompleks karbonhidrat ağırlıklı, düzenli öğün saatlerine dayalı bir yaklaşım.",
@@ -509,11 +512,15 @@ function MBar({protein,carbs,fat,t}){
   return<div><div style={{display:"flex",height:12,borderRadius:6,overflow:"hidden",marginBottom:18}}>{rows.map((r,i)=><div key={i} style={{width:`${r.p}%`,background:r.col}}/>)}</div>{rows.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:i<2?`1px solid ${C.paperDim}`:"none"}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{width:9,height:9,borderRadius:3,background:r.col,display:"inline-block"}}/><span style={{fontSize:14,fontWeight:600}}>{r.l}</span><span style={{fontSize:12,color:C.ink,opacity:0.4}}>{r.p.toFixed(0)}%</span></div><span style={{fontSize:14,fontWeight:700}}>{r.v}g</span></div>)}</div>;
 }
 
-function FoodPage({t,lang,isPro}){
+function FoodPage({t,lang,isPro,T=C}){
   const[query,setQuery]=useState("");
   const[sel,setSel]=useState(null);
   const[amt,setAmt]=useState("100");
   const[showAll,setShowAll]=useState(false);
+  const[comp,setComp]=useState(null);
+  const[compAmt,setCompAmt]=useState("100");
+  const[compQuery,setCompQuery]=useState("");
+  const[tab,setTab]=useState("search"); // search | compare
   const[meals,setMeals]=useState({b:[],l:[],d:[],s:[]});
   const[addingTo,setAddingTo]=useState(null);
   const[mQuery,setMQuery]=useState("");
@@ -525,119 +532,172 @@ function FoodPage({t,lang,isPro}){
 
   const tf=t.food;
   const results=query.length<2?[]:FOODS.filter(f=>{const q=query.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,10);
+  const compResults=compQuery.length<2?[]:FOODS.filter(f=>{const q=compQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,10);
   const mResults=mQuery.length<2?[]:FOODS.filter(f=>{const q=mQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,8);
   const dispN=isPro||showAll?NUTRIENTS:NUTRIENTS.filter(n=>n.imp);
   const cv=(base,g)=>{const v=base*(+g)/100;return v%1===0?v:parseFloat(v.toFixed(2));};
+  const pct=(val,dri)=>dri?Math.min(Math.round(val/dri*100),999):null;
   const cats=[...new Set(FOODS.map(f=>f.cat))];
   const catD={tahıl:"ekmek",et:"tavuk",balık:"somon","yumurta-süt":"yumurta",baklagil:"mercimek",sebze:"domates",meyve:"elma",kuruyemiş:"ceviz",yağ:"zeytinyağı",diğer:"bal"};
 
-  const addToMeal=async()=>{
-    if(!mSel||!addingTo)return;
-    const g=+mAmt||100;
-    const nutrients=mSel.v.map(base=>parseFloat((base*g/100).toFixed(2)));
-    const item={id:mSel.id,name:lang==="tr"?mSel.tr:mSel.en,amount:g,kcal:nutrients[0],protein:nutrients[1],carbs:nutrients[3],fat:nutrients[2],fiber:nutrients[4],nutrients};
-    const newMeals={...meals,[addingTo]:[...meals[addingTo],item]};
-    setMeals(newMeals);
-    await ss(`meals:${today}`,newMeals);
-    setMSel(null);setMQuery("");setMAmt("100");setAddingTo(null);
-  };
-  const removeFromMeal=async(slot,idx)=>{
-    const newMeals={...meals,[slot]:meals[slot].filter((_,i)=>i!==idx)};
-    setMeals(newMeals);
-    await ss(`meals:${today}`,newMeals);
-  };
+  const addToMeal=async()=>{if(!mSel||!addingTo)return;const g=+mAmt||100;const nutrients=mSel.v.map(base=>parseFloat((base*g/100).toFixed(2)));const item={id:mSel.id,name:lang==="tr"?mSel.tr:mSel.en,amount:g,kcal:nutrients[0],protein:nutrients[1],carbs:nutrients[3],fat:nutrients[2],fiber:nutrients[4],nutrients};const newMeals={...meals,[addingTo]:[...meals[addingTo],item]};setMeals(newMeals);await ss(`meals:${today}`,newMeals);setMSel(null);setMQuery("");setMAmt("100");setAddingTo(null);};
+  const removeFromMeal=async(slot,idx)=>{const newMeals={...meals,[slot]:meals[slot].filter((_,i)=>i!==idx)};setMeals(newMeals);await ss(`meals:${today}`,newMeals);};
   const clearMeals=async()=>{const empty={b:[],l:[],d:[],s:[]};setMeals(empty);await ss(`meals:${today}`,empty);};
-
   const allItems=Object.values(meals).flat();
   const totalKcal=allItems.reduce((s,i)=>s+i.kcal,0);
   const totalP=allItems.reduce((s,i)=>s+i.protein,0);
   const totalC=allItems.reduce((s,i)=>s+i.carbs,0);
   const totalF=allItems.reduce((s,i)=>s+i.fat,0);
   const totalFib=allItems.reduce((s,i)=>s+i.fiber,0);
+  const slots=[{key:"b",label:lang==="tr"?"🌅 Kahvaltı":"🌅 Breakfast"},{key:"l",label:lang==="tr"?"☀️ Öğle":"☀️ Lunch"},{key:"d",label:lang==="tr"?"🌙 Akşam":"🌙 Dinner"},{key:"s",label:lang==="tr"?"🍎 Ara Öğün":"🍎 Snack"}];
 
-  const slots=[
-    {key:"b",label:lang==="tr"?"🌅 Kahvaltı":"🌅 Breakfast"},
-    {key:"l",label:lang==="tr"?"☀️ Öğle":"☀️ Lunch"},
-    {key:"d",label:lang==="tr"?"🌙 Akşam":"🌙 Dinner"},
-    {key:"s",label:lang==="tr"?"🍎 Ara Öğün":"🍎 Snack"},
-  ];
+  // Nutrient card with DRI bar
+  const NCard=({n,val,showDri=true})=>{
+    const p=showDri?pct(val,DRI[n.i]):null;
+    return(
+      <div style={{background:T.paper,padding:"10px 12px",border:`1px solid ${T.line}`,borderRadius:6}}>
+        <div style={{fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.5,marginBottom:3}}>{lang==="tr"?n.tr:n.en}</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+          <span style={{fontSize:15,fontWeight:700,color:T.ink}}>{val}</span>
+          <span style={{fontSize:11,color:T.ink,opacity:0.4}}>{n.unit}</span>
+        </div>
+        {p!==null&&DRI[n.i]&&<div style={{marginTop:5}}>
+          <div style={{height:3,background:T.line,borderRadius:2,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${Math.min(p,100)}%`,background:p>100?C.coral:p>50?C.sage:C.gold,borderRadius:2,transition:"width 0.3s"}}/>
+          </div>
+          <div style={{fontSize:9.5,color:T.ink,opacity:0.4,marginTop:2}}>{p}% {lang==="tr"?"günlük değer":"daily value"}</div>
+        </div>}
+      </div>
+    );
+  };
 
   return(
     <section style={{maxWidth:1100,margin:"0 auto",padding:"48px 24px 80px"}}>
-      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px"}}>{tf.title}</h1>
-      <p style={{color:C.ink,opacity:0.6,fontSize:15,margin:"0 0 32px"}}>{tf.sub}</p>
+      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px",color:T.ink}}>{tf.title}</h1>
+      <p style={{color:T.ink,opacity:0.6,fontSize:15,margin:"0 0 24px"}}>{tf.sub}</p>
 
-      {/* Food search panel */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start",marginBottom:40}} className="g2">
-        <div>
-          <div style={{position:"relative",marginBottom:16}}><Search size={17} style={{position:"absolute",left:14,top:14,color:C.ink,opacity:0.4}}/><TIn value={query} onChange={e=>{setQuery(e.target.value);setSel(null);}} placeholder={tf.ph} style={{paddingLeft:42,fontSize:15}}/></div>
-          {query.length>=2&&results.length===0&&<p style={{color:C.ink,opacity:0.5,fontSize:14}}>{tf.notFound}</p>}
-          {results.length>0&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,overflow:"hidden",marginBottom:16}}>{results.map((f,i)=><div key={f.id} onClick={()=>{setSel(f);setAmt("100");}} style={{padding:"12px 16px",borderTop:i>0?`1px solid ${C.paperDim}`:"none",cursor:"pointer",background:sel?.id===f.id?C.paperDim:"#fff",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:14,fontWeight:600}}>{lang==="tr"?f.tr:f.en}</div><div style={{fontSize:12,color:C.ink,opacity:0.45}}>{tf.cats[f.cat]||f.cat}</div></div><div style={{fontSize:13,fontWeight:700,color:C.coral}}>{f.v[0]} kcal</div></div>)}</div>}
-          {!query&&<div><p style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{lang==="tr"?"Kategoriler":"Categories"}</p><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{cats.map(cat=><button key={cat} onClick={()=>setQuery(catD[cat]||cat)} style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${C.line}`,background:"#fff",fontSize:13,cursor:"pointer",color:C.ink,fontFamily:"inherit"}}>{tf.cats[cat]||cat}</button>)}</div></div>}
-        </div>
-        <div>
-          {!sel&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:50,textAlign:"center",color:C.ink,opacity:0.4}}><Leaf size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{tf.selPrompt}</p></div>}
-          {sel&&<Card st={{}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}><div><h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px"}}>{lang==="tr"?sel.tr:sel.en}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{tf.cats[sel.cat]||sel.cat}</span></div><button onClick={()=>setSel(null)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={18}/></button></div>
-            <Fld label={tf.amount}><TIn type="number" value={amt} onChange={e=>setAmt(e.target.value)}/></Fld>
-            {!isPro&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><span style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase"}}>{showAll?tf.allN:tf.impN}</span><button onClick={()=>setShowAll(!showAll)} style={{background:"none",border:"none",cursor:"pointer",fontSize:12,color:C.coral,fontWeight:700,fontFamily:"inherit"}}>{showAll?tf.showLess:tf.showAll}</button></div>}
-            {isPro&&<p style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{tf.allN}</p>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:C.line,borderRadius:8,overflow:"hidden"}}>
-              {dispN.map(n=>{const base=sel.v[n.i];const fA=cv(base,+amt||100);return(<div key={n.i} style={{background:"#fff",padding:"10px 12px"}}><div style={{fontSize:10.5,fontWeight:600,color:C.ink,opacity:0.5,marginBottom:3}}>{lang==="tr"?n.tr:n.en}</div><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:15,fontWeight:700}}>{+amt&&+amt!==100?fA:base}</span><span style={{fontSize:11,color:C.ink,opacity:0.4}}>{n.unit}</span></div>{+amt&&+amt!==100&&<div style={{fontSize:10,color:C.ink,opacity:0.35}}>100g: {base}</div>}</div>);})}
-            </div>
-            <p style={{fontSize:11,color:C.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
-          </Card>}
-        </div>
+      {/* Tab switcher */}
+      <div style={{display:"flex",gap:8,marginBottom:28}}>
+        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search Food"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
+          <button key={tb.k} onClick={()=>setTab(tb.k)} style={{padding:"9px 18px",borderRadius:20,border:`1.5px solid ${tab===tb.k?T.coral:T.line}`,background:tab===tb.k?T.coral:"transparent",color:tab===tb.k?"#fff":T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>{tb.l}</button>
+        ))}
       </div>
 
-      {/* Daily Meal Tracker */}
-      <div style={{borderTop:`2px solid ${C.line}`,paddingTop:36}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-          <div>
-            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,fontWeight:700,margin:"0 0 4px"}}>{lang==="tr"?"Günlük Öğün Takibi":"Daily Meal Tracker"}</h2>
-            <p style={{fontSize:13,color:C.ink,opacity:0.55,margin:0}}>{today}</p>
-          </div>
-          {allItems.length>0&&<button onClick={clearMeals} style={{background:"none",border:`1px solid ${C.line}`,borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:12.5,fontWeight:600,color:C.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Günü Temizle":"Clear Day"}</button>}
+      {/* SEARCH TAB */}
+      {tab==="search"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start"}} className="g2">
+        <div>
+          <div style={{position:"relative",marginBottom:16}}><Search size={17} style={{position:"absolute",left:14,top:14,color:T.ink,opacity:0.4}}/><TIn value={query} onChange={e=>{setQuery(e.target.value);setSel(null);}} placeholder={tf.ph} style={{paddingLeft:42,fontSize:15,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
+          {query.length>=2&&results.length===0&&<p style={{color:T.ink,opacity:0.5,fontSize:14}}>{tf.notFound}</p>}
+          {results.length>0&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,overflow:"hidden",marginBottom:16}}>
+            {results.map((f,i)=><div key={f.id} style={{padding:"11px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",background:sel?.id===f.id?T.paperDim:T.paper}} onClick={()=>{setSel(f);setAmt("100");}}>
+              <div><div style={{fontSize:14,fontWeight:600,color:T.ink}}>{lang==="tr"?f.tr:f.en}</div><div style={{fontSize:12,color:T.ink,opacity:0.45}}>{tf.cats[f.cat]||f.cat}</div></div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:13,fontWeight:700,color:C.coral}}>{f.v[0]} kcal</span>
+                <button onClick={e=>{e.stopPropagation();setComp(f);setCompAmt("100");setTab("compare");}} style={{fontSize:10.5,fontWeight:700,background:T.paperDim,border:`1px solid ${T.line}`,borderRadius:12,padding:"2px 8px",cursor:"pointer",color:T.ink,fontFamily:"inherit"}}>⚖️ {lang==="tr"?"Karşılaştır":"Compare"}</button>
+              </div>
+            </div>)}
+          </div>}
+          {!query&&<div><p style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{lang==="tr"?"Kategoriler":"Categories"}</p><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{cats.map(cat=><button key={cat} onClick={()=>setQuery(catD[cat]||cat)} style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${T.line}`,background:T.paper,fontSize:13,cursor:"pointer",color:T.ink,fontFamily:"inherit"}}>{tf.cats[cat]||cat}</button>)}</div></div>}
         </div>
+        <div>
+          {!sel&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:50,textAlign:"center",color:T.ink,opacity:0.4}}><Leaf size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{tf.selPrompt}</p></div>}
+          {sel&&<Card st={{background:T.paper,borderColor:T.line}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+              <div><h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{lang==="tr"?sel.tr:sel.en}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{tf.cats[sel.cat]||sel.cat}</span></div>
+              <button onClick={()=>setSel(null)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={18}/></button>
+            </div>
+            <Fld label={tf.amount}><TIn type="number" value={amt} onChange={e=>setAmt(e.target.value)} style={{background:T.paper,color:T.ink,borderColor:T.line}}/></Fld>
+            {!isPro&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><span style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase"}}>{showAll?tf.allN:tf.impN}</span><button onClick={()=>setShowAll(!showAll)} style={{background:"none",border:"none",cursor:"pointer",fontSize:12,color:C.coral,fontWeight:700,fontFamily:"inherit"}}>{showAll?tf.showLess:tf.showAll}</button></div>}
+            {isPro&&<p style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{tf.allN}</p>}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+              {dispN.map(n=>{const base=sel.v[n.i];const fA=cv(base,+amt||100);const val=+amt&&+amt!==100?fA:base;return <NCard key={n.i} n={n} val={val}/>;})}
+            </div>
+            <p style={{fontSize:11,color:T.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
+          </Card>}
+        </div>
+      </div>}
 
-        {/* Totals bar */}
-        {allItems.length>0&&<div style={{background:C.ink,borderRadius:14,padding:"18px 24px",marginBottom:24,display:"flex",gap:32,flexWrap:"wrap"}}>
-          {[{l:lang==="tr"?"Toplam Kalori":"Total Calories",v:Math.round(totalKcal),u:"kcal",hi:true},
-            {l:"Protein",v:Math.round(totalP),u:"g"},
-            {l:lang==="tr"?"Karbonhidrat":"Carbs",v:Math.round(totalC),u:"g"},
-            {l:lang==="tr"?"Yağ":"Fat",v:Math.round(totalF),u:"g"},
-            {l:lang==="tr"?"Lif":"Fiber",v:Math.round(totalFib),u:"g"}
-          ].map((item,i)=><div key={i}><div style={{fontSize:11,fontWeight:600,color:"#fff",opacity:0.55,marginBottom:4,letterSpacing:"0.05em",textTransform:"uppercase"}}>{item.l}</div><div style={{display:"flex",alignItems:"baseline",gap:4}}><span style={{fontSize:item.hi?28:22,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{item.v}</span><span style={{fontSize:12,color:"#fff",opacity:0.6,fontWeight:600}}>{item.u}</span></div></div>)}
+      {/* COMPARE TAB */}
+      {tab==="compare"&&<div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:24}} className="g2">
+          {/* Food 1 */}
+          <div>
+            <h3 style={{fontSize:14,fontWeight:700,color:T.ink,margin:"0 0 12px"}}>🟠 {lang==="tr"?"1. Besin":"Food 1"}</h3>
+            <div style={{position:"relative",marginBottom:10}}><Search size={15} style={{position:"absolute",left:12,top:12,opacity:0.4}}/><TIn value={sel?lang==="tr"?sel.tr:sel.en:query} onChange={e=>{setQuery(e.target.value);setSel(null);}} placeholder={lang==="tr"?"Besin ara...":"Search food..."} style={{paddingLeft:36,fontSize:14,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
+            {!sel&&query.length>=2&&results.length>0&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>{results.map((f,i)=><div key={f.id} onClick={()=>{setSel(f);setAmt("100");setQuery("");}} style={{padding:"10px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",cursor:"pointer",fontSize:13.5,display:"flex",justifyContent:"space-between",color:T.ink}}><span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]}</span></div>)}</div>}
+            {sel&&<div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}><div style={{flex:1,background:T.paperDim,borderRadius:8,padding:"8px 12px",fontSize:13.5,fontWeight:600,color:T.ink}}>{lang==="tr"?sel.tr:sel.en}</div><TIn type="number" value={amt} onChange={e=>setAmt(e.target.value)} style={{width:70,padding:"8px 10px",fontSize:13,background:T.paper,color:T.ink,borderColor:T.line}} placeholder="g"/><button onClick={()=>{setSel(null);setQuery("");}} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={15}/></button></div>}
+          </div>
+          {/* Food 2 */}
+          <div>
+            <h3 style={{fontSize:14,fontWeight:700,color:T.ink,margin:"0 0 12px"}}>🔵 {lang==="tr"?"2. Besin":"Food 2"}</h3>
+            <div style={{position:"relative",marginBottom:10}}><Search size={15} style={{position:"absolute",left:12,top:12,opacity:0.4}}/><TIn value={comp?lang==="tr"?comp.tr:comp.en:compQuery} onChange={e=>{setCompQuery(e.target.value);setComp(null);}} placeholder={lang==="tr"?"Besin ara...":"Search food..."} style={{paddingLeft:36,fontSize:14,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
+            {!comp&&compQuery.length>=2&&compResults.length>0&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>{compResults.map((f,i)=><div key={f.id} onClick={()=>{setComp(f);setCompAmt("100");setCompQuery("");}} style={{padding:"10px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",cursor:"pointer",fontSize:13.5,display:"flex",justifyContent:"space-between",color:T.ink}}><span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]}</span></div>)}</div>}
+            {comp&&<div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}><div style={{flex:1,background:T.paperDim,borderRadius:8,padding:"8px 12px",fontSize:13.5,fontWeight:600,color:T.ink}}>{lang==="tr"?comp.tr:comp.en}</div><TIn type="number" value={compAmt} onChange={e=>setCompAmt(e.target.value)} style={{width:70,padding:"8px 10px",fontSize:13,background:T.paper,color:T.ink,borderColor:T.line}} placeholder="g"/><button onClick={()=>{setComp(null);setCompQuery("");}} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={15}/></button></div>}
+          </div>
+        </div>
+        {(!sel||!comp)&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:40,textAlign:"center",color:T.ink,opacity:0.4}}><p style={{margin:0,fontSize:14}}>⚖️ {lang==="tr"?"İki besin seç, yan yana karşılaştır":"Select two foods to compare side by side"}</p></div>}
+        {sel&&comp&&<div>
+          <div style={{display:"grid",gridTemplateColumns:"200px 1fr 1fr",gap:1,background:T.line,borderRadius:12,overflow:"hidden"}}>
+            <div style={{background:T.paperDim,padding:"12px 16px",fontWeight:700,fontSize:12,color:T.ink,opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",display:"flex",alignItems:"center"}}>{lang==="tr"?"Besin Değeri":"Nutrient"}</div>
+            <div style={{background:"#FF6B3520",padding:"12px 16px",fontWeight:700,fontSize:13,color:C.coral,textAlign:"center"}}>{lang==="tr"?sel.tr:sel.en} <span style={{fontWeight:400,fontSize:11,opacity:0.7}}>({amt}g)</span></div>
+            <div style={{background:"#3B82F620",padding:"12px 16px",fontWeight:700,fontSize:13,color:"#3B82F6",textAlign:"center"}}>{lang==="tr"?comp.tr:comp.en} <span style={{fontWeight:400,fontSize:11,opacity:0.7}}>({compAmt}g)</span></div>
+            {(isPro?NUTRIENTS:NUTRIENTS.filter(n=>n.imp)).map(n=>{
+              const v1=cv(sel.v[n.i],+amt||100);
+              const v2=cv(comp.v[n.i],+compAmt||100);
+              const max=Math.max(v1,v2)||1;
+              const winner=v1>v2?"left":v1<v2?"right":"tie";
+              return[
+                <div key={n.i+"l"} style={{background:T.paper,padding:"10px 16px",fontSize:12.5,fontWeight:600,color:T.ink,display:"flex",alignItems:"center"}}>{lang==="tr"?n.tr:n.en} <span style={{fontSize:10,color:T.ink,opacity:0.4,marginLeft:4}}>({n.unit})</span></div>,
+                <div key={n.i+"v1"} style={{background:T.paper,padding:"10px 16px",textAlign:"center"}}>
+                  <div style={{height:4,background:T.line,borderRadius:2,marginBottom:6,overflow:"hidden"}}><div style={{height:"100%",width:`${(v1/max)*100}%`,background:C.coral,borderRadius:2}}/></div>
+                  <span style={{fontSize:14,fontWeight:winner==="left"?800:600,color:winner==="left"?C.coral:T.ink}}>{v1}</span>
+                </div>,
+                <div key={n.i+"v2"} style={{background:T.paper,padding:"10px 16px",textAlign:"center"}}>
+                  <div style={{height:4,background:T.line,borderRadius:2,marginBottom:6,overflow:"hidden"}}><div style={{height:"100%",width:`${(v2/max)*100}%`,background:"#3B82F6",borderRadius:2}}/></div>
+                  <span style={{fontSize:14,fontWeight:winner==="right"?800:600,color:winner==="right"?"#3B82F6":T.ink}}>{v2}</span>
+                </div>
+              ];
+            })}
+          </div>
         </div>}
+      </div>}
 
-        {/* Meal slots */}
+      {/* DAILY TRACKER TAB */}
+      {tab==="tracker"&&<div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div><h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:22,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{lang==="tr"?"Günlük Öğün Takibi":"Daily Meal Tracker"}</h2><p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{today}</p></div>
+          {allItems.length>0&&<button onClick={clearMeals} style={{background:"none",border:`1px solid ${T.line}`,borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:12.5,fontWeight:600,color:T.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Günü Temizle":"Clear Day"}</button>}
+        </div>
+        {allItems.length>0&&<div style={{background:C.ink,borderRadius:14,padding:"18px 24px",marginBottom:24,display:"flex",gap:32,flexWrap:"wrap"}}>
+          {[{l:lang==="tr"?"Toplam Kalori":"Total Calories",v:Math.round(totalKcal),u:"kcal",hi:true},{l:"Protein",v:Math.round(totalP),u:"g"},{l:lang==="tr"?"Karbonhidrat":"Carbs",v:Math.round(totalC),u:"g"},{l:lang==="tr"?"Yağ":"Fat",v:Math.round(totalF),u:"g"},{l:lang==="tr"?"Lif":"Fiber",v:Math.round(totalFib),u:"g"}].map((item,i)=><div key={i}><div style={{fontSize:11,fontWeight:600,color:"#fff",opacity:0.55,marginBottom:4,letterSpacing:"0.05em",textTransform:"uppercase"}}>{item.l}</div><div style={{display:"flex",alignItems:"baseline",gap:4}}><span style={{fontSize:item.hi?28:22,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{item.v}</span><span style={{fontSize:12,color:"#fff",opacity:0.6,fontWeight:600}}>{item.u}</span></div></div>)}
+        </div>}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}} className="g2">
           {slots.map(slot=>(
-            <div key={slot.key} style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:14,padding:18,minHeight:180}}>
-              <h3 style={{fontSize:14,fontWeight:700,margin:"0 0 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div key={slot.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:18,minHeight:180}}>
+              <h3 style={{fontSize:14,fontWeight:700,margin:"0 0 14px",display:"flex",justifyContent:"space-between",alignItems:"center",color:T.ink}}>
                 <span>{slot.label}</span>
                 <span style={{fontSize:11,fontWeight:700,color:C.coral}}>{Math.round(meals[slot.key].reduce((s,i)=>s+i.kcal,0))} kcal</span>
               </h3>
               {meals[slot.key].map((item,idx)=>(
-                <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderTop:`1px solid ${C.paperDim}`}}>
-                  <div><div style={{fontSize:12.5,fontWeight:600}}>{item.name}</div><div style={{fontSize:11,color:C.ink,opacity:0.45}}>{item.amount}g · {item.kcal} kcal</div></div>
+                <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderTop:`1px solid ${T.line}`}}>
+                  <div><div style={{fontSize:12.5,fontWeight:600,color:T.ink}}>{item.name}</div><div style={{fontSize:11,color:T.ink,opacity:0.45}}>{item.amount}g · {item.kcal} kcal</div></div>
                   <button onClick={()=>removeFromMeal(slot.key,idx)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3,flexShrink:0}}><X size={13}/></button>
                 </div>
               ))}
               {addingTo===slot.key?(
                 <div style={{marginTop:12}}>
-                  <div style={{position:"relative",marginBottom:8}}><Search size={13} style={{position:"absolute",left:10,top:10,opacity:0.4}}/><TIn value={mQuery} onChange={e=>{setMQuery(e.target.value);setMSel(null);}} placeholder={lang==="tr"?"Besin ara...":"Search food..."} style={{paddingLeft:30,padding:"9px 9px 9px 30px",fontSize:13}}/></div>
-                  {mResults.length>0&&!mSel&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden",marginBottom:8,maxHeight:160,overflowY:"auto"}}>{mResults.map((f,i)=><div key={f.id} onClick={()=>{setMSel(f);setMQuery(lang==="tr"?f.tr:f.en);}} style={{padding:"8px 12px",borderTop:i>0?`1px solid ${C.paperDim}`:"none",cursor:"pointer",fontSize:13,display:"flex",justifyContent:"space-between"}}><span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]}</span></div>)}</div>}
-                  {mSel&&<div style={{display:"flex",gap:6,marginBottom:8}}><TIn type="number" value={mAmt} onChange={e=>setMAmt(e.target.value)} placeholder="g" style={{padding:"8px 10px",fontSize:13,width:70}}/><button onClick={addToMeal} style={{flex:1,background:C.coral,color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer",padding:"8px"}}>{lang==="tr"?"Ekle":"Add"}</button></div>}
-                  <button onClick={()=>{setAddingTo(null);setMQuery("");setMSel(null);}} style={{width:"100%",background:"none",border:`1px solid ${C.line}`,borderRadius:8,padding:"7px",fontSize:12,cursor:"pointer",color:C.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+                  <div style={{position:"relative",marginBottom:8}}><Search size={13} style={{position:"absolute",left:10,top:10,opacity:0.4}}/><TIn value={mQuery} onChange={e=>{setMQuery(e.target.value);setMSel(null);}} placeholder={lang==="tr"?"Besin ara...":"Search..."} style={{paddingLeft:30,padding:"9px 9px 9px 30px",fontSize:13,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
+                  {mResults.length>0&&!mSel&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:8,overflow:"hidden",marginBottom:8,maxHeight:160,overflowY:"auto"}}>{mResults.map((f,i)=><div key={f.id} onClick={()=>{setMSel(f);setMQuery(lang==="tr"?f.tr:f.en);}} style={{padding:"8px 12px",borderTop:i>0?`1px solid ${T.line}`:"none",cursor:"pointer",fontSize:13,display:"flex",justifyContent:"space-between",color:T.ink}}><span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]}</span></div>)}</div>}
+                  {mSel&&<div style={{display:"flex",gap:6,marginBottom:8}}><TIn type="number" value={mAmt} onChange={e=>setMAmt(e.target.value)} placeholder="g" style={{padding:"8px 10px",fontSize:13,width:70,background:T.paper,color:T.ink,borderColor:T.line}}/><button onClick={addToMeal} style={{flex:1,background:C.coral,color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer",padding:"8px"}}>{lang==="tr"?"Ekle":"Add"}</button></div>}
+                  <button onClick={()=>{setAddingTo(null);setMQuery("");setMSel(null);}} style={{width:"100%",background:"none",border:`1px solid ${T.line}`,borderRadius:8,padding:"7px",fontSize:12,cursor:"pointer",color:T.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
                 </div>
               ):(
-                <button onClick={()=>{setAddingTo(slot.key);setMQuery("");setMSel(null);}} style={{marginTop:12,width:"100%",background:C.paperDim,border:"none",borderRadius:8,padding:"8px",fontSize:12.5,fontWeight:600,cursor:"pointer",color:C.ink,fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><Plus size={13}/> {lang==="tr"?"Besin Ekle":"Add Food"}</button>
+                <button onClick={()=>{setAddingTo(slot.key);setMQuery("");setMSel(null);}} style={{marginTop:12,width:"100%",background:T.paperDim,border:"none",borderRadius:8,padding:"8px",fontSize:12.5,fontWeight:600,cursor:"pointer",color:T.ink,fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><Plus size={13}/> {lang==="tr"?"Besin Ekle":"Add Food"}</button>
               )}
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </section>
   );
 }
@@ -719,8 +779,26 @@ function ClientProfile({t,lang,clientId,nav}){
   const addN=async e=>{e.preventDefault();const ts=Date.now();const vals=nEntry.map(v=>v===""?null:parseFloat(v));await ss(`${clientId}:nutri:${ts}`,{vals,ts,date:new Date().toISOString().slice(0,10)});setNEntry(Array(26).fill(""));setShowN(false);load();};
   if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
   return<section style={{maxWidth:900,margin:"0 auto",padding:"40px 24px 80px"}}>
+    <style>{`@media print{.np{display:none!important;}.nb-rh{display:flex!important;border-bottom:2px solid #0E2A3D;padding-bottom:16px;margin-bottom:24px;}@page{size:A4;margin:20mm;}}`}</style>
+    {/* Print report header */}
+    <div className="nb-rh" style={{display:"none",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
+      <div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:16,color:"#0E2A3D"}}>NutriBase PRO</span></div>
+        <div style={{fontSize:12,color:"#0E2A3D",opacity:0.6}}>{lang==="tr"?"Danışan Klinik Raporu":"Client Clinical Report"}</div>
+      </div>
+      <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
+        <div>{new Date().toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long",year:"numeric"})}</div>
+        <div style={{fontWeight:700,marginTop:2}}>{client.name}</div>
+      </div>
+    </div>
     <button onClick={()=>nav("clients")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.ink,opacity:0.55,marginBottom:20,padding:0,fontWeight:600}}>← {t.common.back}</button>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28}}><div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px"}}>{client.name}</h1><p style={{fontSize:14,color:C.ink,opacity:0.55,margin:0}}>{client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female} · {client.height} cm</p></div>{client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}</div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:12}}>
+      <div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px"}}>{client.name}</h1><p style={{fontSize:14,color:C.ink,opacity:0.55,margin:0}}>{client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female} · {client.height} cm</p></div>
+      <div style={{display:"flex",gap:10,alignItems:"center"}}>
+        {client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}
+        <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"9px 16px",borderRadius:8,border:`1px solid ${C.line}`,background:"#fff",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={14}/> {lang==="tr"?"Rapor Yazdır":"Print Report"}</button>
+      </div>
+    </div>
     {/* Goals */}
     {(client.targetKcal||client.targetWater)&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}} className="g2">
       {client.targetKcal&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"16px 20px"}}>
