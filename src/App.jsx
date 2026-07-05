@@ -483,17 +483,61 @@ function FoodPage({t,lang,isPro}){
   const[sel,setSel]=useState(null);
   const[amt,setAmt]=useState("100");
   const[showAll,setShowAll]=useState(false);
+  const[meals,setMeals]=useState({b:[],l:[],d:[],s:[]});
+  const[addingTo,setAddingTo]=useState(null);
+  const[mQuery,setMQuery]=useState("");
+  const[mSel,setMSel]=useState(null);
+  const[mAmt,setMAmt]=useState("100");
+  const today=new Date().toISOString().slice(0,10);
+
+  useEffect(()=>{(async()=>{const saved=await sg(`meals:${today}`);if(saved)setMeals(saved);})();},[today]);
+
   const tf=t.food;
-  const results=query.length<2?[]:FOODS.filter(f=>{const q=query.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,12);
+  const results=query.length<2?[]:FOODS.filter(f=>{const q=query.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,10);
+  const mResults=mQuery.length<2?[]:FOODS.filter(f=>{const q=mQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,8);
   const dispN=isPro||showAll?NUTRIENTS:NUTRIENTS.filter(n=>n.imp);
   const cv=(base,g)=>{const v=base*(+g)/100;return v%1===0?v:parseFloat(v.toFixed(2));};
   const cats=[...new Set(FOODS.map(f=>f.cat))];
   const catD={tahıl:"ekmek",et:"tavuk",balık:"somon","yumurta-süt":"yumurta",baklagil:"mercimek",sebze:"domates",meyve:"elma",kuruyemiş:"ceviz",yağ:"zeytinyağı",diğer:"bal"};
+
+  const addToMeal=async()=>{
+    if(!mSel||!addingTo)return;
+    const g=+mAmt||100;
+    const nutrients=mSel.v.map(base=>parseFloat((base*g/100).toFixed(2)));
+    const item={id:mSel.id,name:lang==="tr"?mSel.tr:mSel.en,amount:g,kcal:nutrients[0],protein:nutrients[1],carbs:nutrients[3],fat:nutrients[2],fiber:nutrients[4],nutrients};
+    const newMeals={...meals,[addingTo]:[...meals[addingTo],item]};
+    setMeals(newMeals);
+    await ss(`meals:${today}`,newMeals);
+    setMSel(null);setMQuery("");setMAmt("100");setAddingTo(null);
+  };
+  const removeFromMeal=async(slot,idx)=>{
+    const newMeals={...meals,[slot]:meals[slot].filter((_,i)=>i!==idx)};
+    setMeals(newMeals);
+    await ss(`meals:${today}`,newMeals);
+  };
+  const clearMeals=async()=>{const empty={b:[],l:[],d:[],s:[]};setMeals(empty);await ss(`meals:${today}`,empty);};
+
+  const allItems=Object.values(meals).flat();
+  const totalKcal=allItems.reduce((s,i)=>s+i.kcal,0);
+  const totalP=allItems.reduce((s,i)=>s+i.protein,0);
+  const totalC=allItems.reduce((s,i)=>s+i.carbs,0);
+  const totalF=allItems.reduce((s,i)=>s+i.fat,0);
+  const totalFib=allItems.reduce((s,i)=>s+i.fiber,0);
+
+  const slots=[
+    {key:"b",label:lang==="tr"?"🌅 Kahvaltı":"🌅 Breakfast"},
+    {key:"l",label:lang==="tr"?"☀️ Öğle":"☀️ Lunch"},
+    {key:"d",label:lang==="tr"?"🌙 Akşam":"🌙 Dinner"},
+    {key:"s",label:lang==="tr"?"🍎 Ara Öğün":"🍎 Snack"},
+  ];
+
   return(
-    <section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
+    <section style={{maxWidth:1100,margin:"0 auto",padding:"48px 24px 80px"}}>
       <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px"}}>{tf.title}</h1>
       <p style={{color:C.ink,opacity:0.6,fontSize:15,margin:"0 0 32px"}}>{tf.sub}</p>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start"}} className="g2">
+
+      {/* Food search panel */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start",marginBottom:40}} className="g2">
         <div>
           <div style={{position:"relative",marginBottom:16}}><Search size={17} style={{position:"absolute",left:14,top:14,color:C.ink,opacity:0.4}}/><TIn value={query} onChange={e=>{setQuery(e.target.value);setSel(null);}} placeholder={tf.ph} style={{paddingLeft:42,fontSize:15}}/></div>
           {query.length>=2&&results.length===0&&<p style={{color:C.ink,opacity:0.5,fontSize:14}}>{tf.notFound}</p>}
@@ -503,17 +547,64 @@ function FoodPage({t,lang,isPro}){
         <div>
           {!sel&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:50,textAlign:"center",color:C.ink,opacity:0.4}}><Leaf size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{tf.selPrompt}</p></div>}
           {sel&&<Card st={{}}>
-            
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}><div><h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px"}}>{lang==="tr"?sel.tr:sel.en}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{tf.cats[sel.cat]||sel.cat}</span></div><button onClick={()=>setSel(null)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={18}/></button></div>
-              <Fld label={tf.amount}><TIn type="number" value={amt} onChange={e=>setAmt(e.target.value)}/></Fld>
-              {!isPro&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><span style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase"}}>{showAll?tf.allN:tf.impN}</span><button onClick={()=>setShowAll(!showAll)} style={{background:"none",border:"none",cursor:"pointer",fontSize:12,color:C.coral,fontWeight:700,fontFamily:"inherit"}}>{showAll?tf.showLess:tf.showAll}</button></div>}
-              {isPro&&<p style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{tf.allN}</p>}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:C.line,borderRadius:8,overflow:"hidden"}}>
-                {dispN.map(n=>{const base=sel.v[n.i];const fA=cv(base,+amt||100);return(<div key={n.i} style={{background:"#fff",padding:"10px 12px"}}><div style={{fontSize:10.5,fontWeight:600,color:C.ink,opacity:0.5,marginBottom:3}}>{lang==="tr"?n.tr:n.en}</div><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:15,fontWeight:700}}>{+amt&&+amt!==100?fA:base}</span><span style={{fontSize:11,color:C.ink,opacity:0.4}}>{n.unit}</span></div>{+amt&&+amt!==100&&<div style={{fontSize:10,color:C.ink,opacity:0.35}}>100g: {base}</div>}</div>);})}
-              </div>
-              <p style={{fontSize:11,color:C.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
-            
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}><div><h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px"}}>{lang==="tr"?sel.tr:sel.en}</h3><span style={{fontSize:12,color:C.ink,opacity:0.5}}>{tf.cats[sel.cat]||sel.cat}</span></div><button onClick={()=>setSel(null)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.4}}><X size={18}/></button></div>
+            <Fld label={tf.amount}><TIn type="number" value={amt} onChange={e=>setAmt(e.target.value)}/></Fld>
+            {!isPro&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><span style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase"}}>{showAll?tf.allN:tf.impN}</span><button onClick={()=>setShowAll(!showAll)} style={{background:"none",border:"none",cursor:"pointer",fontSize:12,color:C.coral,fontWeight:700,fontFamily:"inherit"}}>{showAll?tf.showLess:tf.showAll}</button></div>}
+            {isPro&&<p style={{fontSize:12,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{tf.allN}</p>}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:C.line,borderRadius:8,overflow:"hidden"}}>
+              {dispN.map(n=>{const base=sel.v[n.i];const fA=cv(base,+amt||100);return(<div key={n.i} style={{background:"#fff",padding:"10px 12px"}}><div style={{fontSize:10.5,fontWeight:600,color:C.ink,opacity:0.5,marginBottom:3}}>{lang==="tr"?n.tr:n.en}</div><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:15,fontWeight:700}}>{+amt&&+amt!==100?fA:base}</span><span style={{fontSize:11,color:C.ink,opacity:0.4}}>{n.unit}</span></div>{+amt&&+amt!==100&&<div style={{fontSize:10,color:C.ink,opacity:0.35}}>100g: {base}</div>}</div>);})}
+            </div>
+            <p style={{fontSize:11,color:C.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
           </Card>}
+        </div>
+      </div>
+
+      {/* Daily Meal Tracker */}
+      <div style={{borderTop:`2px solid ${C.line}`,paddingTop:36}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
+          <div>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,fontWeight:700,margin:"0 0 4px"}}>{lang==="tr"?"Günlük Öğün Takibi":"Daily Meal Tracker"}</h2>
+            <p style={{fontSize:13,color:C.ink,opacity:0.55,margin:0}}>{today}</p>
+          </div>
+          {allItems.length>0&&<button onClick={clearMeals} style={{background:"none",border:`1px solid ${C.line}`,borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:12.5,fontWeight:600,color:C.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Günü Temizle":"Clear Day"}</button>}
+        </div>
+
+        {/* Totals bar */}
+        {allItems.length>0&&<div style={{background:C.ink,borderRadius:14,padding:"18px 24px",marginBottom:24,display:"flex",gap:32,flexWrap:"wrap"}}>
+          {[{l:lang==="tr"?"Toplam Kalori":"Total Calories",v:Math.round(totalKcal),u:"kcal",hi:true},
+            {l:"Protein",v:Math.round(totalP),u:"g"},
+            {l:lang==="tr"?"Karbonhidrat":"Carbs",v:Math.round(totalC),u:"g"},
+            {l:lang==="tr"?"Yağ":"Fat",v:Math.round(totalF),u:"g"},
+            {l:lang==="tr"?"Lif":"Fiber",v:Math.round(totalFib),u:"g"}
+          ].map((item,i)=><div key={i}><div style={{fontSize:11,fontWeight:600,color:"#fff",opacity:0.55,marginBottom:4,letterSpacing:"0.05em",textTransform:"uppercase"}}>{item.l}</div><div style={{display:"flex",alignItems:"baseline",gap:4}}><span style={{fontSize:item.hi?28:22,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{item.v}</span><span style={{fontSize:12,color:"#fff",opacity:0.6,fontWeight:600}}>{item.u}</span></div></div>)}
+        </div>}
+
+        {/* Meal slots */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}} className="g2">
+          {slots.map(slot=>(
+            <div key={slot.key} style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:14,padding:18,minHeight:180}}>
+              <h3 style={{fontSize:14,fontWeight:700,margin:"0 0 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span>{slot.label}</span>
+                <span style={{fontSize:11,fontWeight:700,color:C.coral}}>{Math.round(meals[slot.key].reduce((s,i)=>s+i.kcal,0))} kcal</span>
+              </h3>
+              {meals[slot.key].map((item,idx)=>(
+                <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderTop:`1px solid ${C.paperDim}`}}>
+                  <div><div style={{fontSize:12.5,fontWeight:600}}>{item.name}</div><div style={{fontSize:11,color:C.ink,opacity:0.45}}>{item.amount}g · {item.kcal} kcal</div></div>
+                  <button onClick={()=>removeFromMeal(slot.key,idx)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.3,flexShrink:0}}><X size={13}/></button>
+                </div>
+              ))}
+              {addingTo===slot.key?(
+                <div style={{marginTop:12}}>
+                  <div style={{position:"relative",marginBottom:8}}><Search size={13} style={{position:"absolute",left:10,top:10,opacity:0.4}}/><TIn value={mQuery} onChange={e=>{setMQuery(e.target.value);setMSel(null);}} placeholder={lang==="tr"?"Besin ara...":"Search food..."} style={{paddingLeft:30,padding:"9px 9px 9px 30px",fontSize:13}}/></div>
+                  {mResults.length>0&&!mSel&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden",marginBottom:8,maxHeight:160,overflowY:"auto"}}>{mResults.map((f,i)=><div key={f.id} onClick={()=>{setMSel(f);setMQuery(lang==="tr"?f.tr:f.en);}} style={{padding:"8px 12px",borderTop:i>0?`1px solid ${C.paperDim}`:"none",cursor:"pointer",fontSize:13,display:"flex",justifyContent:"space-between"}}><span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]}</span></div>)}</div>}
+                  {mSel&&<div style={{display:"flex",gap:6,marginBottom:8}}><TIn type="number" value={mAmt} onChange={e=>setMAmt(e.target.value)} placeholder="g" style={{padding:"8px 10px",fontSize:13,width:70}}/><button onClick={addToMeal} style={{flex:1,background:C.coral,color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer",padding:"8px"}}>{lang==="tr"?"Ekle":"Add"}</button></div>}
+                  <button onClick={()=>{setAddingTo(null);setMQuery("");setMSel(null);}} style={{width:"100%",background:"none",border:`1px solid ${C.line}`,borderRadius:8,padding:"7px",fontSize:12,cursor:"pointer",color:C.ink,opacity:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+                </div>
+              ):(
+                <button onClick={()=>{setAddingTo(slot.key);setMQuery("");setMSel(null);}} style={{marginTop:12,width:"100%",background:C.paperDim,border:"none",borderRadius:8,padding:"8px",fontSize:12.5,fontWeight:600,cursor:"pointer",color:C.ink,fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><Plus size={13}/> {lang==="tr"?"Besin Ekle":"Add Food"}</button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -567,15 +658,20 @@ function ProCheckout({t,nav,goPro}){
 }
 
 function ClientsPage({t,lang,nav,setSel}){
-  const[clients,setClients]=useState([]);const[loading,setLoading]=useState(true);const[showForm,setShowForm]=useState(false);const[search,setSearch]=useState("");const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:""});
+  const[clients,setClients]=useState([]);const[loading,setLoading]=useState(true);const[showForm,setShowForm]=useState(false);const[search,setSearch]=useState("");const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
   const load=useCallback(async()=>{setLoading(true);const ks=await sl("client:");const items=[];for(const k of ks){const v=await sg(k);if(v)items.push({...v,key:k});}items.sort((a,b)=>b.createdAt-a.createdAt);setClients(items);setLoading(false);},[]);
   useEffect(()=>{load();},[load]);
-  const add=async e=>{e.preventDefault();if(!form.name)return;const id=`client:${Date.now()}`;await ss(id,{...form,createdAt:Date.now(),id});setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:""});setShowForm(false);load();};
+  const add=async e=>{e.preventDefault();if(!form.name)return;const id=`client:${Date.now()}`;await ss(id,{...form,createdAt:Date.now(),id});setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});setShowForm(false);load();};
   const del=async k=>{if(!window.confirm(t.clients.confirmDel))return;await sd(k);load();};
   const filtered=clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
   return<section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:14}}><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,display:"flex",alignItems:"center",gap:10}}>{t.clients.title} <PBadge sm/></h1><Btn ch={<><UserPlus size={16}/> {t.clients.add}</>} vr="coral" onClick={()=>setShowForm(!showForm)}/></div>
-    {showForm&&<Card st={{marginBottom:24}}><form onSubmit={add}><div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14}} className="g2"><Fld label={t.clients.nameL}><TIn required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder={lang==="tr"?"örn. Danışan-014":"e.g. Client-014"}/></Fld><Fld label={t.clients.age}><TIn type="number" value={form.age} onChange={e=>setForm({...form,age:e.target.value})}/></Fld></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}} className="g3"><Fld label={t.clients.gender}><SegBtn opts={[{v:"female",l:t.calc.female},{v:"male",l:t.calc.male}]} val={form.gender} onChg={v=>setForm({...form,gender:v})}/></Fld><Fld label={t.clients.height}><TIn type="number" value={form.height} onChange={e=>setForm({...form,height:e.target.value})}/></Fld><Fld label={t.clients.weight}><TIn type="number" value={form.weight} onChange={e=>setForm({...form,weight:e.target.value})}/></Fld></div><Fld label={t.clients.condition}><TIn value={form.condition} onChange={e=>setForm({...form,condition:e.target.value})} placeholder={t.clients.condNone}/></Fld><Fld label={t.clients.notes}><textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={3} style={{...iSt,resize:"vertical",fontFamily:"inherit"}}/></Fld><p style={{fontSize:12,color:C.gold,opacity:0.9,marginBottom:16,display:"flex",gap:6}}><AlertCircle size={13} style={{flexShrink:0,marginTop:1}}/> {t.clients.privacy}</p><div style={{display:"flex",gap:10}}><Btn tp="submit" ch={t.clients.save} vr="primary"/><Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowForm(false)}/></div></form></Card>}
+    {showForm&&<Card st={{marginBottom:24}}><form onSubmit={add}><div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14}} className="g2"><Fld label={t.clients.nameL}><TIn required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder={lang==="tr"?"örn. Danışan-014":"e.g. Client-014"}/></Fld><Fld label={t.clients.age}><TIn type="number" value={form.age} onChange={e=>setForm({...form,age:e.target.value})}/></Fld></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}} className="g3"><Fld label={t.clients.gender}><SegBtn opts={[{v:"female",l:t.calc.female},{v:"male",l:t.calc.male}]} val={form.gender} onChg={v=>setForm({...form,gender:v})}/></Fld><Fld label={t.clients.height}><TIn type="number" value={form.height} onChange={e=>setForm({...form,height:e.target.value})}/></Fld><Fld label={t.clients.weight}><TIn type="number" value={form.weight} onChange={e=>setForm({...form,weight:e.target.value})}/></Fld></div><Fld label={t.clients.condition}><TIn value={form.condition} onChange={e=>setForm({...form,condition:e.target.value})} placeholder={t.clients.condNone}/></Fld>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
+  <Fld label={lang==="tr"?"Hedef Kalori (kcal)":"Target Calories (kcal)"}><TIn type="number" value={form.targetKcal} onChange={e=>setForm({...form,targetKcal:e.target.value})} placeholder="örn. 1800"/></Fld>
+  <Fld label={lang==="tr"?"Hedef Su (litre)":"Target Water (liters)"}><TIn type="number" value={form.targetWater} onChange={e=>setForm({...form,targetWater:e.target.value})} placeholder="örn. 2.5"/></Fld>
+</div>
+<Fld label={t.clients.notes}><textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={3} style={{...iSt,resize:"vertical",fontFamily:"inherit"}}/></Fld><p style={{fontSize:12,color:C.gold,opacity:0.9,marginBottom:16,display:"flex",gap:6}}><AlertCircle size={13} style={{flexShrink:0,marginTop:1}}/> {t.clients.privacy}</p><div style={{display:"flex",gap:10}}><Btn tp="submit" ch={t.clients.save} vr="primary"/><Btn tp="button" ch={t.clients.cancel} vr="ghost" onClick={()=>setShowForm(false)}/></div></form></Card>}
     <Fld label=""><div style={{position:"relative"}}><Search size={16} style={{position:"absolute",left:14,top:13,opacity:0.4}}/><TIn value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.clients.search} style={{paddingLeft:38}}/></div></Fld>
     {loading&&<Spin/>}
     {!loading&&filtered.length===0&&<div style={{border:`1.5px dashed ${C.line}`,borderRadius:14,padding:50,textAlign:"center",color:C.ink,opacity:0.45}}><Users size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{t.clients.empty}</p></div>}
@@ -594,6 +690,19 @@ function ClientProfile({t,lang,clientId,nav}){
   return<section style={{maxWidth:900,margin:"0 auto",padding:"40px 24px 80px"}}>
     <button onClick={()=>nav("clients")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.ink,opacity:0.55,marginBottom:20,padding:0,fontWeight:600}}>← {t.common.back}</button>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28}}><div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px"}}>{client.name}</h1><p style={{fontSize:14,color:C.ink,opacity:0.55,margin:0}}>{client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female} · {client.height} cm</p></div>{client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}</div>
+    {/* Goals */}
+    {(client.targetKcal||client.targetWater)&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}} className="g2">
+      {client.targetKcal&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"16px 20px"}}>
+        <div style={{fontSize:11,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:8}}>{lang==="tr"?"Hedef Kalori":"Target Calories"}</div>
+        <div style={{display:"flex",alignItems:"baseline",gap:6,marginBottom:10}}><span style={{fontSize:28,fontWeight:800,color:C.coral,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetKcal}</span><span style={{fontSize:13,color:C.ink,opacity:0.5,fontWeight:600}}>kcal / {lang==="tr"?"gün":"day"}</span></div>
+        {hist.length>0&&hist[0]&&<div><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.ink,opacity:0.45,marginBottom:4}}><span>{lang==="tr"?"Son Kilo":"Last Weight"}: {hist[0].weight} kg</span></div></div>}
+      </div>}
+      {client.targetWater&&<div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:12,padding:"16px 20px"}}>
+        <div style={{fontSize:11,fontWeight:700,color:C.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:8}}>{lang==="tr"?"Hedef Su":"Target Water"}</div>
+        <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:C.sage,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetWater}</span><span style={{fontSize:13,color:C.ink,opacity:0.5,fontWeight:600}}>L / {lang==="tr"?"gün":"day"}</span></div>
+      </div>}
+    </div>}
+
     {client.notes&&<Card st={{marginBottom:20,background:C.paperDim,border:"none"}}><h4 style={{fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",opacity:0.5,margin:"0 0 8px"}}>{t.clients.notes}</h4><p style={{margin:0,fontSize:14,lineHeight:1.6}}>{client.notes}</p></Card>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><h3 style={{fontSize:15,fontWeight:700,margin:0}}>{t.clients.hist}</h3><Btn ch={<><Plus size={14}/> {t.clients.newM}</>} vr="ghost" onClick={()=>setShowAdd(!showAdd)} st={{fontSize:13,padding:"8px 14px"}}/></div>
     {showAdd&&<Card st={{marginBottom:16}}><form onSubmit={addM}><div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:14}} className="g2"><Fld label={t.clients.weight}><TIn type="number" required value={entry.weight} onChange={e=>setEntry({...entry,weight:e.target.value})}/></Fld><Fld label={t.clients.notes}><TIn value={entry.note} onChange={e=>setEntry({...entry,note:e.target.value})}/></Fld></div><Btn tp="submit" ch={t.clients.save} vr="primary"/></form></Card>}
@@ -634,6 +743,29 @@ function TemplateDetail({t,lang,id,nav}){
   const av=lang==="tr"?c.avTr:c.avEn;
   const menu=lang==="tr"?c.mTr:c.mEn;
   return<section style={{maxWidth:820,margin:"0 auto",padding:"40px 24px 90px"}}>
+    <style>{`
+      @media print {
+        body { background: white !important; font-family: 'Inter', sans-serif; }
+        .np { display: none !important; }
+        .nb-print-header { display: flex !important; }
+        section { padding: 0 !important; max-width: 100% !important; }
+        .nb-print-card { break-inside: avoid; border: 1px solid #ccc !important; margin-bottom: 12px !important; }
+        @page { margin: 20mm; size: A4; }
+      }
+      .nb-print-header { display: none; border-bottom: 2px solid #0E2A3D; padding-bottom: 16px; margin-bottom: 24px; justify-content: space-between; align-items: center; }
+    `}</style>
+    {/* Print header — only visible when printing */}
+    <div className="nb-print-header">
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:"#0E2A3D"}}>NutriBase</span>
+        <span style={{fontSize:11,fontWeight:700,background:"#C9A14A",color:"#3A2D0A",padding:"2px 8px",borderRadius:20}}>PRO</span>
+      </div>
+      <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
+        <div style={{fontWeight:700}}>{lang==="tr"?"Klinik Diyet Şablonu":"Clinical Diet Template"}</div>
+        <div>{new Date().toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long",year:"numeric"})}</div>
+      </div>
+    </div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}} className="np">
       <button onClick={()=>nav("templates")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.ink,opacity:0.55,padding:0,fontWeight:600}}>← {t.tpl.back}</button>
       <Btn ch={<><Printer size={14}/> {t.tpl.print}</>} vr="ghost" onClick={()=>window.print()} st={{fontSize:13,padding:"8px 14px"}}/>
