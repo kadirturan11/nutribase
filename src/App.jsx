@@ -1130,6 +1130,13 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[supps,setSupps]=useState([]);
   const[showSupForm,setShowSupForm]=useState(false);
   const[newSup,setNewSup]=useState({name:"",dose:"",freq:"",timing:""});
+  const[dietPlan,setDietPlan]=useState(null);
+  const[dpDays,setDpDays]=useState(3);
+  const[dpEdit,setDpEdit]=useState(null);
+  const[dpEditTxt,setDpEditTxt]=useState("");
+  const[dpNotes,setDpNotes]=useState("");
+  const[dpTitle,setDpTitle]=useState("");
+  const[showDpForm,setShowDpForm]=useState(false);
   const load=useCallback(async()=>{
     if(!clientId)return;
     const c=await sg(clientId);setClient(c);
@@ -1143,6 +1150,8 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     for(const k of cks){const v=await sg(k);if(v)cn.push({...v,key:k});}
     cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
+    const dpData=await sg(`${clientId}:dietPlan`);
+    if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
   },[clientId]);
 
   useEffect(()=>{load();},[load]);
@@ -1175,6 +1184,43 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const delSupp=async id=>{
     const updated=supps.filter(s=>s.id!==id);
     setSupps(updated);await ss(`${clientId}:supps`,updated);
+  };
+
+  const createDietPlan=async()=>{
+    const days=Array(dpDays).fill(null).map((_,i)=>({day:i+1,meals:{b:"",l:"",d:"",s:""}}));
+    const plan={title:dpTitle||(lang==="tr"?"Diyet Planı":"Diet Plan"),days,notes:"",createdAt:Date.now()};
+    setDietPlan(plan);
+    await ss(`${clientId}:dietPlan`,plan);
+    setShowDpForm(false);
+  };
+  const saveDpCell=async()=>{
+    if(!dpEdit||!dietPlan)return;
+    const updated={...dietPlan,days:dietPlan.days.map((d,i)=>i===dpEdit.d?{...d,meals:{...d.meals,[dpEdit.s]:dpEditTxt}}:d)};
+    setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);setDpEdit(null);
+  };
+  const saveDpNotes=async()=>{
+    if(!dietPlan)return;
+    const updated={...dietPlan,notes:dpNotes};
+    setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
+  };
+  const saveDpTitle=async()=>{
+    if(!dietPlan)return;
+    const updated={...dietPlan,title:dpTitle};
+    setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
+  };
+  const deleteDietPlan=async()=>{
+    if(!window.confirm(lang==="tr"?"Bu diyet planını silmek istediğine emin misin?":"Delete this diet plan?"))return;
+    await sd(`${clientId}:dietPlan`);setDietPlan(null);setDpTitle("");setDpNotes("");
+  };
+  const addDietDay=async()=>{
+    if(!dietPlan)return;
+    const updated={...dietPlan,days:[...dietPlan.days,{day:dietPlan.days.length+1,meals:{b:"",l:"",d:"",s:""}}]};
+    setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
+  };
+  const removeDietDay=async(idx)=>{
+    if(!dietPlan||dietPlan.days.length<=1)return;
+    const updated={...dietPlan,days:dietPlan.days.filter((_,i)=>i!==idx).map((d,i)=>({...d,day:i+1}))};
+    setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
   };
 
   if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
@@ -1353,6 +1399,89 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Diet Plan Builder */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}} className="np">
+        <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>📋 {lang==="tr"?"Diyet Planı":"Diet Plan"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Danışana özel yazılı diyet planı oluştur":"Create a custom written diet plan for this client"}</span></div>
+        <div style={{display:"flex",gap:8}}>
+          {dietPlan&&<button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={14}/> {lang==="tr"?"Yazdır":"Print"}</button>}
+          {!dietPlan&&<button onClick={()=>setShowDpForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:C.coral,color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}><Plus size={14}/> {lang==="tr"?"Plan Oluştur":"Create Plan"}</button>}
+        </div>
+      </div>
+
+      {showDpForm&&!dietPlan&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:16}} className="np">
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:12,marginBottom:14}} className="g2">
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Plan Başlığı":"Plan Title"}</label><input value={dpTitle} onChange={e=>setDpTitle(e.target.value)} placeholder={lang==="tr"?"örn. Kilo Verme Programı — 1. Ay":"e.g. Weight Loss Program — Month 1"} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Kaç Gün?":"How many days?"}</label><input type="number" min="1" max="30" value={dpDays} onChange={e=>setDpDays(Math.max(1,Math.min(30,+e.target.value||1)))} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={createDietPlan} style={{padding:"9px 18px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Oluştur":"Create"}</button>
+            <button onClick={()=>setShowDpForm(false)} style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:T.ink,border:`1px solid ${T.line}`,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+
+      {!dietPlan&&!showDpForm&&<div className="np" style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:28,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz diyet planı oluşturulmadı.":"No diet plan created yet."}</div>}
+
+      {dietPlan&&(
+        <div style={{marginBottom:28}}>
+          <style>{`@media print{.np{display:none!important;}.dp-print-title{display:block!important;}}`}</style>
+          <h2 className="dp-print-title" style={{display:"none",fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,fontWeight:700,color:"#0E2A3D",margin:"0 0 16px"}}>{dietPlan.title}</h2>
+
+          <div className="np" style={{display:"flex",gap:10,marginBottom:16,alignItems:"center"}}>
+            <input value={dpTitle} onChange={e=>setDpTitle(e.target.value)} onBlur={saveDpTitle} style={{flex:1,padding:"10px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontWeight:700,fontFamily:"'Source Serif 4',Georgia,serif",boxSizing:"border-box",outline:"none"}}/>
+            <button onClick={deleteDietPlan} style={{padding:"9px 12px",borderRadius:8,border:`1px solid ${C.coral}`,background:"transparent",color:C.coral,cursor:"pointer"}}><Trash2 size={14}/></button>
+          </div>
+
+          <div style={{overflowX:"auto"}} className="dp-table-wrap">
+            <table style={{width:"100%",borderCollapse:"collapse",minWidth:600}}>
+              <thead>
+                <tr>
+                  <th style={{width:80,padding:"8px 10px",fontSize:11,fontWeight:700,textAlign:"left",color:T.ink,opacity:0.5,textTransform:"uppercase",background:T.paperDim,border:`1px solid ${T.line}`}}>{lang==="tr"?"Gün":"Day"}</th>
+                  {["b","l","d","s"].map(sk=>{
+                    const labels={b:lang==="tr"?"🌅 Kahvaltı":"🌅 Breakfast",l:lang==="tr"?"☀️ Öğle":"☀️ Lunch",d:lang==="tr"?"🌙 Akşam":"🌙 Dinner",s:lang==="tr"?"🍎 Ara Öğün":"🍎 Snack"};
+                    return<th key={sk} style={{padding:"8px 10px",fontSize:11,fontWeight:700,color:T.ink,opacity:0.7,background:T.paperDim,border:`1px solid ${T.line}`,textAlign:"left"}}>{labels[sk]}</th>;
+                  })}
+                  <th className="np" style={{width:36,background:T.paperDim,border:`1px solid ${T.line}`}}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {dietPlan.days.map((d,di)=>(
+                  <tr key={di}>
+                    <td style={{padding:"10px",fontSize:13,fontWeight:700,color:T.ink,background:T.paperDim,border:`1px solid ${T.line}`}}>{lang==="tr"?`Gün ${d.day}`:`Day ${d.day}`}</td>
+                    {["b","l","d","s"].map(sk=>(
+                      <td key={sk} onClick={()=>{setDpEdit({d:di,s:sk});setDpEditTxt(d.meals[sk]);}} style={{padding:0,border:`1px solid ${T.line}`,verticalAlign:"top",cursor:"pointer",minWidth:130,background:T.paper}}>
+                        {dpEdit?.d===di&&dpEdit?.s===sk?(
+                          <div onClick={e=>e.stopPropagation()} style={{padding:6}}>
+                            <textarea value={dpEditTxt} onChange={e=>setDpEditTxt(e.target.value)} autoFocus rows={3} style={{width:"100%",fontSize:12.5,border:`1.5px solid ${C.coral}`,borderRadius:6,padding:6,resize:"none",fontFamily:"inherit",outline:"none",background:T.paper,color:T.ink,boxSizing:"border-box"}}/>
+                            <div style={{display:"flex",gap:4,marginTop:4}}>
+                              <button onClick={saveDpCell} style={{flex:1,background:C.coral,color:"#fff",border:"none",borderRadius:5,padding:"5px",fontSize:11,fontWeight:700,cursor:"pointer"}}><Check size={12}/></button>
+                              <button onClick={()=>setDpEdit(null)} style={{flex:1,background:T.line,color:T.ink,border:"none",borderRadius:5,padding:"5px",fontSize:11,cursor:"pointer"}}><X size={12}/></button>
+                            </div>
+                          </div>
+                        ):(
+                          <div style={{padding:"10px 12px",fontSize:12.5,lineHeight:1.5,color:T.ink,opacity:d.meals[sk]?1:0.2,minHeight:60}}>{d.meals[sk]||"+"}</div>
+                        )}
+                      </td>
+                    ))}
+                    <td className="np" style={{border:`1px solid ${T.line}`,textAlign:"center",background:T.paper}}>
+                      {dietPlan.days.length>1&&<button onClick={()=>removeDietDay(di)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><X size={13}/></button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <button onClick={addDietDay} className="np" style={{marginTop:10,display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px dashed ${T.line}`,background:"transparent",color:T.ink,opacity:0.6,fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Plus size={13}/> {lang==="tr"?"Gün Ekle":"Add Day"}</button>
+
+          <div style={{marginTop:16}}>
+            <label className="np" style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Genel Notlar / Öneriler":"General Notes / Recommendations"}</label>
+            <textarea value={dpNotes} onChange={e=>setDpNotes(e.target.value)} onBlur={saveDpNotes} rows={3} placeholder={lang==="tr"?"örn. Günde en az 2.5L su için, tuzu azaltın...":"e.g. Drink at least 2.5L water daily, reduce salt..."} style={{width:"100%",padding:"10px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical",lineHeight:1.6}}/>
+          </div>
         </div>
       )}
 
