@@ -1,1 +1,15 @@
-
+{
+  "name": "NutriBase — Beslenme ve Klinik Takip",
+  "short_name": "NutriBase",
+  "description": "Kalori, su ve makro hesaplama; diyetisyenler için klinik takip araçları.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F3",
+  "theme_color": "#0E2A3D",
+  "orientation": "any",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "tr"
+}
