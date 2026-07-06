@@ -138,6 +138,34 @@ const FOODS = [
 // Daily Reference Intakes (adult, 2000 kcal diet — WHO/FDA/EFSA)
 const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,420,700,11,900,90,20,15,2.4,400,1.7];
 
+// Turkish Dietetics Exchange List System (Değişim Listesi Sistemi)
+const EXCHANGE_GROUPS = [
+  {id:"milk", nameTr:"Süt Grubu", nameEn:"Milk Group", icon:"🥛", kcal:90, protein:8, carb:12, fat:0,
+   foodsTr:[{n:"Süt (yağsız)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (yağsız)",a:"1 su bardağı (200g)"},{n:"Ayran",a:"1.5 su bardağı (300ml)"},{n:"Kefir",a:"1 su bardağı (200ml)"}],
+   foodsEn:[{n:"Skim milk",a:"1 cup (200ml)"},{n:"Non-fat yogurt",a:"1 cup (200g)"},{n:"Ayran",a:"1.5 cups (300ml)"},{n:"Kefir",a:"1 cup (200ml)"}]},
+  {id:"meatLow", nameTr:"Et Grubu (Az Yağlı)", nameEn:"Meat Group (Low-fat)", icon:"🍗", kcal:55, protein:7, carb:0, fat:3,
+   foodsTr:[{n:"Tavuk göğsü (derisiz)",a:"30g (1 kibrit kutusu)"},{n:"Balık (yağsız)",a:"30g"},{n:"Yumurta beyazı",a:"2 adet"},{n:"Lor peyniri",a:"30g"}],
+   foodsEn:[{n:"Chicken breast (skinless)",a:"30g"},{n:"Lean fish",a:"30g"},{n:"Egg white",a:"2 pieces"},{n:"Cottage cheese",a:"30g"}]},
+  {id:"meatMed", nameTr:"Et Grubu (Orta Yağlı)", nameEn:"Meat Group (Medium-fat)", icon:"🥩", kcal:75, protein:7, carb:0, fat:5,
+   foodsTr:[{n:"Kırmızı et (yağsız)",a:"30g"},{n:"Tavuk but (derili)",a:"30g"},{n:"Yumurta (tam)",a:"1 adet"},{n:"Beyaz peynir",a:"30g"}],
+   foodsEn:[{n:"Lean red meat",a:"30g"},{n:"Chicken thigh (with skin)",a:"30g"},{n:"Whole egg",a:"1 piece"},{n:"Feta cheese",a:"30g"}]},
+  {id:"meatHigh", nameTr:"Et Grubu (Yüksek Yağlı)", nameEn:"Meat Group (High-fat)", icon:"🥓", kcal:100, protein:7, carb:0, fat:8,
+   foodsTr:[{n:"Kaşar peyniri",a:"30g"},{n:"Sucuk",a:"30g"},{n:"Kıyma (yağlı)",a:"30g"},{n:"Sosis",a:"30g"}],
+   foodsEn:[{n:"Kashar cheese",a:"30g"},{n:"Sujuk",a:"30g"},{n:"Ground beef (fatty)",a:"30g"},{n:"Sausage",a:"30g"}]},
+  {id:"bread", nameTr:"Ekmek ve Tahıl Grubu", nameEn:"Bread & Starch Group", icon:"🍞", kcal:80, protein:3, carb:15, fat:0,
+   foodsTr:[{n:"Ekmek",a:"1 dilim (25g)"},{n:"Pirinç (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Makarna (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Bulgur (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Patates (haşlanmış)",a:"1 adet orta (100g)"},{n:"Yulaf ezmesi",a:"3 yemek kaşığı (35g)"}],
+   foodsEn:[{n:"Bread",a:"1 slice (25g)"},{n:"Cooked rice",a:"4 tbsp (90g)"},{n:"Cooked pasta",a:"4 tbsp (90g)"},{n:"Cooked bulgur",a:"4 tbsp (90g)"},{n:"Boiled potato",a:"1 medium (100g)"},{n:"Oatmeal",a:"3 tbsp (35g)"}]},
+  {id:"vegetable", nameTr:"Sebze Grubu", nameEn:"Vegetable Group", icon:"🥦", kcal:25, protein:2, carb:5, fat:0,
+   foodsTr:[{n:"Karışık pişmiş sebze",a:"1 su bardağı (150g)"},{n:"Salata (çiğ)",a:"2 su bardağı (200g)"},{n:"Domates",a:"1 adet orta (100g)"},{n:"Brokoli (pişmiş)",a:"1 su bardağı (150g)"}],
+   foodsEn:[{n:"Mixed cooked vegetables",a:"1 cup (150g)"},{n:"Raw salad",a:"2 cups (200g)"},{n:"Tomato",a:"1 medium (100g)"},{n:"Cooked broccoli",a:"1 cup (150g)"}]},
+  {id:"fruit", nameTr:"Meyve Grubu", nameEn:"Fruit Group", icon:"🍎", kcal:60, protein:0, carb:15, fat:0,
+   foodsTr:[{n:"Elma",a:"1 adet küçük (100g)"},{n:"Muz",a:"1/2 adet (50g)"},{n:"Portakal",a:"1 adet orta (150g)"},{n:"Üzüm",a:"15 adet (75g)"},{n:"Çilek",a:"1 su bardağı (150g)"}],
+   foodsEn:[{n:"Apple",a:"1 small (100g)"},{n:"Banana",a:"1/2 piece (50g)"},{n:"Orange",a:"1 medium (150g)"},{n:"Grapes",a:"15 pieces (75g)"},{n:"Strawberries",a:"1 cup (150g)"}]},
+  {id:"fat", nameTr:"Yağ Grubu", nameEn:"Fat Group", icon:"🫒", kcal:45, protein:0, carb:0, fat:5,
+   foodsTr:[{n:"Zeytinyağı",a:"1 tatlı kaşığı (5g)"},{n:"Tereyağı",a:"1 tatlı kaşığı (5g)"},{n:"Ceviz",a:"2 adet"},{n:"Badem",a:"6 adet"},{n:"Tahin",a:"1 tatlı kaşığı (5g)"}],
+   foodsEn:[{n:"Olive oil",a:"1 tsp (5g)"},{n:"Butter",a:"1 tsp (5g)"},{n:"Walnut",a:"2 pieces"},{n:"Almond",a:"6 pieces"},{n:"Tahini",a:"1 tsp (5g)"}]},
+];
+
 const COND = [
   {id:"diabetes2",tr:"Tip 2 Diyabet",en:"Type 2 Diabetes",icon:"🩸",
    ovTr:"Kan şekeri regülasyonunu desteklemek için düşük glisemik indeksli, kompleks karbonhidrat ağırlıklı, düzenli öğün saatlerine dayalı bir yaklaşım.",
@@ -389,6 +417,7 @@ export default function App(){
         {page==="templates"&&(isPro?<TemplatesPage t={t} lang={lang} nav={nav} setSel={setSelTpl} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="templateDetail"&&(isPro?<TemplateDetail t={t} lang={lang} id={selTpl} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="weeklyPlan"&&(isPro?<WeeklyPlanPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="exchangeList"&&(isPro?<ExchangeListPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="proLanding"&&<ProLanding t={t} nav={nav} isPro={isPro} T={T}/>}
         {page==="proCheckout"&&<ProCheckout t={t} nav={nav} goPro={goPro} T={T}/>}
       </main>
@@ -405,6 +434,7 @@ function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,T}){
     {k:"clients",l:t.nav.clients,icon:<Users size={15}/>,pro:true},
     {k:"templates",l:t.nav.templates,icon:<FileText size={15}/>,pro:true},
     {k:"weeklyPlan",l:lang==="tr"?"Haftalık Plan":"Weekly Plan",icon:<FileText size={15}/>,pro:true},
+    {k:"exchangeList",l:lang==="tr"?"Değişim Listesi":"Exchange List",icon:<Scale size={15}/>,pro:true},
   ];
   return(
     <header style={{borderBottom:`1px solid ${T.line}`,background:T.paper,position:"sticky",top:0,zIndex:40,transition:"background 0.2s"}}>
@@ -1137,6 +1167,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[dpNotes,setDpNotes]=useState("");
   const[dpTitle,setDpTitle]=useState("");
   const[showDpForm,setShowDpForm]=useState(false);
+  const[exchPlan,setExchPlan]=useState(null);
   const load=useCallback(async()=>{
     if(!clientId)return;
     const c=await sg(clientId);setClient(c);
@@ -1152,6 +1183,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
     const dpData=await sg(`${clientId}:dietPlan`);
     if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
+    const epData=await sg(`${clientId}:exchangePlan`);if(epData)setExchPlan(epData);
   },[clientId]);
 
   useEffect(()=>{load();},[load]);
@@ -1399,6 +1431,26 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Exchange Plan (if assigned) */}
+      {exchPlan&&(
+        <div style={{marginBottom:28}}>
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 12px",color:T.ink}}>⚖️ {lang==="tr"?"Değişim Listesi Planı":"Exchange List Plan"}</h3>
+          <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:14}}>
+              {EXCHANGE_GROUPS.filter(g=>exchPlan.counts[g.id]>0).map(g=>(
+                <span key={g.id} style={{fontSize:12.5,fontWeight:600,background:T.paperDim,color:T.ink,padding:"5px 12px",borderRadius:20}}>{g.icon} {lang==="tr"?g.nameTr:g.nameEn}: {exchPlan.counts[g.id]}</span>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:24,paddingTop:14,borderTop:`1px solid ${T.line}`}}>
+              <div><div style={{fontSize:10.5,color:T.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?"Toplam":"Total"}</div><div style={{fontSize:20,fontWeight:800,color:C.coral,fontFamily:"'Source Serif 4',Georgia,serif"}}>{exchPlan.totals.kcal} kcal</div></div>
+              <div><div style={{fontSize:10.5,color:T.ink,opacity:0.5,marginBottom:2}}>Protein</div><div style={{fontSize:16,fontWeight:700,color:T.ink}}>{exchPlan.totals.protein}g</div></div>
+              <div><div style={{fontSize:10.5,color:T.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?"Karb":"Carbs"}</div><div style={{fontSize:16,fontWeight:700,color:T.ink}}>{exchPlan.totals.carb}g</div></div>
+              <div><div style={{fontSize:10.5,color:T.ink,opacity:0.5,marginBottom:2}}>{lang==="tr"?"Yağ":"Fat"}</div><div style={{fontSize:16,fontWeight:700,color:T.ink}}>{exchPlan.totals.fat}g</div></div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1706,6 +1758,117 @@ function WeeklyPlanPage({t,lang,nav,T=C}){
         </table>
       </div>
       <p style={{fontSize:12,color:T.ink,opacity:0.4,marginTop:16}}>{lang==="tr"?"Her hücreye tıklayarak öğün içeriğini yazabilirsin. Haftalık plan otomatik kaydedilir.":"Click any cell to enter meal content. The weekly plan is saved automatically."}</p>
+    </section>
+  );
+}
+
+function ExchangeListPage({t,lang,nav,T=C}){
+  const[counts,setCounts]=useState(()=>Object.fromEntries(EXCHANGE_GROUPS.map(g=>[g.id,0])));
+  const[clients,setClients]=useState([]);
+  const[selClientKey,setSelClientKey]=useState("");
+  const[savedMsg,setSavedMsg]=useState(false);
+  const[expandedGroup,setExpandedGroup]=useState(null);
+
+  useEffect(()=>{(async()=>{
+    const ks=await sl("client:");const items=[];
+    for(const k of ks){const v=await sg(k);if(v&&v.name)items.push({...v,key:k});}
+    items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    setClients(items);
+  })();},[]);
+
+  const upd=(id,delta)=>setCounts(c=>({...c,[id]:Math.max(0,c[id]+delta)}));
+
+  const totals=EXCHANGE_GROUPS.reduce((acc,g)=>{
+    const n=counts[g.id]||0;
+    acc.kcal+=n*g.kcal;acc.protein+=n*g.protein;acc.carb+=n*g.carb;acc.fat+=n*g.fat;
+    return acc;
+  },{kcal:0,protein:0,carb:0,fat:0});
+
+  const totalExchanges=Object.values(counts).reduce((s,v)=>s+v,0);
+
+  const saveToClient=async()=>{
+    if(!selClientKey)return;
+    await ss(`${selClientKey}:exchangePlan`,{counts,totals,date:new Date().toISOString().slice(0,10),ts:Date.now()});
+    setSavedMsg(true);
+    setTimeout(()=>setSavedMsg(false),2500);
+  };
+
+  return(
+    <section style={{maxWidth:1100,margin:"0 auto",padding:"48px 24px 80px"}}>
+      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",color:T.ink,display:"flex",alignItems:"center",gap:10}}>
+        ⚖️ {lang==="tr"?"Değişim Listesi Sistemi":"Exchange List System"} <PBadge sm/>
+      </h1>
+      <p style={{color:T.ink,opacity:0.6,fontSize:14.5,margin:"0 0 32px"}}>{lang==="tr"?"Türk diyetetik pratiğinde kullanılan standart besin değişim grupları. Her grup sabit kalori/makro değerine sahiptir; danışana kaç 'değişim' verileceğini belirleyip otomatik toplam hesaplayın.":"Standard food exchange groups used in Turkish dietetic practice. Each group has fixed calorie/macro values; set how many exchanges to assign and get automatic totals."}</p>
+
+      <div style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:28,alignItems:"start"}} className="g2">
+        {/* Reference + Calculator */}
+        <div>
+          <h3 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 14px"}}>{lang==="tr"?"Değişim Grupları":"Exchange Groups"}</h3>
+          {EXCHANGE_GROUPS.map(g=>{
+            const foods=lang==="tr"?g.foodsTr:g.foodsEn;
+            const name=lang==="tr"?g.nameTr:g.nameEn;
+            const isExp=expandedGroup===g.id;
+            return(
+              <div key={g.id} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:16,marginBottom:12}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:12,flex:1,cursor:"pointer"}} onClick={()=>setExpandedGroup(isExp?null:g.id)}>
+                    <span style={{fontSize:24}}>{g.icon}</span>
+                    <div>
+                      <div style={{fontSize:14.5,fontWeight:700,color:T.ink}}>{name}</div>
+                      <div style={{fontSize:11.5,color:T.ink,opacity:0.5}}>1 {lang==="tr"?"değişim":"exchange"} = {g.kcal} kcal · P:{g.protein}g K:{g.carb}g Y:{g.fat}g</div>
+                    </div>
+                    {isExp?<ChevronUp size={16} style={{opacity:0.4,marginLeft:"auto"}}/>:<ChevronDown size={16} style={{opacity:0.4,marginLeft:"auto"}}/>}
+                  </div>
+                </div>
+                {isExp&&(
+                  <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.line}`}}>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}} className="g2">
+                      {foods.map((f,i)=>(
+                        <div key={i} style={{background:T.paperDim,borderRadius:8,padding:"8px 12px"}}>
+                          <div style={{fontSize:12.5,fontWeight:600,color:T.ink}}>{f.n}</div>
+                          <div style={{fontSize:11,color:T.ink,opacity:0.55}}>{f.a}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12,paddingTop:12,borderTop:`1px solid ${T.line}`}}>
+                  <span style={{fontSize:12.5,fontWeight:600,color:T.ink,opacity:0.7}}>{lang==="tr"?"Değişim Sayısı":"Exchange Count"}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <button onClick={()=>upd(g.id,-1)} style={{width:28,height:28,borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,cursor:"pointer",fontSize:16,fontWeight:700}}>−</button>
+                    <span style={{fontSize:16,fontWeight:800,color:C.coral,minWidth:24,textAlign:"center"}}>{counts[g.id]}</span>
+                    <button onClick={()=>upd(g.id,1)} style={{width:28,height:28,borderRadius:8,border:"none",background:C.coral,color:"#fff",cursor:"pointer",fontSize:16,fontWeight:700}}>+</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Totals + Assign */}
+        <div style={{position:"sticky",top:100}}>
+          <div style={{background:C.ink,borderRadius:14,padding:24,marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:14}}>{lang==="tr"?"Toplam"}{" "}({totalExchanges} {lang==="tr"?"değişim":"exchanges"})</div>
+            <div style={{fontSize:40,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif",marginBottom:4}}>{totals.kcal}<span style={{fontSize:16,opacity:0.6,fontWeight:600}}> kcal</span></div>
+            <div style={{display:"flex",gap:16,marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.15)"}}>
+              {[{l:lang==="tr"?"Protein":"Protein",v:totals.protein},{l:lang==="tr"?"Karb":"Carbs",v:totals.carb},{l:lang==="tr"?"Yağ":"Fat",v:totals.fat}].map((x,i)=>(
+                <div key={i}><div style={{fontSize:10.5,color:"#fff",opacity:0.55,marginBottom:2}}>{x.l}</div><div style={{fontSize:18,fontWeight:700,color:"#fff"}}>{x.v}g</div></div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20}}>
+            <h4 style={{fontSize:13,fontWeight:700,color:T.ink,margin:"0 0 12px"}}>👤 {lang==="tr"?"Danışana Ata":"Assign to Client"}</h4>
+            <select value={selClientKey} onChange={e=>setSelClientKey(e.target.value)} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",marginBottom:12,cursor:"pointer"}}>
+              <option value="">{lang==="tr"?"Danışan seç...":"Select client..."}</option>
+              {clients.map(c=><option key={c.key} value={c.key}>{c.name}</option>)}
+            </select>
+            <button onClick={saveToClient} disabled={!selClientKey||totalExchanges===0} style={{width:"100%",padding:"11px",borderRadius:8,border:"none",background:selClientKey&&totalExchanges>0?C.coral:T.line,color:selClientKey&&totalExchanges>0?"#fff":T.ink,fontSize:14,fontWeight:700,cursor:selClientKey&&totalExchanges>0?"pointer":"not-allowed",opacity:selClientKey&&totalExchanges>0?1:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Plana Kaydet":"Save to Plan"}</button>
+            {savedMsg&&<div style={{marginTop:10,fontSize:13,color:C.sage,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><Check size={14}/> {lang==="tr"?"Danışana kaydedildi!":"Saved to client!"}</div>}
+            {totalExchanges===0&&<p style={{fontSize:11.5,color:T.ink,opacity:0.4,marginTop:10,lineHeight:1.5}}>{lang==="tr"?"Önce yukarıdan en az bir değişim grubu seç.":"Select at least one exchange group above first."}</p>}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
