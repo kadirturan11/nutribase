@@ -98,6 +98,41 @@ const FOODS = [
   {id:54,tr:"Pekmez",                en:"Grape Molasses",        cat:"diğer",      v:[284,0.4,0.1,74,0,22,68,0,0,0,0,0,21,370,55,2.8,18,24,0.1,0,1.4,0,0,0,0,0.1]},
   {id:55,tr:"Bal",                   en:"Honey",                 cat:"diğer",      v:[304,0.3,0,82.4,0.2,17,82.1,0,0,0,0,0,4,52,6,0.4,2,4,0.2,0,0.5,0,0,0,2,0]},
   {id:56,tr:"Humus",                 en:"Hummus",                cat:"baklagil",   v:[166,7.9,9.6,14.3,6,65,0.3,1.4,5.2,2.4,0,0,379,228,38,2.4,36,176,1.5,0,3.9,0,0.6,0,72,0.2]},
+,
+  {id:57, tr:"Mısır (Haşlanmış)",   en:"Boiled Corn",          cat:"sebze",      v:[96,3.4,1.5,21,2.4,73,4.5,0.2,0.4,0.7,0,0,15,270,2,0.5,26,89,0.5,11,6.8,0,0.1,0,42,0.1]},
+  {id:58, tr:"Mantar",              en:"Mushroom",              cat:"sebze",      v:[22,3.1,0.3,3.3,1,92,2,0,0,0.1,0,0,5,318,3,0.5,9,86,0.5,0,2.1,0.1,0,0,17,0.1]},
+  {id:59, tr:"Bezelye (Haşlanmış)", en:"Boiled Peas",           cat:"sebze",      v:[84,5.4,0.4,15.6,5.5,79,5.7,0.1,0,0.2,0,0,3,271,27,1.5,39,117,1.8,38,14,0,0.1,0,63,0.2]},
+  {id:60, tr:"Kereviz",             en:"Celery",                cat:"sebze",      v:[16,0.7,0.2,3,1.6,95,1.8,0,0,0.1,0,0,80,260,40,0.2,11,24,0.1,22,3.1,0,0.3,0,36,0.1]},
+  {id:61, tr:"Pırasa",              en:"Leek",                  cat:"sebze",      v:[61,1.5,0.3,14.2,1.8,83,3.9,0,0,0.1,0,0,20,180,59,2.1,28,35,0.1,83,12,0,0.9,0,64,0.2]},
+  {id:62, tr:"Bamya",               en:"Okra",                  cat:"sebze",      v:[33,1.9,0.2,7.5,3.2,90,1.5,0,0,0.1,0,0,7,299,82,0.6,57,61,0.6,36,23,0,0.4,0,88,0.2]},
+  {id:63, tr:"Sarımsak",            en:"Garlic",                cat:"sebze",      v:[149,6.4,0.5,33.1,2.1,59,1,0.1,0,0.2,0,0,17,401,181,1.7,25,153,1.2,0,31.2,0,0.1,0,3,1.2]},
+  {id:64, tr:"Çilek",               en:"Strawberry",            cat:"meyve",      v:[32,0.7,0.3,7.7,2,91,4.9,0,0,0.2,0,0,1,153,16,0.4,13,24,0.1,1,58.8,0,0.3,0,24,0.1]},
+  {id:65, tr:"Kiraz",               en:"Cherry",                cat:"meyve",      v:[63,1.1,0.2,16,2.1,82,12.8,0,0.1,0.1,0,0,0,222,13,0.4,11,21,0.1,3,7,0,0.1,0,4,0.1]},
+  {id:66, tr:"Karpuz",              en:"Watermelon",            cat:"meyve",      v:[30,0.6,0.2,7.6,0.4,91,6.2,0,0,0.1,0,0,1,112,7,0.2,10,11,0.1,28,8.1,0,0.1,0,3,0.1]},
+  {id:67, tr:"Kavun",               en:"Cantaloupe",            cat:"meyve",      v:[34,0.8,0.2,8.2,0.9,90,7.9,0.1,0,0.1,0,0,16,267,9,0.2,12,15,0.2,169,36.7,0,0.1,0,21,0.1]},
+  {id:68, tr:"Şeftali",             en:"Peach",                 cat:"meyve",      v:[39,0.9,0.3,9.5,1.5,89,8.4,0,0.1,0.1,0,0,0,190,6,0.3,9,20,0.2,16,6.6,0,0.7,0,4,0]},
+  {id:69, tr:"Kivi",                en:"Kiwi",                  cat:"meyve",      v:[61,1.1,0.5,14.7,3,83,9,0,0.1,0.3,0,0,3,312,34,0.3,17,34,0.1,4,92.7,0,1.5,0,25,0.1]},
+  {id:70, tr:"Nar",                 en:"Pomegranate",           cat:"meyve",      v:[83,1.7,1.2,18.7,4,78,13.7,0.1,0.1,0.1,0,0,3,236,10,0.3,12,36,0.4,0,10.2,0,0.6,0,38,0.1]},
+  {id:71, tr:"Kuru İncir",          en:"Dried Fig",             cat:"meyve",      v:[249,3.3,0.9,63.9,9.8,30,47.9,0.2,0.2,0.4,0,0,10,680,162,2,68,67,0.5,0,1.2,0,0.4,0,9,0.1]},
+  {id:72, tr:"Vişne",               en:"Sour Cherry",           cat:"meyve",      v:[50,1,0.3,12.2,1.6,86,8.5,0.1,0.1,0.1,0,0,3,173,16,0.3,9,15,0.1,64,10,0,0.1,0,8,0.1]},
+  {id:73, tr:"Kefir",               en:"Kefir",                 cat:"yumurta-süt",v:[41,3.3,1,4.7,0,89,4.3,0.7,0.3,0.1,0,5,40,150,130,0.1,12,93,0.4,29,0.5,0,0.1,0.3,9,0.1]},
+  {id:74, tr:"Labne Peyniri",       en:"Labneh",                cat:"yumurta-süt",v:[172,10.5,13.9,3.5,0,70,3,9.1,3.8,0.5,0.5,44,365,150,200,0.2,18,170,1.2,130,0,0.3,0.3,0.6,15,0.1]},
+  {id:75, tr:"Antep Fıstığı",       en:"Pistachio",             cat:"kuruyemiş",  v:[560,20.2,45.3,27.2,10.6,4,7.7,5.6,23.3,13.5,0,0,1,1025,105,3.9,121,490,2.2,26,5.6,0,2.3,0,51,1.7]},
+  {id:76, tr:"Susam",               en:"Sesame Seeds",          cat:"kuruyemiş",  v:[573,17.7,49.7,23.5,11.8,5,0.3,7,18.8,21.8,0,0,11,468,975,14.6,351,629,7.8,0,0,0,0.3,0,97,0.8]},
+  {id:77, tr:"Ay Çekirdeği",        en:"Sunflower Seeds",       cat:"kuruyemiş",  v:[584,20.8,51.5,20,8.6,5,2.6,4.5,18.5,23.1,0,0,9,645,78,5.3,325,660,5,50,1.4,0,35.2,0,227,1.3]},
+  {id:78, tr:"Chia Tohumu",         en:"Chia Seeds",            cat:"kuruyemiş",  v:[486,16.5,30.7,42.1,34.4,6,0,3.3,2.3,23.7,0,0,16,407,631,7.7,335,860,4.6,54,1.6,0,0.5,0,49,0.6]},
+  {id:79, tr:"Sucuk",               en:"Sujuk (Dry Sausage)",   cat:"et",         v:[383,21.7,32.5,1.9,0,40,1.9,12.3,14.9,2.9,0,91,1316,258,15,2.5,20,192,4.3,0,0,0.4,0.4,1.5,4,0.3]},
+  {id:80, tr:"Tavuk Ciğeri",        en:"Chicken Liver",         cat:"et",         v:[119,16.9,4.8,0.7,0,76,0,1.5,1.3,1.1,0,345,71,230,11,8.5,19,297,3.7,3296,17.9,1.3,0.7,16.6,578,0.9]},
+  {id:81, tr:"İstavrit",            en:"Horse Mackerel",        cat:"balık",      v:[112,19.5,3.8,0,0,77,0,0.9,1.3,1.1,0,62,90,370,34,1.4,32,218,0.8,22,0,3.8,1.1,6.4,8,0.5]},
+  {id:82, tr:"Yulaf Kepeği",        en:"Oat Bran",              cat:"tahıl",      v:[246,17.3,7,66.2,15.4,5,1.4,1.4,2.4,2.9,0,0,4,566,58,5.4,235,734,3.1,0,0,0,0.8,0,52,0.2]},
+  {id:83, tr:"Mercimek Çorbası",    en:"Lentil Soup",           cat:"yemek",      v:[68,4.8,1.8,9.5,3,85,1.2,0.3,0.8,0.5,0,0,380,210,18,1.5,22,78,0.6,18,2.5,0,0.3,0,38,0.1]},
+  {id:84, tr:"Cacık",               en:"Cacik",                 cat:"yemek",      v:[49,3.2,2.8,3.2,0.3,90,2.9,1.8,0.8,0.1,0,10,180,160,110,0.2,14,90,0.6,20,2.1,0,0.1,0.3,8,0.1]},
+  {id:85, tr:"Kısır",               en:"Kisir (Bulgur Salad)",  cat:"yemek",      v:[142,4.8,4.2,23.5,5.2,68,2.1,0.6,2.8,0.6,0,0,310,240,42,1.8,45,85,0.9,55,18,0,1.8,0,28,0.2]},
+  {id:86, tr:"Izgara Köfte",        en:"Grilled Meatball",      cat:"yemek",      v:[218,16.8,15.2,3.2,0.3,63,0.8,5.8,6.2,1.4,0.4,72,380,260,25,2.1,22,164,4.2,0,0,0.1,0.3,2.2,8,0.3]},
+  {id:87, tr:"Vişne Suyu",          en:"Sour Cherry Juice",     cat:"içecek",     v:[47,0.4,0.1,11.5,0.3,88,9.8,0,0,0.1,0,0,2,118,12,0.2,8,14,0.1,18,4,0,0.2,0,3,0.1]},
+  {id:88, tr:"Şalgam Suyu",         en:"Turnip Juice",          cat:"içecek",     v:[18,0.8,0.2,3.5,1.2,94,2.8,0,0,0.1,0,0,680,320,55,0.8,22,38,0.3,0,15,0,0.3,0,18,0.1]},
+  {id:89, tr:"Domates Suyu",        en:"Tomato Juice",          cat:"içecek",     v:[17,0.8,0.1,3.8,0.4,94,3.1,0,0,0.1,0,0,268,218,10,0.4,11,19,0.1,45,18,0,0.7,0,20,0.1]},
+  {id:90, tr:"Zeytinyağlı Fasulye", en:"Green Beans Olive Oil", cat:"yemek",      v:[82,2.1,4.8,9.2,3.5,82,4.8,0.7,3.4,0.6,0,0,220,180,48,1.2,24,44,0.4,30,12,0,1.2,0,32,0.1]}
 ];
 
 // Daily Reference Intakes (adult, 2000 kcal diet — WHO/FDA/EFSA)
@@ -876,7 +911,7 @@ function TrackPage({t,lang,T=C}){
       {loading&&<Spin/>}
       {!loading&&entries.length===0&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:14,padding:50,textAlign:"center",color:T.ink,opacity:0.45}}><ClipboardList size={28} style={{marginBottom:10}}/><p style={{margin:0,fontSize:14}}>{t.track.empty}</p></div>}
       {!loading&&entries.length>0&&<>
-        {entries.length>1&&<WC entries={entries} t={t}/>}
+        {entries.length>1&&<WC entries={entries} t={t} T={T} lang={lang}/>}
         <Card st={{padding:0,overflow:"hidden",background:T.paper,borderColor:T.line}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
             <thead><tr style={{background:T.paperDim}}>{[t.track.date,t.track.weight,t.track.target,t.track.water,""].map((h,i)=><th key={i} style={{textAlign:"left",padding:"12px 18px",fontSize:11.5,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:T.ink,opacity:0.55}}>{h}</th>)}</tr></thead>
@@ -888,13 +923,38 @@ function TrackPage({t,lang,T=C}){
   );
 }
 
-function WC({entries,t}){
+function WC({entries,t,T=C,lang="tr"}){
   const sorted=[...entries].sort((a,b)=>a.ts-b.ts);
-  const ws=sorted.map(e=>Number(e.weight));
-  const mn=Math.min(...ws)-1,mx=Math.max(...ws)+1,rng=mx-mn||1;
-  const W=800,H=160,P=20;
-  const pts=sorted.map((e,i)=>{const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e.weight)-mn)/rng)*(H-P*2);return`${x},${y}`;});
-  return<Card st={{marginBottom:20}}><h3 style={{fontSize:13,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:C.ink,opacity:0.5,margin:"0 0 16px"}}>{t.track.trend}</h3><svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}} preserveAspectRatio="none"><polyline points={pts.join(" ")} fill="none" stroke={C.coral} strokeWidth="2.5"/>{sorted.map((e,i)=>{const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e.weight)-mn)/rng)*(H-P*2);return<circle key={i} cx={x} cy={y} r="4" fill={C.ink}/>;})}</svg></Card>;
+  const datasets=[
+    {key:"weight",label:lang==="tr"?"Kilo":"Weight",  color:C.coral},
+    {key:"waist", label:lang==="tr"?"Bel":"Waist",    color:C.sage},
+    {key:"hip",   label:lang==="tr"?"Kalça":"Hip",    color:C.gold},
+  ];
+  const active=datasets.filter(d=>sorted.some(e=>Number(e[d.key])>0));
+  const allVals=active.flatMap(d=>sorted.map(e=>Number(e[d.key])||0).filter(v=>v>0));
+  if(allVals.length===0)return null;
+  const mn=Math.min(...allVals)-2,mx=Math.max(...allVals)+2,rng=mx-mn||1;
+  const W=800,H=180,P=30;
+  const pts=key=>{
+    const valid=sorted.filter(e=>Number(e[key])>0);
+    return valid.map(e=>{const i=sorted.indexOf(e);const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e[key])-mn)/rng)*(H-P*2);return`${x},${y}`;}).join(" ");
+  };
+  return(
+    <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <h3 style={{fontSize:13,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?"Ölçüm Grafiği":"Measurement Chart"}</h3>
+        <div style={{display:"flex",gap:14}}>{active.map(d=><div key={d.key} style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:14,height:3,borderRadius:2,background:d.color}}/><span style={{fontSize:11,color:T.ink,opacity:0.6}}>{d.label}</span></div>)}</div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}} preserveAspectRatio="none">
+        {[0.25,0.5,0.75].map((f,i)=>{const y=P+f*(H-P*2);const v=Math.round(mx-f*rng);return<g key={i}><line x1={P} y1={y} x2={W-P} y2={y} stroke={T.line} strokeWidth="1" strokeDasharray="3 5" opacity="0.5"/><text x={P-4} y={y+3} textAnchor="end" fontSize="9" fill={T.ink} opacity="0.4">{v}</text></g>;})}
+        {active.map(d=><polyline key={d.key} points={pts(d.key)} fill="none" stroke={d.color} strokeWidth="2.5" strokeLinejoin="round"/>)}
+        {sorted.map((e,i)=>{if(!Number(e.weight))return null;const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e.weight)-mn)/rng)*(H-P*2);return<circle key={i} cx={x} cy={y} r="4" fill={C.coral}/>;  })}
+      </svg>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingLeft:P,paddingRight:P}}>
+        {[sorted[0],sorted[Math.floor((sorted.length-1)/2)],sorted[sorted.length-1]].filter(Boolean).map((e,i)=><span key={i} style={{fontSize:10,color:T.ink,opacity:0.4}}>{e.date}</span>)}
+      </div>
+    </div>
+  );
 }
 
 function Upsell({t,nav}){return<section style={{maxWidth:600,margin:"0 auto",padding:"100px 24px",textAlign:"center"}}><div style={{width:64,height:64,borderRadius:18,background:C.paperDim,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",color:C.gold}}><Lock size={26}/></div><h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:26,fontWeight:700,margin:"0 0 10px"}}>{t.upsell.title}</h2><p style={{color:C.ink,opacity:0.6,fontSize:15,marginBottom:28,lineHeight:1.6}}>{t.upsell.sub}</p><Btn ch={<><Crown size={16}/> {t.upsell.cta}</>} vr="coral" onClick={()=>nav("proLanding")} st={{padding:"14px 28px"}}/></section>;}
@@ -913,7 +973,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[loading,setLoading]=useState(true);
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
-  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
+  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:""});
 
   useEffect(()=>{
     (async()=>{
@@ -948,7 +1008,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     if(!form.name.trim())return;
     const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
-    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:""});
+    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:""});
     setShowForm(false);
     reload();
   };
@@ -991,6 +1051,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}</label><input type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Su (L)":"Target Water (L)"}</label><input type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
+            <div style={{marginBottom:14}}><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📅 {lang==="tr"?"Sonraki Randevu":"Next Appointment"}</label><input type="date" value={form.nextAppt||""} onChange={e=>setForm(f=>({...f,nextAppt:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Klinik Notlar":"Clinical Notes"}</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={2} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical"}}/></div>
             <div style={{display:"flex",gap:10,marginTop:16}}>
               <button type="submit" style={{padding:"11px 22px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
@@ -1066,7 +1127,9 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[clinNotes,setClinNotes]=useState([]);
   const[showNoteForm,setShowNoteForm]=useState(false);
   const[noteText,setNoteText]=useState("");
-
+  const[supps,setSupps]=useState([]);
+  const[showSupForm,setShowSupForm]=useState(false);
+  const[newSup,setNewSup]=useState({name:"",dose:"",freq:"",timing:""});
   const load=useCallback(async()=>{
     if(!clientId)return;
     const c=await sg(clientId);setClient(c);
@@ -1079,6 +1142,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const cks=await sl(`${clientId}:clinNote:`);const cn=[];
     for(const k of cks){const v=await sg(k);if(v)cn.push({...v,key:k});}
     cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
+    const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
   },[clientId]);
 
   useEffect(()=>{load();},[load]);
@@ -1102,6 +1166,16 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     setNoteText("");setShowNoteForm(false);load();
   };
   const delClinNote=async key=>{await sd(key);load();};
+  const addSupp=async()=>{
+    if(!newSup.name.trim())return;
+    const updated=[...supps,{...newSup,id:Date.now()}];
+    setSupps(updated);await ss(`${clientId}:supps`,updated);
+    setNewSup({name:"",dose:"",freq:"",timing:""});setShowSupForm(false);
+  };
+  const delSupp=async id=>{
+    const updated=supps.filter(s=>s.id!==id);
+    setSupps(updated);await ss(`${clientId}:supps`,updated);
+  };
 
   if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
 
@@ -1137,8 +1211,8 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       </div>
 
       {/* Goals */}
-      {(client.targetKcal||client.targetWater)&&(
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}} className="g2">
+      {(client.targetKcal||client.targetWater||client.nextAppt)&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:20}} className="g3">
           {client.targetKcal&&(
             <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 20px"}}>
               <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>{lang==="tr"?"Hedef Kalori":"Target Calories"}</div>
@@ -1151,6 +1225,17 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
               <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:"#3B82F6",fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetWater}</span><span style={{fontSize:12,color:T.ink,opacity:0.5}}>L/{lang==="tr"?"gün":"day"}</span></div>
             </div>
           )}
+          {client.nextAppt&&(()=>{
+            const days=Math.ceil((new Date(client.nextAppt)-new Date())/(1000*60*60*24));
+            const isPast=days<0;
+            return(
+              <div style={{background:T.paper,border:`1.5px solid ${isPast?C.coral:C.sage}`,borderRadius:12,padding:"16px 20px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:isPast?C.coral:C.sage,opacity:0.8,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>📅 {lang==="tr"?"Sonraki Randevu":"Next Appointment"}</div>
+                <div style={{fontSize:15,fontWeight:700,color:T.ink}}>{new Date(client.nextAppt).toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long"})}</div>
+                <div style={{fontSize:12,color:isPast?C.coral:C.sage,fontWeight:600,marginTop:4}}>{isPast?lang==="tr"?`${Math.abs(days)} gün geçti`:`${Math.abs(days)} days ago`:lang==="tr"?`${days} gün kaldı`:`${days} days left`}</div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -1185,7 +1270,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
         </div>
       )}
 
-      {hist.length>1&&<WC entries={hist} t={t}/>}
+      {hist.length>1&&<WC entries={hist} t={t} T={T} lang={lang}/>}
 
       <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,overflow:"hidden",marginBottom:28}}>
         {hist.length===0&&<p style={{padding:24,fontSize:14,color:T.ink,opacity:0.5,margin:0}}>{t.track.empty}</p>}
@@ -1266,6 +1351,46 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
                   </div>
                 </div>
               )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Supplement Tracking */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}}>
+        <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>💊 {lang==="tr"?"Takviye Takibi":"Supplement Tracking"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Vitamin, mineral ve ilaç listesi":"Vitamins, minerals and medications"}</span></div>
+        <button onClick={()=>setShowSupForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Plus size={14}/> {lang==="tr"?"Takviye Ekle":"Add Supplement"}</button>
+      </div>
+      {showSupForm&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:12,marginBottom:12}} className="g2">
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?"Takviye Adı *":"Supplement Name *"}</label><input value={newSup.name} onChange={e=>setNewSup(s=>({...s,name:e.target.value}))} placeholder={lang==="tr"?"örn. D Vitamini":"e.g. Vitamin D"} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?"Doz":"Dose"}</label><input value={newSup.dose} onChange={e=>setNewSup(s=>({...s,dose:e.target.value}))} placeholder="1000mg" style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}} className="g2">
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?"Sıklık":"Frequency"}</label><input value={newSup.freq} onChange={e=>setNewSup(s=>({...s,freq:e.target.value}))} placeholder={lang==="tr"?"Günde 1x":"Once daily"} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?"Alım Zamanı":"Timing"}</label><input value={newSup.timing} onChange={e=>setNewSup(s=>({...s,timing:e.target.value}))} placeholder={lang==="tr"?"Sabah aç karın":"Morning, fasting"} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={addSupp} style={{padding:"9px 18px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
+            <button onClick={()=>{setShowSupForm(false);setNewSup({name:"",dose:"",freq:"",timing:""},);}} style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:T.ink,border:`1px solid ${T.line}`,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+      {supps.length===0&&!showSupForm&&<div style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:24,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz takviye eklenmedi.":"No supplements added yet."}</div>}
+      {supps.length>0&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:28}} className="g2">
+          {supps.map(s=>(
+            <div key={s.id} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:T.ink,marginBottom:4}}>💊 {s.name}</div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {s.dose&&<span style={{fontSize:11.5,background:T.paperDim,color:T.ink,opacity:0.7,padding:"2px 8px",borderRadius:10,fontWeight:600}}>{s.dose}</span>}
+                  {s.freq&&<span style={{fontSize:11.5,background:T.paperDim,color:T.ink,opacity:0.7,padding:"2px 8px",borderRadius:10,fontWeight:600}}>{s.freq}</span>}
+                  {s.timing&&<span style={{fontSize:11.5,background:C.coralSoft,color:C.coral,padding:"2px 8px",borderRadius:10,fontWeight:600}}>{s.timing}</span>}
+                </div>
+              </div>
+              <button onClick={()=>delSupp(s.id)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3,flexShrink:0}}><Trash2 size={13}/></button>
             </div>
           ))}
         </div>
