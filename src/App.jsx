@@ -348,7 +348,7 @@ export default function App(){
         {page==="landing"&&<Landing t={t} nav={nav} lang={lang} T={T}/>}
         {page==="calc"&&<CalcPage t={t} lang={lang} T={T}/>}
         {page==="food"&&<FoodPage t={t} lang={lang} isPro={isPro} T={T}/>}
-        {page==="track"&&<TrackPage t={t} T={T}/>}
+        {page==="track"&&<TrackPage t={t} lang={lang} T={T}/>}
         {page==="clients"&&(isPro?<ClientsPage t={t} lang={lang} nav={nav} setSel={setSelClient} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="clientProfile"&&(isPro?<ClientProfile t={t} lang={lang} clientId={selClient} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="templates"&&(isPro?<TemplatesPage t={t} lang={lang} nav={nav} setSel={setSelTpl} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
@@ -788,7 +788,7 @@ function FoodPage({t,lang,isPro,T=C}){
   );
 }
 
-function TrackPage({t,T=C}){
+function TrackPage({t,lang,T=C}){
   const[entries,setEntries]=useState([]);
   const[loading,setLoading]=useState(true);
   const[waterMl,setWaterMl]=useState(0);
@@ -1316,7 +1316,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     </section>
   );
 }
-function TemplatesPage({t,lang,nav,setSel}){
+function TemplatesPage({t,lang,nav,setSel,T=C}){
   return<section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
     <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",display:"flex",alignItems:"center",gap:10}}>{t.tpl.title} <PBadge sm/></h1>
     <p style={{color:C.ink,opacity:0.6,fontSize:14.5,margin:"0 0 28px"}}>{t.tpl.sub}</p>
@@ -1333,7 +1333,7 @@ function TemplatesPage({t,lang,nav,setSel}){
   </section>;
 }
 
-function TemplateDetail({t,lang,id,nav}){
+function TemplateDetail({t,lang,id,nav,T=C}){
   const c=COND.find(x=>x.id===id);
   if(!c)return null;
   const res=lang==="tr"?c.resTr:c.resEn;
