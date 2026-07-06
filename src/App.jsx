@@ -1848,7 +1848,7 @@ function ExchangeListPage({t,lang,nav,T=C}){
         {/* Totals + Assign */}
         <div style={{position:"sticky",top:100}}>
           <div style={{background:C.ink,borderRadius:14,padding:24,marginBottom:16}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:14}}>{lang==="tr"?"Toplam"}{" "}({totalExchanges} {lang==="tr"?"değişim":"exchanges"})</div>
+            <div style={{fontSize:12,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:14}}>{lang==="tr"?"Toplam":"Total"} ({totalExchanges} {lang==="tr"?"değişim":"exchanges"})</div>
             <div style={{fontSize:40,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif",marginBottom:4}}>{totals.kcal}<span style={{fontSize:16,opacity:0.6,fontWeight:600}}> kcal</span></div>
             <div style={{display:"flex",gap:16,marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.15)"}}>
               {[{l:lang==="tr"?"Protein":"Protein",v:totals.protein},{l:lang==="tr"?"Karb":"Carbs",v:totals.carb},{l:lang==="tr"?"Yağ":"Fat",v:totals.fat}].map((x,i)=>(
