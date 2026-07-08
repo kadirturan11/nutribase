@@ -733,6 +733,13 @@ function FoodPage({t,lang,isPro,T=C}){
   const[mAmt,setMAmt]=useState("100");
   const today=new Date().toISOString().slice(0,10);
 
+  const[photoPreview,setPhotoPreview]=useState(null);
+  const[photoBase64,setPhotoBase64]=useState(null);
+  const[photoMediaType,setPhotoMediaType]=useState("image/jpeg");
+  const[analyzing,setAnalyzing]=useState(false);
+  const[photoResults,setPhotoResults]=useState(null);
+  const[photoError,setPhotoError]=useState(null);
+
   useEffect(()=>{(async()=>{const saved=await sg(`meals:${today}`);if(saved)setMeals(saved);})();},[today]);
 
   const tf=t.food;
@@ -748,6 +755,45 @@ function FoodPage({t,lang,isPro,T=C}){
   const addToMeal=async()=>{if(!mSel||!addingTo)return;const g=+mAmt||100;const nutrients=mSel.v.map(base=>parseFloat((base*g/100).toFixed(2)));const item={id:mSel.id,name:lang==="tr"?mSel.tr:mSel.en,amount:g,kcal:nutrients[0],protein:nutrients[1],carbs:nutrients[3],fat:nutrients[2],fiber:nutrients[4],nutrients};const newMeals={...meals,[addingTo]:[...meals[addingTo],item]};setMeals(newMeals);await ss(`meals:${today}`,newMeals);setMSel(null);setMQuery("");setMAmt("100");setAddingTo(null);};
   const removeFromMeal=async(slot,idx)=>{const newMeals={...meals,[slot]:meals[slot].filter((_,i)=>i!==idx)};setMeals(newMeals);await ss(`meals:${today}`,newMeals);};
   const clearMeals=async()=>{const empty={b:[],l:[],d:[],s:[]};setMeals(empty);await ss(`meals:${today}`,empty);};
+
+  const handlePhotoSelect=(e)=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    setPhotoError(null);setPhotoResults(null);
+    setPhotoMediaType(file.type||"image/jpeg");
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const dataUrl=reader.result;
+      setPhotoPreview(dataUrl);
+      const base64=dataUrl.split(",")[1];
+      setPhotoBase64(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+  const analyzePhoto=async()=>{
+    if(!photoBase64)return;
+    setAnalyzing(true);setPhotoError(null);setPhotoResults(null);
+    try{
+      const res=await fetch("/api/analyze-food",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({image:photoBase64,mediaType:photoMediaType})
+      });
+      const data=await res.json();
+      if(!res.ok||data.error){setPhotoError(data.error||(lang==="tr"?"Analiz başarısız oldu.":"Analysis failed."));setAnalyzing(false);return;}
+      setPhotoResults(data);
+    }catch(err){
+      setPhotoError(lang==="tr"?"Bağlantı hatası. API anahtarı Vercel'de tanımlı mı kontrol et.":"Connection error. Check that the API key is configured in Vercel.");
+    }
+    setAnalyzing(false);
+  };
+  const resetPhoto=()=>{setPhotoPreview(null);setPhotoBase64(null);setPhotoResults(null);setPhotoError(null);};
+  const addPhotoFoodToMeal=async(food,slot)=>{
+    const item={id:`photo-${Date.now()}`,name:food.name,amount:food.estimatedGrams,kcal:food.estimatedKcal,protein:0,carbs:0,fat:0,fiber:0,nutrients:Array(26).fill(0)};
+    item.nutrients[0]=food.estimatedKcal;
+    const newMeals={...meals,[slot]:[...meals[slot],item]};
+    setMeals(newMeals);await ss(`meals:${today}`,newMeals);
+  };
   const allItems=Object.values(meals).flat();
   const totalKcal=allItems.reduce((s,i)=>s+i.kcal,0);
   const totalP=allItems.reduce((s,i)=>s+i.protein,0);
@@ -783,7 +829,7 @@ function FoodPage({t,lang,isPro,T=C}){
 
       {/* Tab switcher */}
       <div style={{display:"flex",gap:8,marginBottom:28}}>
-        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tarif",l:lang==="tr"?"🍳 Tarif Oluştur":"🍳 Recipe Builder"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
+        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search"},{k:"photo",l:lang==="tr"?"📷 Fotoğrafla Tanı":"📷 Photo Recognition"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tarif",l:lang==="tr"?"🍳 Tarif Oluştur":"🍳 Recipe Builder"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
           <button key={tb.k} onClick={()=>setTab(tb.k)} style={{padding:"9px 18px",borderRadius:20,border:`1.5px solid ${tab===tb.k?T.coral:T.line}`,background:tab===tb.k?T.coral:"transparent",color:tab===tb.k?"#fff":T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>{tb.l}</button>
         ))}
       </div>
@@ -819,6 +865,63 @@ function FoodPage({t,lang,isPro,T=C}){
             </div>
             <p style={{fontSize:11,color:T.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
           </Card>}
+        </div>
+      </div>}
+
+      {/* PHOTO RECOGNITION TAB */}
+      {tab==="photo"&&<div>
+        <div style={{maxWidth:600,margin:"0 auto"}}>
+          {!photoPreview&&<div>
+            <label htmlFor="photo-input" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,border:`2px dashed ${T.line}`,borderRadius:16,padding:"48px 24px",cursor:"pointer",background:T.paper}}>
+              <div style={{fontSize:40}}>📷</div>
+              <div style={{fontSize:15,fontWeight:700,color:T.ink}}>{lang==="tr"?"Fotoğraf Çek veya Yükle":"Take or Upload a Photo"}</div>
+              <div style={{fontSize:12.5,color:T.ink,opacity:0.5,textAlign:"center"}}>{lang==="tr"?"Tabağının fotoğrafını çek, AI besinleri tanısın ve kaloriyi tahmin etsin":"Snap a photo of your plate — AI will identify foods and estimate calories"}</div>
+              <input id="photo-input" type="file" accept="image/*" capture="environment" onChange={handlePhotoSelect} style={{display:"none"}}/>
+            </label>
+          </div>}
+
+          {photoPreview&&<div>
+            <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:16}}>
+              <img src={photoPreview} alt="food" style={{width:"100%",display:"block",maxHeight:340,objectFit:"cover"}}/>
+              <button onClick={resetPhoto} style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:20,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}><X size={16} color="#fff"/></button>
+            </div>
+
+            {!photoResults&&!analyzing&&<Btn ch={<>🔍 {lang==="tr"?"Besinleri Tanı":"Analyze Foods"}</>} vr="coral" onClick={analyzePhoto} st={{width:"100%",padding:"14px"}}/>}
+            {analyzing&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10,padding:20}}>
+              <div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${T.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/>
+              <span style={{fontSize:13.5,color:T.ink,opacity:0.6}}>{lang==="tr"?"Fotoğraf analiz ediliyor...":"Analyzing photo..."}</span>
+            </div>}
+
+            {photoError&&<div style={{background:C.coralSoft,border:`1px solid ${C.coral}`,borderRadius:10,padding:14,marginTop:12}}>
+              <div style={{display:"flex",gap:8,alignItems:"flex-start"}}><AlertCircle size={16} color={C.coral} style={{flexShrink:0,marginTop:1}}/><span style={{fontSize:13,color:C.coral}}>{photoError}</span></div>
+            </div>}
+
+            {photoResults&&<div style={{marginTop:16}}>
+              {photoResults.note&&<p style={{fontSize:13,color:T.ink,opacity:0.6,fontStyle:"italic",marginBottom:14}}>{photoResults.note}</p>}
+              <div style={{background:C.ink,borderRadius:14,padding:"18px 22px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Toplam Tahmini":"Total Estimate"}</span>
+                <span style={{fontSize:26,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{photoResults.totalKcal} kcal</span>
+              </div>
+              {(photoResults.foods||[]).map((food,i)=>(
+                <div key={i} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"14px 16px",marginBottom:10}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                    <div>
+                      <div style={{fontSize:14.5,fontWeight:700,color:T.ink}}>{food.name}</div>
+                      <div style={{fontSize:12,color:T.ink,opacity:0.5}}>~{food.estimatedGrams}g · {food.confidence==="high"?(lang==="tr"?"Yüksek güven":"High confidence"):food.confidence==="medium"?(lang==="tr"?"Orta güven":"Medium confidence"):(lang==="tr"?"Düşük güven":"Low confidence")}</div>
+                    </div>
+                    <span style={{fontSize:15,fontWeight:800,color:C.coral}}>{food.estimatedKcal} kcal</span>
+                  </div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    {[{k:"b",l:lang==="tr"?"Kahvaltı":"Breakfast"},{k:"l",l:lang==="tr"?"Öğle":"Lunch"},{k:"d",l:lang==="tr"?"Akşam":"Dinner"},{k:"s",l:lang==="tr"?"Ara Öğün":"Snack"}].map(slot=>(
+                      <button key={slot.k} onClick={()=>addPhotoFoodToMeal(food,slot.k)} style={{fontSize:11,fontWeight:600,padding:"5px 10px",borderRadius:20,border:`1px solid ${T.line}`,background:T.paperDim,color:T.ink,cursor:"pointer",fontFamily:"inherit"}}>+ {slot.l}</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <Btn ch={lang==="tr"?"Başka Fotoğraf Dene":"Try Another Photo"} vr="ghost" onClick={resetPhoto} st={{width:"100%",marginTop:8}}/>
+              <p style={{fontSize:11,color:T.ink,opacity:0.4,marginTop:14,lineHeight:1.6}}>{lang==="tr"?"AI tahminleri yaklaşıktır ve porsiyon büyüklüğüne göre değişebilir. Klinik kararlar için gerçek ölçüm önerilir.":"AI estimates are approximate and vary by portion size. Real measurement is recommended for clinical decisions."}</p>
+            </div>}
+          </div>}
         </div>
       </div>}
 
