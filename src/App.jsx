@@ -442,6 +442,78 @@ const COND = [
    avEn:["Overly salty foods","Cola and cola-based drinks","Excess red meat","Excess high-oxalate foods"],
    mTr:{b:"Yumurta + limon suyu + tam tahıllı ekmek",l:"Tavuk + pirinç + bol su",d:"Balık + sebze + limon",s:"Meyve + bol su"},
    mEn:{b:"Eggs + lemon juice + whole grain bread",l:"Chicken + rice + plenty of water",d:"Fish + vegetables + lemon",s:"Fruit + plenty of water"}},
+
+  {id:"sportsNutrition",tr:"Sporcu Beslenmesi",en:"Sports Nutrition",icon:"🏋️",
+   ovTr:"Performansı ve toparlanmayı desteklemeye yönelik, antrenman öncesi/sonrası zamanlamaya dikkat edilen, yüksek proteinli ve yeterli karbonhidratlı bir beslenme planı.",
+   ovEn:"A high-protein, adequately carbohydrate-rich nutrition plan with attention to pre/post-workout timing to support performance and recovery.",
+   resTr:["Antrenman öncesi ağır/yağlı öğünler","Yetersiz sıvı alımı","Antrenman sonrası uzun süre aç kalma"],
+   resEn:["Heavy/fatty meals before training","Insufficient fluid intake","Prolonged fasting after training"],
+   recTr:["Antrenman öncesi kompleks karbonhidrat","Antrenman sonrası 30 dk içinde protein+karbonhidrat","Yeterli su ve elektrolit","Kaliteli protein kaynakları her öğünde"],
+   recEn:["Complex carbs before training","Protein+carbs within 30 min post-workout","Adequate water and electrolytes","Quality protein sources at every meal"],
+   avTr:["Antrenman öncesi aşırı yağlı yemek","Şekerli enerji içecekleri (aşırı)","Yetersiz su tüketimi"],
+   avEn:["Very fatty meals before training","Excess sugary energy drinks","Insufficient water intake"],
+   mTr:{b:"Yulaf + muz + yumurta beyazı",l:"Tavuk + bulgur + sebze",d:"Balık + tatlı patates + salata",s:"Antrenman sonrası: süt + muz"},
+   mEn:{b:"Oats + banana + egg whites",l:"Chicken + bulgur + vegetables",d:"Fish + sweet potato + salad",s:"Post-workout: milk + banana"}},
+
+  {id:"migraine",tr:"Migren",en:"Migraine",icon:"🤕",
+   ovTr:"Migren ataklarını tetikleyen gıdaların belirlenip elenmesine dayalı, düzenli öğün saatleri ve yeterli hidrasyonu önceliklendiren bir beslenme yaklaşımı.",
+   ovEn:"A nutrition approach based on identifying and eliminating migraine-triggering foods, prioritizing regular meal timing and adequate hydration.",
+   resTr:["Eskitilmiş peynirler (tiramin)","Çikolata (bazı kişilerde)","İşlenmiş etler (nitrat)","Aşırı kafein veya kafein yoksunluğu","Alkol (özellikle kırmızı şarap)"],
+   resEn:["Aged cheeses (tyramine)","Chocolate (in some individuals)","Processed meats (nitrates)","Excess caffeine or caffeine withdrawal","Alcohol (especially red wine)"],
+   recTr:["Düzenli öğün saatleri (öğün atlamamak)","Bol su tüketimi","Magnezyum açısından zengin gıdalar (yeşil yapraklılar, kuruyemiş)","Taze, işlenmemiş gıdalar"],
+   recEn:["Regular meal timing (no skipping)","Plenty of water","Magnesium-rich foods (leafy greens, nuts)","Fresh, unprocessed foods"],
+   avTr:["Eskitilmiş/olgunlaştırılmış peynirler","İşlenmiş et ürünleri","Yapay tatlandırıcılar (aspartam)","Düzensiz öğün saatleri"],
+   avEn:["Aged/matured cheeses","Processed meat products","Artificial sweeteners (aspartame)","Irregular meal timing"],
+   mTr:{b:"Yumurta + taze ekmek + salatalık",l:"Taze tavuk + pirinç + yeşil sebze",d:"Balık + patates + taze sebze",s:"Badem + su"},
+   mEn:{b:"Eggs + fresh bread + cucumber",l:"Fresh chicken + rice + green vegetables",d:"Fish + potato + fresh vegetables",s:"Almonds + water"}},
+
+  {id:"depression",tr:"Ruh Sağlığı Beslenmesi (Depresyon/Anksiyete)",en:"Mental Health Nutrition (Depression/Anxiety)",icon:"🧠",
+   ovTr:"Omega-3, B vitaminleri ve triptofan açısından zengin, bağırsak-beyin eksenini destekleyen anti-inflamatuar bir beslenme yaklaşımı. Tıbbi tedavinin yerine geçmez.",
+   ovEn:"An anti-inflammatory nutrition approach rich in omega-3s, B vitamins, and tryptophan, supporting the gut-brain axis. Not a substitute for medical treatment.",
+   resTr:["Aşırı işlenmiş gıdalar","Aşırı şeker (ruh hali dalgalanmaları)","Aşırı alkol","Aşırı kafein"],
+   resEn:["Highly processed foods","Excess sugar (mood fluctuations)","Excess alcohol","Excess caffeine"],
+   recTr:["Omega-3 kaynakları (balık, ceviz)","Probiyotik gıdalar (yoğurt, kefir)","B vitamini kaynakları (tam tahıl, yeşillik)","Triptofan içeren gıdalar (hindi, yumurta, kuruyemiş)"],
+   recEn:["Omega-3 sources (fish, walnuts)","Probiotic foods (yogurt, kefir)","B vitamin sources (whole grains, greens)","Tryptophan-containing foods (turkey, eggs, nuts)"],
+   avTr:["Şekerli işlenmiş atıştırmalıklar","Fast food","Aşırı alkol tüketimi"],
+   avEn:["Sugary processed snacks","Fast food","Excess alcohol consumption"],
+   mTr:{b:"Yumurta + ceviz + tam tahıllı ekmek",l:"Somon + kinoa + yeşil salata",d:"Hindi + sebze + yoğurt",s:"Kefir + badem"},
+   mEn:{b:"Eggs + walnuts + whole grain bread",l:"Salmon + quinoa + green salad",d:"Turkey + vegetables + yogurt",s:"Kefir + almonds"}},
+
+  {id:"menopause",tr:"Menopoz",en:"Menopause",icon:"🌷",
+   ovTr:"Hormonal değişimlerle birlikte kemik sağlığını, kilo yönetimini ve kalp sağlığını desteklemeye yönelik kalsiyum, fitoöstrojen ve lif açısından zengin bir beslenme planı.",
+   ovEn:"A calcium, phytoestrogen, and fiber-rich nutrition plan to support bone health, weight management, and heart health during hormonal changes.",
+   resTr:["Aşırı kafein (sıcak basmaları tetikleyebilir)","Aşırı baharatlı yiyecekler","Alkol (sıcak basması tetikleyicisi)","Rafine şeker"],
+   resEn:["Excess caffeine (may trigger hot flashes)","Very spicy foods","Alcohol (hot flash trigger)","Refined sugar"],
+   recTr:["Kalsiyum ve D vitamini kaynakları","Fitoöstrojen içeren gıdalar (soya, keten tohumu)","Lifli tam tahıllar","Omega-3 kaynakları"],
+   recEn:["Calcium and vitamin D sources","Phytoestrogen-containing foods (soy, flaxseed)","Fiber-rich whole grains","Omega-3 sources"],
+   avTr:["Aşırı kafein","Baharatlı/acılı yiyecekler","Alkol","Rafine şeker ürünleri"],
+   avEn:["Excess caffeine","Spicy/hot foods","Alcohol","Refined sugar products"],
+   mTr:{b:"Yoğurt + keten tohumu + meyve",l:"Soya/tofu + bulgur + yeşil sebze",d:"Balık + brokoli + kepekli ekmek",s:"Ceviz + süt"},
+   mEn:{b:"Yogurt + flaxseed + fruit",l:"Soy/tofu + bulgur + green vegetables",d:"Fish + broccoli + whole grain bread",s:"Walnuts + milk"}},
+
+  {id:"autoimmune",tr:"Otoimmün Hastalıklar (Anti-inflamatuar)",en:"Autoimmune Diseases (Anti-inflammatory)",icon:"🛡️",
+   ovTr:"Sistemik inflamasyonu azaltmaya yönelik, işlenmiş gıdalardan uzak, omega-3 ve antioksidan açısından zengin bir beslenme yaklaşımı. Hastalığa özel kısıtlamalar değişebilir.",
+   ovEn:"An anti-inflammatory nutrition approach rich in omega-3s and antioxidants, avoiding processed foods, aimed at reducing systemic inflammation. Disease-specific restrictions may vary.",
+   resTr:["İşlenmiş ve rafine gıdalar","Trans yağlar","Aşırı şeker","Bazı kişilerde gluten/süt (bireysel değerlendirme gerekir)"],
+   resEn:["Processed and refined foods","Trans fats","Excess sugar","Gluten/dairy in some individuals (needs individual assessment)"],
+   recTr:["Omega-3 kaynakları (yağlı balık)","Renkli sebze ve meyveler (antioksidan)","Zerdeçal, zencefil gibi anti-inflamatuar baharatlar","Zeytinyağı"],
+   recEn:["Omega-3 sources (fatty fish)","Colorful vegetables and fruits (antioxidants)","Anti-inflammatory spices like turmeric, ginger","Olive oil"],
+   avTr:["İşlenmiş et ürünleri","Rafine şeker ve un","Trans yağ içeren gıdalar","Aşırı alkol"],
+   avEn:["Processed meat products","Refined sugar and flour","Trans fat-containing foods","Excess alcohol"],
+   mTr:{b:"Yumurta + avokado + yeşillik",l:"Somon + kinoa + renkli sebze",d:"Tavuk + zerdeçallı sebze + zeytinyağı",s:"Yaban mersini + ceviz"},
+   mEn:{b:"Eggs + avocado + greens",l:"Salmon + quinoa + colorful vegetables",d:"Chicken + turmeric vegetables + olive oil",s:"Blueberries + walnuts"}},
+
+  {id:"eatingDisorderRecovery",tr:"Yeme Bozukluğu Sonrası Beslenme Desteği",en:"Post-Eating Disorder Nutrition Support",icon:"🌱",warn:true,
+   ovTr:"Yeme bozukluğundan iyileşme sürecinde düzenli, yargısız ve esnek beslenme alışkanlıkları kazanmaya odaklanan bir yaklaşım. Mutlaka bir ruh sağlığı uzmanı ile birlikte yürütülmelidir.",
+   ovEn:"An approach focused on developing regular, non-judgmental, and flexible eating habits during eating disorder recovery. Must be conducted alongside a mental health professional.",
+   resTr:["Katı kalori kısıtlaması veya sayımı","Yasaklı gıda listeleri oluşturma","Aşırı kısıtlayıcı diyet kuralları"],
+   resEn:["Strict calorie restriction or counting","Creating forbidden food lists","Overly restrictive diet rules"],
+   recTr:["Düzenli aralıklarla dengeli öğünler","Tüm gıda gruplarına yer verme","Açlık-tokluk sinyallerini dinlemeyi destekleme","Multidisipliner ekip desteği (doktor, terapist, diyetisyen)"],
+   recEn:["Regular balanced meals at consistent intervals","Including all food groups","Supporting hunger-fullness cue awareness","Multidisciplinary team support (doctor, therapist, dietitian)"],
+   avTr:["Kalori sayımı odaklı yaklaşımlar","'İyi/kötü' gıda etiketlemesi","Aşırı kısıtlayıcı planlar"],
+   avEn:["Calorie-counting-focused approaches","'Good/bad' food labeling","Overly restrictive plans"],
+   mTr:{b:"Dengeli ve çeşitli bir kahvaltı (kişiye özel planlanır)",l:"Multidisipliner ekiple planlanan öğün",d:"Multidisipliner ekiple planlanan öğün",s:"Kişiye özel, yargısız ara öğün"},
+   mEn:{b:"Balanced varied breakfast (personalized)",l:"Meal planned with multidisciplinary team",d:"Meal planned with multidisciplinary team",s:"Personalized, non-judgmental snack"}},
 ];
 
 const STR = {
@@ -455,7 +527,7 @@ const STR = {
     food:{title:"Besin Arama",sub:"Besin adı yazın, miktarını girin — 26 besin değerini görün.",ph:"Besin adı yazın (örn: yumurta, tavuk, elma...)",amount:"Miktar (gram)",impN:"Önemli Değerler",allN:"Tüm 26 Değer (PRO)",showAll:"↓ Tümünü Gör",showLess:"↑ Az Göster",src:"Kaynak: TurKomp + USDA veritabanları",notFound:"Besin bulunamadı. Farklı bir kelime deneyin.",selPrompt:"Soldan bir besin seçin",cats:{tahıl:"Tahıllar",et:"Etler",balık:"Balıklar","yumurta-süt":"Yumurta & Süt Ürünleri",baklagil:"Baklagiller",sebze:"Sebzeler",meyve:"Meyveler",kuruyemiş:"Kuruyemiş & Tohumlar",yağ:"Yağlar",diğer:"Diğer"}},
     track:{title:"Günlük Takip",sub:"Kayıtlı hesaplamalarını ve ilerlemeni gör.",empty:"Henüz kayıt yok. Hesap makinesinden hesaplama yapıp kaydet.",date:"Tarih",weight:"Kilo",target:"Hedef Kalori",water:"Su",trend:"Kilo Değişimi"},
     upsell:{title:"Bu özellik Pro'da",sub:"Danışan yönetimi ve hastalık şablonları yalnızca Pro pakette bulunur.",cta:"Pro'yu İncele"},
-    pro:{badge:"DİYETİSYEN PRO",title:"Klinik pratiğin için tasarlandı",sub:"Danışan kayıtları, hastalık bazlı diyet şablonları ve klinik notlar — hepsi tek yerde.",f1:"Sınırsız danışan kaydı ve geçmiş takibi",f2:"23 hastalık için hazır diyet şablonu kütüphanesi",f3:"Şablonları danışana özel düzenleyip dışa aktarma",f4:"Danışan başına 26 besin değeri klinik takibi",pM:"Aylık",pY:"Yıllık (2 ay bedava)",demo:"Demo Aboneliği Başlat",demoNote:"Bu bir demo akışıdır — gerçek ödeme alınmaz.",cardNum:"Kart Numarası",expiry:"SK/YY",cvc:"CVC",cardName:"Kart Üzerindeki İsim",confirm:"Aboneliği Onayla",proc:"İşleniyor...",success:"Pro'ya hoş geldin!",successSub:"Artık tüm klinik araçlara erişimin var.",goApp:"Panele Git"},
+    pro:{badge:"DİYETİSYEN PRO",title:"Klinik pratiğin için tasarlandı",sub:"Danışan kayıtları, hastalık bazlı diyet şablonları ve klinik notlar — hepsi tek yerde.",f1:"Sınırsız danışan kaydı ve geçmiş takibi",f2:"29 hastalık için hazır diyet şablonu kütüphanesi",f3:"Şablonları danışana özel düzenleyip dışa aktarma",f4:"Danışan başına 26 besin değeri klinik takibi",pM:"Aylık",pY:"Yıllık (2 ay bedava)",demo:"Demo Aboneliği Başlat",demoNote:"Bu bir demo akışıdır — gerçek ödeme alınmaz.",cardNum:"Kart Numarası",expiry:"SK/YY",cvc:"CVC",cardName:"Kart Üzerindeki İsim",confirm:"Aboneliği Onayla",proc:"İşleniyor...",success:"Pro'ya hoş geldin!",successSub:"Artık tüm klinik araçlara erişimin var.",goApp:"Panele Git"},
     clients:{title:"Danışanlarım",add:"Yeni Danışan",search:"Danışan ara...",empty:"Henüz danışan eklenmedi.",nameL:"Ad Soyad / Kod",age:"Yaş",gender:"Cinsiyet",height:"Boy",weight:"Güncel Kilo",condition:"Sağlık Durumu",condNone:"Özel durum yok",notes:"Klinik Notlar",save:"Kaydet",cancel:"Vazgeç",view:"Profili Gör",newM:"Yeni Ölçüm Ekle",newN:"Besin Değeri Girişi",hist:"Ölçüm Geçmişi",nutriHist:"Besin Değeri Geçmişi",privacy:"Gizlilik için gerçek kimlik yerine rumuz veya danışan kodu kullanmanız önerilir.",confirmDel:"Bu danışanı ve tüm kayıtlarını silmek istediğine emin misin?"},
     tpl:{title:"Hastalık Diyet Şablonları",sub:"Klinik referans amaçlıdır. Danışana özel olarak düzenleyip onaylamalısın.",use:"Şablonu İncele",overview:"Genel Bakış",res:"Kısıtlamalar",rec:"Önerilen Gıdalar",avoid:"Kaçınılması Gerekenler",menu:"Örnek Günlük Menü",b:"Kahvaltı",l:"Öğle",d:"Akşam",s:"Ara Öğün",note:"Bu şablon genel klinik kılavuzlara dayanır; ilaç etkileşimleri ve bireysel laboratuvar değerleri mutlaka dikkate alınmalıdır.",back:"Listeye Dön",print:"Yazdır / PDF"},
     footer:{desc:"Bireyler için beslenme hesaplamaları, diyetisyenler için klinik takip araçları.",links:"Bağlantılar",rights:"Tüm hakları saklıdır.",disc:"Bu uygulama tıbbi tavsiye vermez."},
@@ -471,7 +543,7 @@ const STR = {
     food:{title:"Food Search",sub:"Type a food name, enter the amount — see 26 nutritional values.",ph:"Type food name (e.g. egg, chicken, apple...)",amount:"Amount (grams)",impN:"Key Nutrients",allN:"All 26 Nutrients (PRO)",showAll:"↓ Show All",showLess:"↑ Show Less",src:"Source: TurKomp + USDA databases",notFound:"Food not found. Try a different word.",selPrompt:"Select a food on the left",cats:{tahıl:"Grains",et:"Meat",balık:"Fish","yumurta-süt":"Eggs & Dairy",baklagil:"Legumes",sebze:"Vegetables",meyve:"Fruits",kuruyemiş:"Nuts & Seeds",yağ:"Oils",diğer:"Other"}},
     track:{title:"Daily Tracking",sub:"View your saved calculations and progress.",empty:"No entries yet. Run a calculation and save it.",date:"Date",weight:"Weight",target:"Target Cal",water:"Water",trend:"Weight Trend"},
     upsell:{title:"This feature is Pro",sub:"Client management and condition templates are available only in the Pro plan.",cta:"See Pro"},
-    pro:{badge:"DIETITIAN PRO",title:"Built for your clinical practice",sub:"Client records, condition-based diet templates, and clinical notes — all in one place.",f1:"Unlimited client records and history tracking",f2:"Ready-made diet template library for 23 conditions",f3:"Customize templates per client and export them",f4:"26-value clinical nutrition tracking per client",pM:"Monthly",pY:"Yearly (2 months free)",demo:"Start Demo Subscription",demoNote:"This is a demo flow — no real payment is taken.",cardNum:"Card Number",expiry:"MM/YY",cvc:"CVC",cardName:"Name on Card",confirm:"Confirm Subscription",proc:"Processing...",success:"Welcome to Pro!",successSub:"You now have access to all clinical tools.",goApp:"Go to Dashboard"},
+    pro:{badge:"DIETITIAN PRO",title:"Built for your clinical practice",sub:"Client records, condition-based diet templates, and clinical notes — all in one place.",f1:"Unlimited client records and history tracking",f2:"Ready-made diet template library for 29 conditions",f3:"Customize templates per client and export them",f4:"26-value clinical nutrition tracking per client",pM:"Monthly",pY:"Yearly (2 months free)",demo:"Start Demo Subscription",demoNote:"This is a demo flow — no real payment is taken.",cardNum:"Card Number",expiry:"MM/YY",cvc:"CVC",cardName:"Name on Card",confirm:"Confirm Subscription",proc:"Processing...",success:"Welcome to Pro!",successSub:"You now have access to all clinical tools.",goApp:"Go to Dashboard"},
     clients:{title:"My Clients",add:"New Client",search:"Search clients...",empty:"No clients added yet.",nameL:"Name / Code",age:"Age",gender:"Gender",height:"Height",weight:"Current Weight",condition:"Health Condition",condNone:"No specific condition",notes:"Clinical Notes",save:"Save",cancel:"Cancel",view:"View Profile",newM:"Add Measurement",newN:"Add Nutrition Entry",hist:"Measurement History",nutriHist:"Nutrition History",privacy:"For privacy, use a pseudonym or client code instead of a real name.",confirmDel:"Are you sure you want to delete this client and all their records?"},
     tpl:{title:"Condition Diet Templates",sub:"For clinical reference only. You must customize and approve for each client.",use:"View Template",overview:"Overview",res:"Restrictions",rec:"Recommended Foods",avoid:"Foods to Avoid",menu:"Sample Daily Menu",b:"Breakfast",l:"Lunch",d:"Dinner",s:"Snack",note:"This template is based on general clinical guidelines; medication interactions and individual lab values must always be considered.",back:"Back to List",print:"Print / PDF"},
     footer:{desc:"Nutrition calculations for individuals, clinical tracking tools for dietitians.",links:"Links",rights:"All rights reserved.",disc:"This app does not provide medical advice."},
@@ -625,14 +697,14 @@ function Landing({t,nav,lang}){
       </section>
       <section style={{background:C.ink,padding:"28px 24px"}}>
         <div style={{maxWidth:1180,margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20,textAlign:"center"}} className="g2">
-          {[{v:"23+",l:t.stats.t1},{v:"2",l:t.stats.t2},{v:"104+",l:t.stats.t3},{v:"100%",l:t.stats.t4}].map((s,i)=><div key={i}><div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:800,color:"#fff"}}>{s.v}</div><div style={{fontSize:12,fontWeight:600,color:C.paperDim,opacity:0.7,marginTop:4}}>{s.l}</div></div>)}
+          {[{v:"29+",l:t.stats.t1},{v:"2",l:t.stats.t2},{v:"104+",l:t.stats.t3},{v:"100%",l:t.stats.t4}].map((s,i)=><div key={i}><div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:800,color:"#fff"}}>{s.v}</div><div style={{fontSize:12,fontWeight:600,color:C.paperDim,opacity:0.7,marginTop:4}}>{s.l}</div></div>)}
         </div>
       </section>
       <section style={{maxWidth:1180,margin:"0 auto",padding:"60px 24px 20px"}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}} className="g3">
           {[{icon:<Calculator size={20}/>,t:lang==="tr"?"Doğru Hesaplama":"Accurate Calculation",d:lang==="tr"?"BMR, TDEE, BMİ, su ve makro ihtiyacı bilimsel formüllerle.":"BMR, TDEE, BMI, water and macro needs via scientific formulas."},
             {icon:<Search size={20}/>,t:lang==="tr"?"Besin Veritabanı":"Food Database",d:lang==="tr"?"56+ besin için TurKomp+USDA verileriyle 26 besin değeri.":"26 nutritional values for 56+ foods via TurKomp+USDA."},
-            {icon:<FileText size={20}/>,t:lang==="tr"?"Klinik Şablonlar":"Clinical Templates",d:lang==="tr"?"23 hastalık için referans diyet planları.":"Reference diet plans for 23 conditions.",pro:true}
+            {icon:<FileText size={20}/>,t:lang==="tr"?"Klinik Şablonlar":"Clinical Templates",d:lang==="tr"?"29 hastalık için referans diyet planları.":"Reference diet plans for 29 conditions.",pro:true}
           ].map((f,i)=><Card key={i} st={{}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><div style={{width:38,height:38,borderRadius:10,background:C.paperDim,display:"flex",alignItems:"center",justifyContent:"center",color:C.coral}}>{f.icon}</div>{f.pro&&<PBadge sm/>}</div><h3 style={{fontSize:16,fontWeight:700,margin:"0 0 6px"}}>{f.t}</h3><p style={{fontSize:13.5,color:C.ink,opacity:0.6,lineHeight:1.5,margin:0}}>{f.d}</p>
           </Card>)}
@@ -733,13 +805,6 @@ function FoodPage({t,lang,isPro,T=C}){
   const[mAmt,setMAmt]=useState("100");
   const today=new Date().toISOString().slice(0,10);
 
-  const[photoPreview,setPhotoPreview]=useState(null);
-  const[photoBase64,setPhotoBase64]=useState(null);
-  const[photoMediaType,setPhotoMediaType]=useState("image/jpeg");
-  const[analyzing,setAnalyzing]=useState(false);
-  const[photoResults,setPhotoResults]=useState(null);
-  const[photoError,setPhotoError]=useState(null);
-
   useEffect(()=>{(async()=>{const saved=await sg(`meals:${today}`);if(saved)setMeals(saved);})();},[today]);
 
   const tf=t.food;
@@ -755,45 +820,6 @@ function FoodPage({t,lang,isPro,T=C}){
   const addToMeal=async()=>{if(!mSel||!addingTo)return;const g=+mAmt||100;const nutrients=mSel.v.map(base=>parseFloat((base*g/100).toFixed(2)));const item={id:mSel.id,name:lang==="tr"?mSel.tr:mSel.en,amount:g,kcal:nutrients[0],protein:nutrients[1],carbs:nutrients[3],fat:nutrients[2],fiber:nutrients[4],nutrients};const newMeals={...meals,[addingTo]:[...meals[addingTo],item]};setMeals(newMeals);await ss(`meals:${today}`,newMeals);setMSel(null);setMQuery("");setMAmt("100");setAddingTo(null);};
   const removeFromMeal=async(slot,idx)=>{const newMeals={...meals,[slot]:meals[slot].filter((_,i)=>i!==idx)};setMeals(newMeals);await ss(`meals:${today}`,newMeals);};
   const clearMeals=async()=>{const empty={b:[],l:[],d:[],s:[]};setMeals(empty);await ss(`meals:${today}`,empty);};
-
-  const handlePhotoSelect=(e)=>{
-    const file=e.target.files?.[0];
-    if(!file)return;
-    setPhotoError(null);setPhotoResults(null);
-    setPhotoMediaType(file.type||"image/jpeg");
-    const reader=new FileReader();
-    reader.onload=()=>{
-      const dataUrl=reader.result;
-      setPhotoPreview(dataUrl);
-      const base64=dataUrl.split(",")[1];
-      setPhotoBase64(base64);
-    };
-    reader.readAsDataURL(file);
-  };
-  const analyzePhoto=async()=>{
-    if(!photoBase64)return;
-    setAnalyzing(true);setPhotoError(null);setPhotoResults(null);
-    try{
-      const res=await fetch("/api/analyze-food",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({image:photoBase64,mediaType:photoMediaType})
-      });
-      const data=await res.json();
-      if(!res.ok||data.error){setPhotoError(data.error||(lang==="tr"?"Analiz başarısız oldu.":"Analysis failed."));setAnalyzing(false);return;}
-      setPhotoResults(data);
-    }catch(err){
-      setPhotoError(lang==="tr"?"Bağlantı hatası. API anahtarı Vercel'de tanımlı mı kontrol et.":"Connection error. Check that the API key is configured in Vercel.");
-    }
-    setAnalyzing(false);
-  };
-  const resetPhoto=()=>{setPhotoPreview(null);setPhotoBase64(null);setPhotoResults(null);setPhotoError(null);};
-  const addPhotoFoodToMeal=async(food,slot)=>{
-    const item={id:`photo-${Date.now()}`,name:food.name,amount:food.estimatedGrams,kcal:food.estimatedKcal,protein:0,carbs:0,fat:0,fiber:0,nutrients:Array(26).fill(0)};
-    item.nutrients[0]=food.estimatedKcal;
-    const newMeals={...meals,[slot]:[...meals[slot],item]};
-    setMeals(newMeals);await ss(`meals:${today}`,newMeals);
-  };
   const allItems=Object.values(meals).flat();
   const totalKcal=allItems.reduce((s,i)=>s+i.kcal,0);
   const totalP=allItems.reduce((s,i)=>s+i.protein,0);
@@ -829,7 +855,7 @@ function FoodPage({t,lang,isPro,T=C}){
 
       {/* Tab switcher */}
       <div style={{display:"flex",gap:8,marginBottom:28}}>
-        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search"},{k:"photo",l:lang==="tr"?"📷 Fotoğrafla Tanı":"📷 Photo Recognition"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tarif",l:lang==="tr"?"🍳 Tarif Oluştur":"🍳 Recipe Builder"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
+        {[{k:"search",l:lang==="tr"?"🔍 Besin Ara":"🔍 Search"},{k:"compare",l:lang==="tr"?"⚖️ Karşılaştır":"⚖️ Compare"},{k:"tarif",l:lang==="tr"?"🍳 Tarif Oluştur":"🍳 Recipe Builder"},{k:"tracker",l:lang==="tr"?"🍽️ Günlük Takip":"🍽️ Daily Tracker"}].map(tb=>(
           <button key={tb.k} onClick={()=>setTab(tb.k)} style={{padding:"9px 18px",borderRadius:20,border:`1.5px solid ${tab===tb.k?T.coral:T.line}`,background:tab===tb.k?T.coral:"transparent",color:tab===tb.k?"#fff":T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>{tb.l}</button>
         ))}
       </div>
@@ -865,63 +891,6 @@ function FoodPage({t,lang,isPro,T=C}){
             </div>
             <p style={{fontSize:11,color:T.ink,opacity:0.4,marginTop:12,lineHeight:1.5}}>{tf.src}</p>
           </Card>}
-        </div>
-      </div>}
-
-      {/* PHOTO RECOGNITION TAB */}
-      {tab==="photo"&&<div>
-        <div style={{maxWidth:600,margin:"0 auto"}}>
-          {!photoPreview&&<div>
-            <label htmlFor="photo-input" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,border:`2px dashed ${T.line}`,borderRadius:16,padding:"48px 24px",cursor:"pointer",background:T.paper}}>
-              <div style={{fontSize:40}}>📷</div>
-              <div style={{fontSize:15,fontWeight:700,color:T.ink}}>{lang==="tr"?"Fotoğraf Çek veya Yükle":"Take or Upload a Photo"}</div>
-              <div style={{fontSize:12.5,color:T.ink,opacity:0.5,textAlign:"center"}}>{lang==="tr"?"Tabağının fotoğrafını çek, AI besinleri tanısın ve kaloriyi tahmin etsin":"Snap a photo of your plate — AI will identify foods and estimate calories"}</div>
-              <input id="photo-input" type="file" accept="image/*" capture="environment" onChange={handlePhotoSelect} style={{display:"none"}}/>
-            </label>
-          </div>}
-
-          {photoPreview&&<div>
-            <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:16}}>
-              <img src={photoPreview} alt="food" style={{width:"100%",display:"block",maxHeight:340,objectFit:"cover"}}/>
-              <button onClick={resetPhoto} style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:20,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}><X size={16} color="#fff"/></button>
-            </div>
-
-            {!photoResults&&!analyzing&&<Btn ch={<>🔍 {lang==="tr"?"Besinleri Tanı":"Analyze Foods"}</>} vr="coral" onClick={analyzePhoto} st={{width:"100%",padding:"14px"}}/>}
-            {analyzing&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10,padding:20}}>
-              <div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${T.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/>
-              <span style={{fontSize:13.5,color:T.ink,opacity:0.6}}>{lang==="tr"?"Fotoğraf analiz ediliyor...":"Analyzing photo..."}</span>
-            </div>}
-
-            {photoError&&<div style={{background:C.coralSoft,border:`1px solid ${C.coral}`,borderRadius:10,padding:14,marginTop:12}}>
-              <div style={{display:"flex",gap:8,alignItems:"flex-start"}}><AlertCircle size={16} color={C.coral} style={{flexShrink:0,marginTop:1}}/><span style={{fontSize:13,color:C.coral}}>{photoError}</span></div>
-            </div>}
-
-            {photoResults&&<div style={{marginTop:16}}>
-              {photoResults.note&&<p style={{fontSize:13,color:T.ink,opacity:0.6,fontStyle:"italic",marginBottom:14}}>{photoResults.note}</p>}
-              <div style={{background:C.ink,borderRadius:14,padding:"18px 22px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Toplam Tahmini":"Total Estimate"}</span>
-                <span style={{fontSize:26,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{photoResults.totalKcal} kcal</span>
-              </div>
-              {(photoResults.foods||[]).map((food,i)=>(
-                <div key={i} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"14px 16px",marginBottom:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                    <div>
-                      <div style={{fontSize:14.5,fontWeight:700,color:T.ink}}>{food.name}</div>
-                      <div style={{fontSize:12,color:T.ink,opacity:0.5}}>~{food.estimatedGrams}g · {food.confidence==="high"?(lang==="tr"?"Yüksek güven":"High confidence"):food.confidence==="medium"?(lang==="tr"?"Orta güven":"Medium confidence"):(lang==="tr"?"Düşük güven":"Low confidence")}</div>
-                    </div>
-                    <span style={{fontSize:15,fontWeight:800,color:C.coral}}>{food.estimatedKcal} kcal</span>
-                  </div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                    {[{k:"b",l:lang==="tr"?"Kahvaltı":"Breakfast"},{k:"l",l:lang==="tr"?"Öğle":"Lunch"},{k:"d",l:lang==="tr"?"Akşam":"Dinner"},{k:"s",l:lang==="tr"?"Ara Öğün":"Snack"}].map(slot=>(
-                      <button key={slot.k} onClick={()=>addPhotoFoodToMeal(food,slot.k)} style={{fontSize:11,fontWeight:600,padding:"5px 10px",borderRadius:20,border:`1px solid ${T.line}`,background:T.paperDim,color:T.ink,cursor:"pointer",fontFamily:"inherit"}}>+ {slot.l}</button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <Btn ch={lang==="tr"?"Başka Fotoğraf Dene":"Try Another Photo"} vr="ghost" onClick={resetPhoto} st={{width:"100%",marginTop:8}}/>
-              <p style={{fontSize:11,color:T.ink,opacity:0.4,marginTop:14,lineHeight:1.6}}>{lang==="tr"?"AI tahminleri yaklaşıktır ve porsiyon büyüklüğüne göre değişebilir. Klinik kararlar için gerçek ölçüm önerilir.":"AI estimates are approximate and vary by portion size. Real measurement is recommended for clinical decisions."}</p>
-            </div>}
-          </div>}
         </div>
       </div>}
 
