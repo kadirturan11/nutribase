@@ -1253,6 +1253,54 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     reload();
   };
 
+  const[exporting,setExporting]=useState(false);
+  const[importing,setImporting]=useState(false);
+  const[importMsg,setImportMsg]=useState(null);
+
+  const exportAllData=async()=>{
+    setExporting(true);
+    try{
+      const allKeys=await sl("");
+      const backup={};
+      for(const k of allKeys){
+        const v=await sg(k);
+        if(v!==null)backup[k]=v;
+      }
+      const payload={version:1,exportedAt:new Date().toISOString(),appName:"NutriBase",data:backup};
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      const dateStr=new Date().toISOString().slice(0,10);
+      a.href=url;a.download=`nutribase-yedek-${dateStr}.json`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }catch(e){console.error(e);}
+    setExporting(false);
+  };
+
+  const importData=async(e)=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    setImporting(true);setImportMsg(null);
+    try{
+      const text=await file.text();
+      const payload=JSON.parse(text);
+      const data=payload.data||payload; // support raw dumps too
+      let count=0;
+      for(const [k,v] of Object.entries(data)){
+        await ss(k,v);
+        count++;
+      }
+      setImportMsg({type:"success",text:lang==="tr"?`${count} kayıt başarıyla geri yüklendi!`:`${count} records restored successfully!`});
+      reload();
+    }catch(err){
+      setImportMsg({type:"error",text:lang==="tr"?"Dosya okunamadı. Geçerli bir yedek dosyası seçtiğinden emin ol.":"Could not read file. Make sure you selected a valid backup file."});
+    }
+    setImporting(false);
+    e.target.value="";
+  };
+
+
   const[filterCondition,setFilterCondition]=useState("");
   const[sortBy,setSortBy]=useState("recent");
 
@@ -1280,10 +1328,26 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:0,color:T.ink,display:"flex",alignItems:"center",gap:10}}>
           {lang==="tr"?"Danışanlarım":"My Clients"} <PBadge sm/>
         </h1>
-        <button onClick={()=>setShowForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:8,padding:"11px 20px",borderRadius:9,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>
-          <Plus size={16}/> {lang==="tr"?"Yeni Danışan":"New Client"}
-        </button>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <button onClick={exportAllData} disabled={exporting} title={lang==="tr"?"Tüm verileri yedekle":"Backup all data"} style={{display:"flex",alignItems:"center",gap:6,padding:"11px 16px",borderRadius:9,background:"transparent",color:T.ink,border:`1.5px solid ${T.line}`,cursor:exporting?"not-allowed":"pointer",fontSize:13.5,fontWeight:600,fontFamily:"inherit",opacity:exporting?0.5:1}}>
+            💾 {exporting?(lang==="tr"?"Hazırlanıyor...":"Preparing..."):(lang==="tr"?"Yedekle":"Backup")}
+          </button>
+          <label style={{display:"flex",alignItems:"center",gap:6,padding:"11px 16px",borderRadius:9,background:"transparent",color:T.ink,border:`1.5px solid ${T.line}`,cursor:importing?"not-allowed":"pointer",fontSize:13.5,fontWeight:600,fontFamily:"inherit",opacity:importing?0.5:1}}>
+            📥 {importing?(lang==="tr"?"Yükleniyor...":"Restoring..."):(lang==="tr"?"Geri Yükle":"Restore")}
+            <input type="file" accept=".json" onChange={importData} disabled={importing} style={{display:"none"}}/>
+          </label>
+          <button onClick={()=>setShowForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:8,padding:"11px 20px",borderRadius:9,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>
+            <Plus size={16}/> {lang==="tr"?"Yeni Danışan":"New Client"}
+          </button>
+        </div>
       </div>
+
+      {importMsg&&(
+        <div style={{background:importMsg.type==="success"?"#E8F5E9":C.coralSoft,border:`1px solid ${importMsg.type==="success"?C.sage:C.coral}`,borderRadius:10,padding:14,marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:13,color:importMsg.type==="success"?C.sage:C.coral,fontWeight:600}}>{importMsg.text}</span>
+          <button onClick={()=>setImportMsg(null)} style={{background:"none",border:"none",cursor:"pointer",opacity:0.5}}><X size={14}/></button>
+        </div>
+      )}
 
       {/* Dashboard Stats */}
       {!loading&&clients.length>0&&(()=>{
