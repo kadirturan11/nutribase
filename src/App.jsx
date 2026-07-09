@@ -1157,7 +1157,7 @@ function TrackPage({t,lang,T=C}){
   );
 }
 
-function WC({entries,t,T=C,lang="tr"}){
+function WC({entries,t,T=C,lang="tr",targetWeight=null}){
   const sorted=[...entries].sort((a,b)=>a.ts-b.ts);
   const datasets=[
     {key:"weight",label:lang==="tr"?"Kilo":"Weight",  color:C.coral},
@@ -1167,20 +1167,28 @@ function WC({entries,t,T=C,lang="tr"}){
   const active=datasets.filter(d=>sorted.some(e=>Number(e[d.key])>0));
   const allVals=active.flatMap(d=>sorted.map(e=>Number(e[d.key])||0).filter(v=>v>0));
   if(allVals.length===0)return null;
-  const mn=Math.min(...allVals)-2,mx=Math.max(...allVals)+2,rng=mx-mn||1;
+  const tw=targetWeight?Number(targetWeight):null;
+  const rawMn=Math.min(...allVals,...(tw?[tw]:[]))-2;
+  const rawMx=Math.max(...allVals,...(tw?[tw]:[]))+2;
+  const mn=rawMn,mx=rawMx,rng=mx-mn||1;
   const W=800,H=180,P=30;
   const pts=key=>{
     const valid=sorted.filter(e=>Number(e[key])>0);
     return valid.map(e=>{const i=sorted.indexOf(e);const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e[key])-mn)/rng)*(H-P*2);return`${x},${y}`;}).join(" ");
   };
+  const targetY=tw?H-P-((tw-mn)/rng)*(H-P*2):null;
   return(
     <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:20}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
         <h3 style={{fontSize:13,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?"Ölçüm Grafiği":"Measurement Chart"}</h3>
-        <div style={{display:"flex",gap:14}}>{active.map(d=><div key={d.key} style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:14,height:3,borderRadius:2,background:d.color}}/><span style={{fontSize:11,color:T.ink,opacity:0.6}}>{d.label}</span></div>)}</div>
+        <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+          {active.map(d=><div key={d.key} style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:14,height:3,borderRadius:2,background:d.color}}/><span style={{fontSize:11,color:T.ink,opacity:0.6}}>{d.label}</span></div>)}
+          {tw&&<div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:14,height:0,borderTop:`2px dashed ${C.gold}`}}/><span style={{fontSize:11,color:T.ink,opacity:0.6}}>🎯 {lang==="tr"?"Hedef":"Target"}</span></div>}
+        </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}} preserveAspectRatio="none">
         {[0.25,0.5,0.75].map((f,i)=>{const y=P+f*(H-P*2);const v=Math.round(mx-f*rng);return<g key={i}><line x1={P} y1={y} x2={W-P} y2={y} stroke={T.line} strokeWidth="1" strokeDasharray="3 5" opacity="0.5"/><text x={P-4} y={y+3} textAnchor="end" fontSize="9" fill={T.ink} opacity="0.4">{v}</text></g>;})}
+        {targetY!==null&&<g><line x1={P} y1={targetY} x2={W-P} y2={targetY} stroke={C.gold} strokeWidth="2" strokeDasharray="6 4"/><text x={W-P} y={targetY-6} textAnchor="end" fontSize="10" fontWeight="700" fill={C.gold}>🎯 {tw}kg</text></g>}
         {active.map(d=><polyline key={d.key} points={pts(d.key)} fill="none" stroke={d.color} strokeWidth="2.5" strokeLinejoin="round"/>)}
         {sorted.map((e,i)=>{if(!Number(e.weight))return null;const x=P+(i/Math.max(sorted.length-1,1))*(W-P*2);const y=H-P-((Number(e.weight)-mn)/rng)*(H-P*2);return<circle key={i} cx={x} cy={y} r="4" fill={C.coral}/>;  })}
       </svg>
@@ -1207,7 +1215,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[loading,setLoading]=useState(true);
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
-  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:""});
+  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:""});
 
   useEffect(()=>{
     (async()=>{
@@ -1242,7 +1250,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     if(!form.name.trim())return;
     const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
-    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:""});
+    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:""});
     setShowForm(false);
     reload();
   };
@@ -1419,9 +1427,10 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Kilo (kg)":"Weight (kg)"}</label><input type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Sağlık Durumu":"Condition"}</label><input value={form.condition} onChange={e=>setForm(f=>({...f,condition:e.target.value}))} placeholder={lang==="tr"?"örn. Tip 2 Diyabet":"e.g. Type 2 Diabetes"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}} className="g2">
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}</label><input type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Su (L)":"Target Water (L)"}</label><input type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>🎯 {lang==="tr"?"Hedef Kilo (kg)":"Target Weight (kg)"}</label><input type="number" value={form.targetWeight} onChange={e=>setForm(f=>({...f,targetWeight:e.target.value}))} placeholder="65" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
             <div style={{marginBottom:14}}><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📅 {lang==="tr"?"Sonraki Randevu":"Next Appointment"}</label><input type="date" value={form.nextAppt||""} onChange={e=>setForm(f=>({...f,nextAppt:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Klinik Notlar":"Clinical Notes"}</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} rows={2} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical"}}/></div>
@@ -1681,8 +1690,20 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       </div>
 
       {/* Goals */}
-      {(client.targetKcal||client.targetWater||client.nextAppt)&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:20}} className="g3">
+      {(client.targetKcal||client.targetWater||client.nextAppt||client.targetWeight)&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}} className="g2">
+          {client.targetWeight&&(()=>{
+            const lastWeight=hist.length>0?Number(hist[0].weight):null;
+            const diff=lastWeight?lastWeight-Number(client.targetWeight):null;
+            const reached=diff!==null&&Math.abs(diff)<0.5;
+            return(
+              <div style={{background:T.paper,border:`1.5px solid ${reached?C.sage:T.line}`,borderRadius:12,padding:"16px 20px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>🎯 {lang==="tr"?"Hedef Kilo":"Target Weight"}</div>
+                <div style={{display:"flex",alignItems:"baseline",gap:6}}><span style={{fontSize:28,fontWeight:800,color:C.gold,fontFamily:"'Source Serif 4',Georgia,serif"}}>{client.targetWeight}</span><span style={{fontSize:12,color:T.ink,opacity:0.5}}>kg</span></div>
+                {diff!==null&&<div style={{fontSize:12,color:reached?C.sage:T.ink,opacity:reached?1:0.6,fontWeight:600,marginTop:4}}>{reached?(lang==="tr"?"🎉 Hedefe ulaşıldı!":"🎉 Goal reached!"):diff>0?(lang==="tr"?`${diff.toFixed(1)} kg kaldı`:`${diff.toFixed(1)} kg to go`):(lang==="tr"?`${Math.abs(diff).toFixed(1)} kg hedefin altında`:`${Math.abs(diff).toFixed(1)} kg below target`)}</div>}
+              </div>
+            );
+          })()}
           {client.targetKcal&&(
             <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 20px"}}>
               <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:6}}>{lang==="tr"?"Hedef Kalori":"Target Calories"}</div>
@@ -1740,7 +1761,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
         </div>
       )}
 
-      {hist.length>1&&<WC entries={hist} t={t} T={T} lang={lang}/>}
+      {hist.length>1&&<WC entries={hist} t={t} T={T} lang={lang} targetWeight={client.targetWeight}/>}
 
       <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,overflow:"hidden",marginBottom:28}}>
         {hist.length===0&&<p style={{padding:24,fontSize:14,color:T.ink,opacity:0.5,margin:0}}>{t.track.empty}</p>}
