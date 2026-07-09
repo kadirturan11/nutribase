@@ -1253,7 +1253,25 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     reload();
   };
 
-  const filtered=clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+  const[filterCondition,setFilterCondition]=useState("");
+  const[sortBy,setSortBy]=useState("recent");
+
+  const uniqueConditions=[...new Set(clients.map(c=>c.condition).filter(Boolean))];
+
+  let filtered=clients.filter(c=>
+    c.name.toLowerCase().includes(search.toLowerCase())&&
+    (filterCondition===""||c.condition===filterCondition)
+  );
+  filtered=[...filtered].sort((a,b)=>{
+    if(sortBy==="name")return a.name.localeCompare(b.name);
+    if(sortBy==="appt"){
+      if(!a.nextAppt&&!b.nextAppt)return 0;
+      if(!a.nextAppt)return 1;
+      if(!b.nextAppt)return -1;
+      return new Date(a.nextAppt)-new Date(b.nextAppt);
+    }
+    return (b.createdAt||0)-(a.createdAt||0); // recent (default)
+  });
 
   return(
     <section style={{maxWidth:1000,margin:"0 auto",padding:"48px 24px 80px"}}>
@@ -1351,11 +1369,23 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         </div>
       )}
 
-      {/* Search */}
-      <div style={{position:"relative",marginBottom:24}}>
-        <Search size={16} style={{position:"absolute",left:14,top:13,color:T.ink,opacity:0.4}}/>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="tr"?"Danışan ara...":"Search clients..."} style={{width:"100%",padding:"11px 14px 11px 38px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+      {/* Search + Filter + Sort */}
+      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:24}} className="g3">
+        <div style={{position:"relative"}}>
+          <Search size={16} style={{position:"absolute",left:14,top:13,color:T.ink,opacity:0.4}}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="tr"?"Danışan ara...":"Search clients..."} style={{width:"100%",padding:"11px 14px 11px 38px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+        </div>
+        <select value={filterCondition} onChange={e=>setFilterCondition(e.target.value)} style={{padding:"11px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",cursor:"pointer",boxSizing:"border-box"}}>
+          <option value="">{lang==="tr"?"Tüm Durumlar":"All Conditions"}</option>
+          {uniqueConditions.map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{padding:"11px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",cursor:"pointer",boxSizing:"border-box"}}>
+          <option value="recent">{lang==="tr"?"En Yeni":"Most Recent"}</option>
+          <option value="name">{lang==="tr"?"İsme Göre (A-Z)":"Name (A-Z)"}</option>
+          <option value="appt">{lang==="tr"?"Randevu Tarihine Göre":"By Appointment Date"}</option>
+        </select>
       </div>
+      {(search||filterCondition)&&<div style={{marginBottom:16,fontSize:12.5,color:T.ink,opacity:0.5}}>{lang==="tr"?`${filtered.length} sonuç bulundu`:`${filtered.length} results found`}{filterCondition&&<button onClick={()=>setFilterCondition("")} style={{marginLeft:8,background:"none",border:"none",color:C.coral,cursor:"pointer",fontSize:12.5,fontWeight:600,fontFamily:"inherit"}}>{lang==="tr"?"filtreyi temizle":"clear filter"}</button>}</div>}
 
       {/* Loading */}
       {loading&&<div style={{display:"flex",justifyContent:"center",padding:40}}><div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${T.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/></div>}
