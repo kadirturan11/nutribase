@@ -1267,6 +1267,62 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         </button>
       </div>
 
+      {/* Dashboard Stats */}
+      {!loading&&clients.length>0&&(()=>{
+        const today=new Date();today.setHours(0,0,0,0);
+        const in7days=new Date(today);in7days.setDate(in7days.getDate()+7);
+        const upcoming=clients.filter(c=>{
+          if(!c.nextAppt)return false;
+          const d=new Date(c.nextAppt);
+          return d>=today&&d<=in7days;
+        }).sort((a,b)=>new Date(a.nextAppt)-new Date(b.nextAppt));
+        const overdue=clients.filter(c=>c.nextAppt&&new Date(c.nextAppt)<today);
+        const conditionCounts={};
+        clients.forEach(c=>{if(c.condition)conditionCounts[c.condition]=(conditionCounts[c.condition]||0)+1;});
+        const topCondition=Object.entries(conditionCounts).sort((a,b)=>b[1]-a[1])[0];
+
+        return(
+          <div style={{marginBottom:28}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}} className="g3">
+              <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{lang==="tr"?"Toplam Danışan":"Total Clients"}</div>
+                <div style={{fontSize:26,fontWeight:800,color:T.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{clients.length}</div>
+              </div>
+              <div style={{background:T.paper,border:`1.5px solid ${upcoming.length>0?C.sage:T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:upcoming.length>0?C.sage:T.ink,opacity:upcoming.length>0?0.9:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>📅 {lang==="tr"?"Bu Hafta Randevu":"This Week"}</div>
+                <div style={{fontSize:26,fontWeight:800,color:upcoming.length>0?C.sage:T.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{upcoming.length}</div>
+              </div>
+              <div style={{background:T.paper,border:`1.5px solid ${overdue.length>0?C.coral:T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:overdue.length>0?C.coral:T.ink,opacity:overdue.length>0?0.9:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>⚠️ {lang==="tr"?"Geçmiş Randevu":"Overdue"}</div>
+                <div style={{fontSize:26,fontWeight:800,color:overdue.length>0?C.coral:T.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{overdue.length}</div>
+              </div>
+              <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{lang==="tr"?"En Sık Durum":"Top Condition"}</div>
+                <div style={{fontSize:14,fontWeight:700,color:T.ink,marginTop:4,lineHeight:1.3}}>{topCondition?topCondition[0]:"—"}</div>
+              </div>
+            </div>
+
+            {upcoming.length>0&&(
+              <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:8}}>
+                <h4 style={{fontSize:12.5,fontWeight:700,color:T.ink,opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 12px"}}>📅 {lang==="tr"?"Yaklaşan Randevular":"Upcoming Appointments"}</h4>
+                {upcoming.map(c=>{
+                  const days=Math.ceil((new Date(c.nextAppt)-today)/(1000*60*60*24));
+                  return(
+                    <div key={c.key} onClick={()=>{setSel(c.key);nav("clientProfile");}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:`1px solid ${T.paperDim}`,cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:14,fontWeight:600,color:T.ink}}>{c.name}</span>
+                        {c.condition&&<span style={{fontSize:11,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"2px 8px",borderRadius:10}}>{c.condition}</span>}
+                      </div>
+                      <span style={{fontSize:12.5,fontWeight:700,color:days===0?C.coral:C.sage}}>{days===0?(lang==="tr"?"Bugün":"Today"):days===1?(lang==="tr"?"Yarın":"Tomorrow"):(lang==="tr"?`${days} gün sonra`:`in ${days} days`)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Add form */}
       {showForm&&(
         <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24,marginBottom:24}}>
