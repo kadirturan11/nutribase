@@ -1418,6 +1418,9 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[showNoteForm,setShowNoteForm]=useState(false);
   const[noteText,setNoteText]=useState("");
   const[supps,setSupps]=useState([]);
+  const[progressPhotos,setProgressPhotos]=useState([]);
+  const[photoUploading,setPhotoUploading]=useState(false);
+  const[viewingPhoto,setViewingPhoto]=useState(null);
   const[showSupForm,setShowSupForm]=useState(false);
   const[newSup,setNewSup]=useState({name:"",dose:"",freq:"",timing:""});
   const[dietPlan,setDietPlan]=useState(null);
@@ -1441,6 +1444,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     for(const k of cks){const v=await sg(k);if(v)cn.push({...v,key:k});}
     cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
+    const photosData=await sg(`${clientId}:progressPhotos`);if(photosData)setProgressPhotos(photosData);
     const dpData=await sg(`${clientId}:dietPlan`);
     if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
     const epData=await sg(`${clientId}:exchangePlan`);if(epData)setExchPlan(epData);
@@ -1476,6 +1480,40 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const delSupp=async id=>{
     const updated=supps.filter(s=>s.id!==id);
     setSupps(updated);await ss(`${clientId}:supps`,updated);
+  };
+
+  const handlePhotoUpload=(e)=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    setPhotoUploading(true);
+    const reader=new FileReader();
+    reader.onload=(ev)=>{
+      const img=new Image();
+      img.onload=async()=>{
+        const maxW=500;
+        const scale=Math.min(1,maxW/img.width);
+        const canvas=document.createElement("canvas");
+        canvas.width=img.width*scale;
+        canvas.height=img.height*scale;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        const dataUrl=canvas.toDataURL("image/jpeg",0.75);
+        const newPhoto={id:Date.now(),url:dataUrl,date:new Date().toISOString().slice(0,10)};
+        const updated=[newPhoto,...progressPhotos];
+        setProgressPhotos(updated);
+        await ss(`${clientId}:progressPhotos`,updated);
+        setPhotoUploading(false);
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value="";
+  };
+  const delPhoto=async(id)=>{
+    const updated=progressPhotos.filter(p=>p.id!==id);
+    setProgressPhotos(updated);
+    await ss(`${clientId}:progressPhotos`,updated);
+    if(viewingPhoto?.id===id)setViewingPhoto(null);
   };
 
   const createDietPlan=async()=>{
@@ -1793,6 +1831,45 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
           <div style={{marginTop:16}}>
             <label className="np" style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Genel Notlar / Öneriler":"General Notes / Recommendations"}</label>
             <textarea value={dpNotes} onChange={e=>setDpNotes(e.target.value)} onBlur={saveDpNotes} rows={3} placeholder={lang==="tr"?"örn. Günde en az 2.5L su için, tuzu azaltın...":"e.g. Drink at least 2.5L water daily, reduce salt..."} style={{width:"100%",padding:"10px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical",lineHeight:1.6}}/>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Photos */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}} className="np">
+        <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>📸 {lang==="tr"?"İlerleme Fotoğrafları":"Progress Photos"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Görsel değişim takibi":"Visual change tracking"}</span></div>
+        <label style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:photoUploading?"not-allowed":"pointer",fontFamily:"inherit",opacity:photoUploading?0.5:1}}>
+          {photoUploading?(lang==="tr"?"Yükleniyor...":"Uploading..."):<><Plus size={14}/> {lang==="tr"?"Fotoğraf Ekle":"Add Photo"}</>}
+          <input type="file" accept="image/*" onChange={handlePhotoUpload} disabled={photoUploading} style={{display:"none"}}/>
+        </label>
+      </div>
+
+      {progressPhotos.length===0&&<div className="np" style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:28,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz fotoğraf eklenmedi.":"No photos added yet."}</div>}
+
+      {progressPhotos.length>0&&(
+        <div style={{marginBottom:28}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}} className="g3">
+            {progressPhotos.map(p=>(
+              <div key={p.id} style={{position:"relative",borderRadius:10,overflow:"hidden",cursor:"pointer",aspectRatio:"1"}} onClick={()=>setViewingPhoto(p)}>
+                <img src={p.url} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                <div style={{position:"absolute",bottom:0,left:0,right:0,background:"linear-gradient(transparent,rgba(0,0,0,0.7))",padding:"16px 8px 6px",fontSize:10.5,color:"#fff",fontWeight:600}}>{p.date}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {viewingPhoto&&(
+        <div className="np" onClick={()=>setViewingPhoto(null)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.85)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div onClick={e=>e.stopPropagation()} style={{maxWidth:500,width:"100%"}}>
+            <img src={viewingPhoto.url} alt="" style={{width:"100%",borderRadius:12,display:"block"}}/>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:14}}>
+              <span style={{color:"#fff",fontSize:14,fontWeight:600}}>{viewingPhoto.date}</span>
+              <div style={{display:"flex",gap:10}}>
+                <button onClick={()=>delPhoto(viewingPhoto.id)} style={{padding:"8px 14px",borderRadius:8,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Sil":"Delete"}</button>
+                <button onClick={()=>setViewingPhoto(null)} style={{padding:"8px 14px",borderRadius:8,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>{lang==="tr"?"Kapat":"Close"}</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
