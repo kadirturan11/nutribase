@@ -738,10 +738,44 @@ function Landing({t,nav,lang}){
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}} className="g3">
           {[{icon:<Calculator size={20}/>,t:lang==="tr"?"Doğru Hesaplama":"Accurate Calculation",d:lang==="tr"?"BMR, TDEE, BMİ, su ve makro ihtiyacı bilimsel formüllerle.":"BMR, TDEE, BMI, water and macro needs via scientific formulas."},
             {icon:<Search size={20}/>,t:lang==="tr"?"Besin Veritabanı":"Food Database",d:lang==="tr"?"120+ besin için TurKomp+USDA verileriyle 26 besin değeri.":"26 nutritional values for 120+ foods via TurKomp+USDA."},
-            {icon:<FileText size={20}/>,t:lang==="tr"?"Klinik Şablonlar":"Clinical Templates",d:lang==="tr"?"29 hastalık için referans diyet planları.":"Reference diet plans for 29 conditions.",pro:true}
+            {icon:<FileText size={20}/>,t:lang==="tr"?"Klinik Şablonlar":"Clinical Templates",d:lang==="tr"?"29 hastalık için referans diyet planları.":"Reference diet plans for 29 conditions.",pro:true},
+            {icon:<Scale size={20}/>,t:lang==="tr"?"Değişim Listesi Sistemi":"Exchange List System",d:lang==="tr"?"Türk diyetetik standardı besin değişim grupları.":"Turkish dietetic standard food exchange groups.",pro:true},
+            {icon:<Users size={20}/>,t:lang==="tr"?"Danışan Yönetimi":"Client Management",d:lang==="tr"?"Ölçüm, fotoğraf, seans ve ödeme takibi tek yerde.":"Measurements, photos, sessions, and payments in one place.",pro:true},
+            {icon:<Crown size={20}/>,t:lang==="tr"?"Diyet Planı Oluşturucu":"Diet Plan Builder",d:lang==="tr"?"Danışana özel yazılı, yazdırılabilir diyet planları.":"Custom, printable diet plans for each client.",pro:true},
           ].map((f,i)=><Card key={i} st={{}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><div style={{width:38,height:38,borderRadius:10,background:C.paperDim,display:"flex",alignItems:"center",justifyContent:"center",color:C.coral}}>{f.icon}</div>{f.pro&&<PBadge sm/>}</div><h3 style={{fontSize:16,fontWeight:700,margin:"0 0 6px"}}>{f.t}</h3><p style={{fontSize:13.5,color:C.ink,opacity:0.6,lineHeight:1.5,margin:0}}>{f.d}</p>
           </Card>)}
+        </div>
+      </section>
+
+      {/* Pro feature showcase */}
+      <section style={{maxWidth:1180,margin:"0 auto",padding:"20px 24px 60px"}}>
+        <div style={{background:C.ink,borderRadius:20,padding:"44px 40px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+            <PBadge/>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,fontWeight:700,margin:0,color:"#fff"}}>{lang==="tr"?"Diyetisyenler için tam donanımlı klinik araç seti":"A fully-equipped clinical toolkit for dietitians"}</h2>
+          </div>
+          <p style={{fontSize:14,color:C.paperDim,opacity:0.7,marginBottom:28,maxWidth:560}}>{lang==="tr"?"Danışan yönetiminden gelir takibine, fotoğraftan besin tanımaya kadar pratiğini dijitalleştir.":"From client management to revenue tracking to photo-based food recognition — digitize your practice."}</p>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}} className="g2">
+            {[
+              {icon:"📋",t:lang==="tr"?"Diyet Planı":"Diet Plans"},
+              {icon:"⚖️",t:lang==="tr"?"Değişim Listesi":"Exchange List"},
+              {icon:"📸",t:lang==="tr"?"İlerleme Fotoğrafı":"Progress Photos"},
+              {icon:"💰",t:lang==="tr"?"Ödeme Takibi":"Payment Tracking"},
+              {icon:"📷",t:lang==="tr"?"Fotoğraftan Tanı":"Photo Recognition"},
+              {icon:"🎯",t:lang==="tr"?"Hedef Takibi":"Goal Tracking"},
+              {icon:"💊",t:lang==="tr"?"Takviye Listesi":"Supplements"},
+              {icon:"📊",t:lang==="tr"?"Gelir Paneli":"Revenue Dashboard"},
+            ].map((x,i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,0.06)",borderRadius:12,padding:"16px 14px",textAlign:"center"}}>
+                <div style={{fontSize:24,marginBottom:8}}>{x.icon}</div>
+                <div style={{fontSize:12.5,fontWeight:600,color:"#fff",opacity:0.85}}>{x.t}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:28}}>
+            <Btn ch={<>{lang==="tr"?"Pro'yu Keşfet":"Explore Pro"} <ArrowRight size={16}/></>} vr="coral" onClick={()=>nav("proLanding")} st={{padding:"14px 28px"}}/>
+          </div>
         </div>
       </section>
       <section style={{maxWidth:1180,margin:"0 auto",padding:"60px 24px 80px"}}>
