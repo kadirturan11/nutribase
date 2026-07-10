@@ -1554,6 +1554,9 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[progressPhotos,setProgressPhotos]=useState([]);
   const[photoUploading,setPhotoUploading]=useState(false);
   const[viewingPhoto,setViewingPhoto]=useState(null);
+  const[sessions,setSessions]=useState([]);
+  const[showSessionForm,setShowSessionForm]=useState(false);
+  const[newSession,setNewSession]=useState({date:new Date().toISOString().slice(0,10),fee:"",paid:true,notes:""});
   const[showSupForm,setShowSupForm]=useState(false);
   const[newSup,setNewSup]=useState({name:"",dose:"",freq:"",timing:""});
   const[dietPlan,setDietPlan]=useState(null);
@@ -1578,6 +1581,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     cn.sort((a,b)=>b.ts-a.ts);setClinNotes(cn);
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
     const photosData=await sg(`${clientId}:progressPhotos`);if(photosData)setProgressPhotos(photosData);
+    const sessData=await sg(`${clientId}:sessions`);if(sessData)setSessions(sessData);
     const dpData=await sg(`${clientId}:dietPlan`);
     if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
     const epData=await sg(`${clientId}:exchangePlan`);if(epData)setExchPlan(epData);
@@ -1647,6 +1651,26 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     setProgressPhotos(updated);
     await ss(`${clientId}:progressPhotos`,updated);
     if(viewingPhoto?.id===id)setViewingPhoto(null);
+  };
+
+  const addSession=async()=>{
+    if(!newSession.fee)return;
+    const session={...newSession,id:Date.now(),fee:parseFloat(newSession.fee)};
+    const updated=[session,...sessions].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    setSessions(updated);
+    await ss(`${clientId}:sessions`,updated);
+    setNewSession({date:new Date().toISOString().slice(0,10),fee:"",paid:true,notes:""});
+    setShowSessionForm(false);
+  };
+  const toggleSessionPaid=async(id)=>{
+    const updated=sessions.map(s=>s.id===id?{...s,paid:!s.paid}:s);
+    setSessions(updated);
+    await ss(`${clientId}:sessions`,updated);
+  };
+  const delSession=async(id)=>{
+    const updated=sessions.filter(s=>s.id!==id);
+    setSessions(updated);
+    await ss(`${clientId}:sessions`,updated);
   };
 
   const createDietPlan=async()=>{
@@ -2016,6 +2040,73 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Session & Payment Tracking */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}} className="np">
+        <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>💰 {lang==="tr"?"Seans & Ödeme Takibi":"Session & Payment Tracking"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Görüşme ve ödeme geçmişi":"Consultation and payment history"}</span></div>
+        <button onClick={()=>setShowSessionForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Plus size={14}/> {lang==="tr"?"Seans Ekle":"Add Session"}</button>
+      </div>
+
+      {sessions.length>0&&(()=>{
+        const totalEarned=sessions.filter(s=>s.paid).reduce((sum,s)=>sum+s.fee,0);
+        const totalPending=sessions.filter(s=>!s.paid).reduce((sum,s)=>sum+s.fee,0);
+        return(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}} className="g2">
+            <div style={{background:T.paper,border:`1px solid ${C.sage}`,borderRadius:12,padding:"14px 18px"}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.sage,opacity:0.8,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{lang==="tr"?"Toplam Alınan":"Total Received"}</div>
+              <div style={{fontSize:22,fontWeight:800,color:C.sage,fontFamily:"'Source Serif 4',Georgia,serif"}}>₺{totalEarned.toLocaleString()}</div>
+            </div>
+            {totalPending>0&&<div style={{background:T.paper,border:`1px solid ${C.coral}`,borderRadius:12,padding:"14px 18px"}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.coral,opacity:0.8,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{lang==="tr"?"Bekleyen Ödeme":"Pending Payment"}</div>
+              <div style={{fontSize:22,fontWeight:800,color:C.coral,fontFamily:"'Source Serif 4',Georgia,serif"}}>₺{totalPending.toLocaleString()}</div>
+            </div>}
+          </div>
+        );
+      })()}
+
+      {showSessionForm&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}} className="g2">
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Tarih":"Date"}</label><input type="date" value={newSession.date} onChange={e=>setNewSession(s=>({...s,date:e.target.value}))} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+            <div><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Ücret (₺)":"Fee (₺)"}</label><input type="number" value={newSession.fee} onChange={e=>setNewSession(s=>({...s,fee:e.target.value}))} placeholder="500" style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+          </div>
+          <div style={{marginBottom:12}}>
+            <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+              <input type="checkbox" checked={newSession.paid} onChange={e=>setNewSession(s=>({...s,paid:e.target.checked}))} style={{width:16,height:16,cursor:"pointer"}}/>
+              <span style={{fontSize:13.5,color:T.ink,fontWeight:600}}>{lang==="tr"?"Ödeme alındı":"Payment received"}</span>
+            </label>
+          </div>
+          <div style={{marginBottom:14}}><label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.55,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Not (isteğe bağlı)":"Note (optional)"}</label><input value={newSession.notes} onChange={e=>setNewSession(s=>({...s,notes:e.target.value}))} placeholder={lang==="tr"?"örn. İlk görüşme":"e.g. First consultation"} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={addSession} style={{padding:"9px 18px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
+            <button onClick={()=>setShowSessionForm(false)} style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:T.ink,border:`1px solid ${T.line}`,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+
+      {sessions.length===0&&!showSessionForm&&<div className="np" style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:24,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz seans kaydı yok.":"No sessions recorded yet."}</div>}
+
+      {sessions.length>0&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,overflow:"hidden",marginBottom:28}}>
+          {sessions.map((s,i)=>(
+            <div key={s.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderTop:i>0?`1px solid ${T.paperDim}`:"none"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <button onClick={()=>toggleSessionPaid(s.id)} style={{width:22,height:22,borderRadius:"50%",border:`2px solid ${s.paid?C.sage:C.coral}`,background:s.paid?C.sage:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  {s.paid&&<Check size={12} color="#fff"/>}
+                </button>
+                <div>
+                  <div style={{fontSize:13.5,fontWeight:600,color:T.ink}}>{s.date} {s.notes&&`· ${s.notes}`}</div>
+                  <div style={{fontSize:11.5,color:s.paid?C.sage:C.coral,fontWeight:600}}>{s.paid?(lang==="tr"?"Ödendi":"Paid"):(lang==="tr"?"Bekliyor":"Pending")}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <span style={{fontSize:15,fontWeight:800,color:T.ink}}>₺{s.fee.toLocaleString()}</span>
+                <button onClick={()=>delSession(s.id)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><Trash2 size={14}/></button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
