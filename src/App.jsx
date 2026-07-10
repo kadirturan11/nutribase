@@ -1344,6 +1344,40 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     setExporting(false);
   };
 
+  const[exportingCsv,setExportingCsv]=useState(false);
+  const exportCsv=async(clientList)=>{
+    setExportingCsv(true);
+    try{
+      const rows=[[lang==="tr"?"Tarih":"Date",lang==="tr"?"Danışan":"Client",lang==="tr"?"Ücret (₺)":"Fee (₺)",lang==="tr"?"Durum":"Status",lang==="tr"?"Not":"Note"]];
+      for(const c of clientList){
+        const sessions=await sg(`${c.key}:sessions`);
+        if(!sessions)continue;
+        for(const s of sessions){
+          rows.push([s.date,c.name,s.fee,s.paid?(lang==="tr"?"Ödendi":"Paid"):(lang==="tr"?"Bekliyor":"Pending"),s.notes||""]);
+        }
+      }
+      if(rows.length===1){
+        alert(lang==="tr"?"Henüz hiçbir seans kaydı yok.":"No session records yet.");
+        setExportingCsv(false);
+        return;
+      }
+      const header=rows[0];
+      const dataRows=rows.slice(1).sort((a,b)=>new Date(a[0])-new Date(b[0]));
+      const allRows=[header,...dataRows];
+      const csv=allRows.map(row=>row.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const bom="\uFEFF"; // UTF-8 BOM for Excel Turkish character support
+      const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      const dateStr=new Date().toISOString().slice(0,10);
+      a.href=url;a.download=`nutribase-muhasebe-${dateStr}.csv`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }catch(e){console.error(e);}
+    setExportingCsv(false);
+  };
+
+
   const importData=async(e)=>{
     const file=e.target.files?.[0];
     if(!file)return;
@@ -1404,6 +1438,9 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
             📥 {importing?(lang==="tr"?"Yükleniyor...":"Restoring..."):(lang==="tr"?"Geri Yükle":"Restore")}
             <input type="file" accept=".json" onChange={importData} disabled={importing} style={{display:"none"}}/>
           </label>
+          <button onClick={()=>exportCsv(clients)} disabled={exportingCsv} title={lang==="tr"?"Muhasebe için CSV indir":"Download CSV for accounting"} style={{display:"flex",alignItems:"center",gap:6,padding:"11px 16px",borderRadius:9,background:"transparent",color:T.ink,border:`1.5px solid ${T.line}`,cursor:exportingCsv?"not-allowed":"pointer",fontSize:13.5,fontWeight:600,fontFamily:"inherit",opacity:exportingCsv?0.5:1}}>
+            📈 {exportingCsv?(lang==="tr"?"Hazırlanıyor...":"Preparing..."):(lang==="tr"?"Muhasebe CSV":"Accounting CSV")}
+          </button>
           <button onClick={()=>setShowForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:8,padding:"11px 20px",borderRadius:9,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>
             <Plus size={16}/> {lang==="tr"?"Yeni Danışan":"New Client"}
           </button>
