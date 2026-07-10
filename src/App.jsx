@@ -1245,7 +1245,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[loading,setLoading]=useState(true);
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
-  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:""});
+  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active"});
   const[revenueStats,setRevenueStats]=useState(null);
 
   const loadRevenue=async(clientList)=>{
@@ -1304,7 +1304,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     if(!form.name.trim())return;
     const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
-    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:""});
+    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active"});
     setShowForm(false);
     reload();
   };
@@ -1364,13 +1364,15 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
 
 
   const[filterCondition,setFilterCondition]=useState("");
+  const[filterStatus,setFilterStatus]=useState("");
   const[sortBy,setSortBy]=useState("recent");
 
   const uniqueConditions=[...new Set(clients.map(c=>c.condition).filter(Boolean))];
 
   let filtered=clients.filter(c=>
     c.name.toLowerCase().includes(search.toLowerCase())&&
-    (filterCondition===""||c.condition===filterCondition)
+    (filterCondition===""||c.condition===filterCondition)&&
+    (filterStatus===""||((c.status||"active")===filterStatus))
   );
   filtered=[...filtered].sort((a,b)=>{
     if(sortBy==="name")return a.name.localeCompare(b.name);
@@ -1493,6 +1495,14 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Ad / Kod *":"Name / Code *"}</label><input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={lang==="tr"?"örn. Danışan-001":"e.g. Client-001"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Yaş":"Age"}</label><input type="number" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
+            <div style={{marginBottom:14}}>
+              <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Durum":"Status"}</label>
+              <div style={{display:"flex",gap:8}}>
+                {[{k:"active",l:lang==="tr"?"🟢 Aktif":"🟢 Active"},{k:"paused",l:lang==="tr"?"🟡 Beklemede":"🟡 Paused"},{k:"completed",l:lang==="tr"?"✅ Tamamlandı":"✅ Completed"}].map(opt=>(
+                  <button key={opt.k} type="button" onClick={()=>setForm(f=>({...f,status:opt.k}))} style={{flex:1,padding:"9px 10px",borderRadius:8,fontSize:12.5,fontWeight:600,border:`1.5px solid ${form.status===opt.k?C.ink:T.line}`,background:form.status===opt.k?C.ink:"transparent",color:form.status===opt.k?"#fff":T.ink,cursor:"pointer",fontFamily:"inherit"}}>{opt.l}</button>
+                ))}
+              </div>
+            </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Boy (cm)":"Height (cm)"}</label><input type="number" value={form.height} onChange={e=>setForm(f=>({...f,height:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Kilo (kg)":"Weight (kg)"}</label><input type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
@@ -1514,11 +1524,17 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
       )}
 
       {/* Search + Filter + Sort */}
-      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:24}} className="g3">
+      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:24}} className="g2">
         <div style={{position:"relative"}}>
           <Search size={16} style={{position:"absolute",left:14,top:13,color:T.ink,opacity:0.4}}/>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="tr"?"Danışan ara...":"Search clients..."} style={{width:"100%",padding:"11px 14px 11px 38px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
         </div>
+        <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} style={{padding:"11px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",cursor:"pointer",boxSizing:"border-box"}}>
+          <option value="">{lang==="tr"?"Tüm Statüler":"All Statuses"}</option>
+          <option value="active">{lang==="tr"?"🟢 Aktif":"🟢 Active"}</option>
+          <option value="paused">{lang==="tr"?"🟡 Beklemede":"🟡 Paused"}</option>
+          <option value="completed">{lang==="tr"?"✅ Tamamlandı":"✅ Completed"}</option>
+        </select>
         <select value={filterCondition} onChange={e=>setFilterCondition(e.target.value)} style={{padding:"11px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13.5,fontFamily:"inherit",cursor:"pointer",boxSizing:"border-box"}}>
           <option value="">{lang==="tr"?"Tüm Durumlar":"All Conditions"}</option>
           {uniqueConditions.map(c=><option key={c} value={c}>{c}</option>)}
@@ -1529,7 +1545,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
           <option value="appt">{lang==="tr"?"Randevu Tarihine Göre":"By Appointment Date"}</option>
         </select>
       </div>
-      {(search||filterCondition)&&<div style={{marginBottom:16,fontSize:12.5,color:T.ink,opacity:0.5}}>{lang==="tr"?`${filtered.length} sonuç bulundu`:`${filtered.length} results found`}{filterCondition&&<button onClick={()=>setFilterCondition("")} style={{marginLeft:8,background:"none",border:"none",color:C.coral,cursor:"pointer",fontSize:12.5,fontWeight:600,fontFamily:"inherit"}}>{lang==="tr"?"filtreyi temizle":"clear filter"}</button>}</div>}
+      {(search||filterCondition||filterStatus)&&<div style={{marginBottom:16,fontSize:12.5,color:T.ink,opacity:0.5}}>{lang==="tr"?`${filtered.length} sonuç bulundu`:`${filtered.length} results found`}{(filterCondition||filterStatus)&&<button onClick={()=>{setFilterCondition("");setFilterStatus("");}} style={{marginLeft:8,background:"none",border:"none",color:C.coral,cursor:"pointer",fontSize:12.5,fontWeight:600,fontFamily:"inherit"}}>{lang==="tr"?"filtreyi temizle":"clear filter"}</button>}</div>}
 
       {/* Loading */}
       {loading&&<div style={{display:"flex",justifyContent:"center",padding:40}}><div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${T.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/></div>}
@@ -1546,10 +1562,13 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
       {!loading&&filtered.length>0&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}} className="g2">
           {filtered.map(c=>(
-            <div key={c.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24}}>
+            <div key={c.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24,opacity:(c.status==="completed")?0.7:1}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
                 <div>
-                  <h3 style={{fontSize:17,fontWeight:700,margin:"0 0 4px",color:T.ink}}>{c.name}</h3>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                    <h3 style={{fontSize:17,fontWeight:700,margin:0,color:T.ink}}>{c.name}</h3>
+                    {(()=>{const st=c.status||"active";const cfg={active:{l:lang==="tr"?"Aktif":"Active",col:C.sage,dot:"🟢"},paused:{l:lang==="tr"?"Beklemede":"Paused",col:C.gold,dot:"🟡"},completed:{l:lang==="tr"?"Tamamlandı":"Completed",col:T.ink,dot:"✅"}}[st];return<span style={{fontSize:10.5,fontWeight:700,color:cfg.col,opacity:0.85}}>{cfg.dot}</span>;})()}
+                  </div>
                   <p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>
                     {c.age?c.age+(lang==="tr"?" yaş":" yrs"):""}
                     {c.weight?" · "+c.weight+" kg":""}
