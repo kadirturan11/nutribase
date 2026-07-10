@@ -2294,6 +2294,8 @@ function TemplatesPage({t,lang,nav,setSel,T=C}){
 
 function TemplateDetail({t,lang,id,nav,T=C}){
   const c=COND.find(x=>x.id===id);
+  const[dietitianProfile,setDietitianProfile]=useState(null);
+  useEffect(()=>{(async()=>{const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);})();},[]);
   if(!c)return null;
   const res=lang==="tr"?c.resTr:c.resEn;
   const rec=lang==="tr"?c.recTr:c.recEn;
@@ -2315,8 +2317,11 @@ function TemplateDetail({t,lang,id,nav,T=C}){
     <div className="nb-print-header">
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:"#0E2A3D"}}>NutriBase</span>
-        <span style={{fontSize:11,fontWeight:700,background:"#C9A14A",color:"#3A2D0A",padding:"2px 8px",borderRadius:20}}>PRO</span>
+        <div>
+          <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:"#0E2A3D"}}>{dietitianProfile?.clinicName||"NutriBase"}</span>
+          {!dietitianProfile?.clinicName&&<span style={{fontSize:11,fontWeight:700,background:"#C9A14A",color:"#3A2D0A",padding:"2px 8px",borderRadius:20,marginLeft:6}}>PRO</span>}
+          {dietitianProfile?.dietitianName&&<div style={{fontSize:10.5,color:"#0E2A3D",opacity:0.6}}>{dietitianProfile.dietitianName}{dietitianProfile.tagline&&` · ${dietitianProfile.tagline}`}</div>}
+        </div>
       </div>
       <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
         <div style={{fontWeight:700}}>{lang==="tr"?"Klinik Diyet Şablonu":"Clinical Diet Template"}</div>
@@ -2354,8 +2359,9 @@ function WeeklyPlanPage({t,lang,nav,T=C}){
   const [plan,setPlan]=useState(()=>Array(7).fill(null).map(()=>Array(4).fill("")));
   const [edit,setEdit]=useState(null);
   const [editTxt,setEditTxt]=useState("");
+  const[dietitianProfile,setDietitianProfile]=useState(null);
 
-  useEffect(()=>{(async()=>{const saved=await sg(`weekplan:${weekNum}`);if(saved)setPlan(saved);})();},[weekNum]);
+  useEffect(()=>{(async()=>{const saved=await sg(`weekplan:${weekNum}`);if(saved)setPlan(saved);const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);})();},[weekNum]);
 
   const saveCell=async()=>{
     if(!edit)return;
@@ -2368,7 +2374,13 @@ function WeeklyPlanPage({t,lang,nav,T=C}){
     <section style={{maxWidth:1200,margin:"0 auto",padding:"48px 24px 80px"}}>
       <style>{`@media print{.np{display:none!important;}.nb-ph{display:flex!important;}@page{size:A4 landscape;margin:15mm;}}`}</style>
       <div className="nb-ph" style={{display:"none",justifyContent:"space-between",alignItems:"center",marginBottom:20,paddingBottom:16,borderBottom:`2px solid ${T.ink}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}><Logo sz={24} T={T}/><span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:T.ink}}>NutriBase</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <Logo sz={24} T={T}/>
+          <div>
+            <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:18,color:T.ink}}>{dietitianProfile?.clinicName||"NutriBase"}</span>
+            {dietitianProfile?.dietitianName&&<div style={{fontSize:10.5,color:T.ink,opacity:0.6}}>{dietitianProfile.dietitianName}</div>}
+          </div>
+        </div>
         <div style={{fontSize:12,color:T.ink,textAlign:"right"}}><div style={{fontWeight:700}}>{lang==="tr"?"Haftalık Öğün Planı":"Weekly Meal Plan"}</div><div>{lang==="tr"?`Hafta ${weekNum}`:`Week ${weekNum}`} · {today.getFullYear()}</div></div>
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,flexWrap:"wrap",gap:12}} className="np">
