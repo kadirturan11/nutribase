@@ -1246,6 +1246,28 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
   const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:""});
+  const[revenueStats,setRevenueStats]=useState(null);
+
+  const loadRevenue=async(clientList)=>{
+    const today=new Date();
+    const thisMonth=today.getMonth();
+    const thisYear=today.getFullYear();
+    let monthTotal=0,pendingTotal=0,allTimeTotal=0;
+    for(const c of clientList){
+      const sessions=await sg(`${c.key}:sessions`);
+      if(!sessions)continue;
+      for(const s of sessions){
+        if(s.paid){
+          allTimeTotal+=s.fee;
+          const d=new Date(s.date);
+          if(d.getMonth()===thisMonth&&d.getFullYear()===thisYear)monthTotal+=s.fee;
+        }else{
+          pendingTotal+=s.fee;
+        }
+      }
+    }
+    setRevenueStats({monthTotal,pendingTotal,allTimeTotal});
+  };
 
   useEffect(()=>{
     (async()=>{
@@ -1258,6 +1280,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         }
         items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         setClients(items);
+        loadRevenue(items);
       }catch(e){console.error("load error",e);}
       setLoading(false);
     })();
@@ -1271,6 +1294,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
       for(const k of ks){const v=await sg(k);if(v&&v.name)items.push({...v,key:k});}
       items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
       setClients(items);
+      loadRevenue(items);
     }catch(e){console.error(e);}
     setLoading(false);
   };
@@ -1421,6 +1445,23 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
                 <div style={{fontSize:14,fontWeight:700,color:T.ink,marginTop:4,lineHeight:1.3}}>{topCondition?topCondition[0]:"—"}</div>
               </div>
             </div>
+
+            {revenueStats&&(revenueStats.monthTotal>0||revenueStats.pendingTotal>0)&&(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:20}} className="g3">
+                <div style={{background:C.ink,borderRadius:12,padding:"16px 18px"}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>💰 {lang==="tr"?"Bu Ay Gelir":"This Month"}</div>
+                  <div style={{fontSize:24,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>₺{revenueStats.monthTotal.toLocaleString()}</div>
+                </div>
+                <div style={{background:T.paper,border:`1.5px solid ${revenueStats.pendingTotal>0?C.coral:T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                  <div style={{fontSize:11,fontWeight:700,color:revenueStats.pendingTotal>0?C.coral:T.ink,opacity:revenueStats.pendingTotal>0?0.9:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>⏳ {lang==="tr"?"Bekleyen Ödeme":"Pending Payment"}</div>
+                  <div style={{fontSize:24,fontWeight:800,color:revenueStats.pendingTotal>0?C.coral:T.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>₺{revenueStats.pendingTotal.toLocaleString()}</div>
+                </div>
+                <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 18px"}}>
+                  <div style={{fontSize:11,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{lang==="tr"?"Toplam (Tüm Zamanlar)":"All-Time Total"}</div>
+                  <div style={{fontSize:24,fontWeight:800,color:C.sage,fontFamily:"'Source Serif 4',Georgia,serif"}}>₺{revenueStats.allTimeTotal.toLocaleString()}</div>
+                </div>
+              </div>
+            )}
 
             {upcoming.length>0&&(
               <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:8}}>
