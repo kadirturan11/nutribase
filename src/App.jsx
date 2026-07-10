@@ -1245,7 +1245,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[loading,setLoading]=useState(true);
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
-  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active"});
+  const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active",phone:"",email:""});
   const[revenueStats,setRevenueStats]=useState(null);
 
   const loadRevenue=async(clientList)=>{
@@ -1304,7 +1304,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     if(!form.name.trim())return;
     const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
-    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active"});
+    setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active",phone:"",email:""});
     setShowForm(false);
     reload();
   };
@@ -1507,6 +1507,10 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Boy (cm)":"Height (cm)"}</label><input type="number" value={form.height} onChange={e=>setForm(f=>({...f,height:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Kilo (kg)":"Weight (kg)"}</label><input type="number" value={form.weight} onChange={e=>setForm(f=>({...f,weight:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Sağlık Durumu":"Condition"}</label><input value={form.condition} onChange={e=>setForm(f=>({...f,condition:e.target.value}))} placeholder={lang==="tr"?"örn. Tip 2 Diyabet":"e.g. Type 2 Diabetes"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}} className="g2">
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📞 {lang==="tr"?"Telefon":"Phone"}</label><input type="tel" value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="0555 123 45 67" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>✉️ {lang==="tr"?"E-posta":"Email"}</label><input type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="ornek@email.com" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}</label><input type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
@@ -1793,9 +1797,15 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24,flexWrap:"wrap",gap:12}}>
         <div>
           <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px",color:T.ink}}>{client.name}</h1>
-          <p style={{fontSize:14,color:T.ink,opacity:0.55,margin:0}}>
+          <p style={{fontSize:14,color:T.ink,opacity:0.55,margin:"0 0 8px"}}>
             {client.age&&`${client.age} ${lang==="tr"?"yaş":"yrs"}`} · {client.gender==="male"?t.calc.male:t.calc.female}{client.height&&` · ${client.height} cm`}
           </p>
+          {(client.phone||client.email)&&(
+            <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+              {client.phone&&<a href={`tel:${client.phone.replace(/\s/g,"")}`} style={{display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.sage,textDecoration:"none",fontWeight:600}}>📞 {client.phone}</a>}
+              {client.email&&<a href={`mailto:${client.email}`} style={{display:"flex",alignItems:"center",gap:5,fontSize:13,color:C.sage,textDecoration:"none",fontWeight:600}}>✉️ {client.email}</a>}
+            </div>
+          )}
         </div>
         <div style={{display:"flex",gap:10,alignItems:"center"}}>
           {client.condition&&<span style={{fontSize:12.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"5px 12px",borderRadius:20}}>{client.condition}</span>}
