@@ -3,7 +3,7 @@ import {
   Calculator, Droplets, TrendingUp, Users, FileText, Lock, Check,
   ChevronRight, Globe, Plus, X, Activity, Apple, AlertCircle,
   ArrowRight, Sparkles, ClipboardList, UserPlus, Search, Trash2,
-  Crown, Scale, Printer, ChevronDown, ChevronUp, Leaf
+  Crown, Scale, Printer, ChevronDown, ChevronUp, Leaf, Settings
 } from "lucide-react";
 
 const C = {
@@ -652,6 +652,7 @@ export default function App(){
         {page==="templateDetail"&&(isPro?<TemplateDetail t={t} lang={lang} id={selTpl} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="weeklyPlan"&&(isPro?<WeeklyPlanPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="exchangeList"&&(isPro?<ExchangeListPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="settings"&&(isPro?<SettingsPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="proLanding"&&<ProLanding t={t} nav={nav} isPro={isPro} T={T}/>}
         {page==="proCheckout"&&<ProCheckout t={t} nav={nav} goPro={goPro} T={T}/>}
       </main>
@@ -680,6 +681,9 @@ function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,T}){
           {items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:page===i.k?T.paperDim:"transparent",color:T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={10} style={{marginLeft:2,opacity:0.5}}/>}</button>)}
         </nav>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={()=>nav("settings")} title={lang==="tr"?"Ayarlar":"Settings"} style={{display:"flex",alignItems:"center",justifyContent:"center",width:34,height:34,borderRadius:8,border:`1px solid ${T.line}`,background:page==="settings"?T.line:T.paperDim,cursor:"pointer",color:T.ink}}>
+            <Settings size={15}/>
+          </button>
           <button onClick={toggleDark} title={isDark?"Light mode":"Dark mode"} style={{display:"flex",alignItems:"center",justifyContent:"center",width:34,height:34,borderRadius:8,border:`1px solid ${T.line}`,background:T.paperDim,cursor:"pointer",fontSize:16,color:T.ink}}>
             {isDark?"☀️":"🌙"}
           </button>
@@ -1619,6 +1623,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[photoUploading,setPhotoUploading]=useState(false);
   const[viewingPhoto,setViewingPhoto]=useState(null);
   const[sessions,setSessions]=useState([]);
+  const[dietitianProfile,setDietitianProfile]=useState(null);
   const[showSessionForm,setShowSessionForm]=useState(false);
   const[newSession,setNewSession]=useState({date:new Date().toISOString().slice(0,10),fee:"",paid:true,notes:""});
   const[showSupForm,setShowSupForm]=useState(false);
@@ -1646,6 +1651,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
     const photosData=await sg(`${clientId}:progressPhotos`);if(photosData)setProgressPhotos(photosData);
     const sessData=await sg(`${clientId}:sessions`);if(sessData)setSessions(sessData);
+    const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);
     const dpData=await sg(`${clientId}:dietPlan`);
     if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
     const epData=await sg(`${clientId}:exchangePlan`);if(epData)setExchPlan(epData);
@@ -1783,11 +1789,15 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       <div className="nb-rh" style={{display:"none",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24,paddingBottom:16,borderBottom:"2px solid #0E2A3D"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:16,color:"#0E2A3D"}}>NutriBase PRO</span>
+          <div>
+            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:16,color:"#0E2A3D"}}>{dietitianProfile?.clinicName||"NutriBase PRO"}</div>
+            {dietitianProfile?.dietitianName&&<div style={{fontSize:10.5,color:"#0E2A3D",opacity:0.6}}>{dietitianProfile.dietitianName}{dietitianProfile.tagline&&` · ${dietitianProfile.tagline}`}</div>}
+          </div>
         </div>
         <div style={{textAlign:"right",fontSize:12,color:"#0E2A3D",opacity:0.6}}>
           <div>{new Date().toLocaleDateString(lang==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long",year:"numeric"})}</div>
           <div style={{fontWeight:700,marginTop:2}}>{client.name}</div>
+          {dietitianProfile?.phone&&<div style={{fontSize:10.5,marginTop:2}}>{dietitianProfile.phone}</div>}
         </div>
       </div>
 
@@ -2512,6 +2522,86 @@ function ExchangeListPage({t,lang,nav,T=C}){
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+function SettingsPage({t,lang,nav,T=C}){
+  const[profile,setProfile]=useState({dietitianName:"",clinicName:"",phone:"",email:"",tagline:""});
+  const[saved,setSaved]=useState(false);
+  const[loading,setLoading]=useState(true);
+
+  useEffect(()=>{(async()=>{
+    const p=await sg("dietitianProfile");
+    if(p)setProfile(p);
+    setLoading(false);
+  })();},[]);
+
+  const save=async()=>{
+    await ss("dietitianProfile",profile);
+    setSaved(true);
+    setTimeout(()=>setSaved(false),2500);
+  };
+
+  if(loading)return<section style={{maxWidth:600,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
+
+  return(
+    <section style={{maxWidth:600,margin:"0 auto",padding:"48px 24px 80px"}}>
+      <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",color:T.ink,display:"flex",alignItems:"center",gap:10}}>
+        ⚙️ {lang==="tr"?"Diyetisyen / Klinik Ayarları":"Dietitian / Clinic Settings"}
+      </h1>
+      <p style={{color:T.ink,opacity:0.6,fontSize:14.5,margin:"0 0 32px"}}>{lang==="tr"?"Bu bilgiler yazdırılan raporların üst kısmında görünecek — kendi adın veya kliniğinle profesyonel çıktı alabilirsin.":"This information appears at the top of printed reports — get professional output with your own name or clinic."}</p>
+
+      <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24}}>
+        <div style={{marginBottom:16}}>
+          <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Diyetisyen Adı":"Dietitian Name"}</label>
+          <input value={profile.dietitianName} onChange={e=>setProfile(p=>({...p,dietitianName:e.target.value}))} placeholder={lang==="tr"?"örn. Dyt. Ayşe Yılmaz":"e.g. Dt. Jane Smith"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+        </div>
+        <div style={{marginBottom:16}}>
+          <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Klinik / İşletme Adı":"Clinic / Business Name"}</label>
+          <input value={profile.clinicName} onChange={e=>setProfile(p=>({...p,clinicName:e.target.value}))} placeholder={lang==="tr"?"örn. Sağlıklı Yaşam Diyet Kliniği":"e.g. Healthy Living Nutrition Clinic"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}} className="g2">
+          <div>
+            <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📞 {lang==="tr"?"Telefon":"Phone"}</label>
+            <input type="tel" value={profile.phone} onChange={e=>setProfile(p=>({...p,phone:e.target.value}))} placeholder="0555 123 45 67" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+          </div>
+          <div>
+            <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>✉️ {lang==="tr"?"E-posta":"Email"}</label>
+            <input type="email" value={profile.email} onChange={e=>setProfile(p=>({...p,email:e.target.value}))} placeholder="ornek@klinik.com" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+          </div>
+        </div>
+        <div style={{marginBottom:20}}>
+          <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Slogan / Unvan (isteğe bağlı)":"Tagline / Title (optional)"}</label>
+          <input value={profile.tagline} onChange={e=>setProfile(p=>({...p,tagline:e.target.value}))} placeholder={lang==="tr"?"örn. Klinik Beslenme Uzmanı":"e.g. Clinical Nutrition Specialist"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+        </div>
+
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <button onClick={save} style={{padding:"11px 24px",borderRadius:9,background:C.coral,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
+          {saved&&<span style={{color:C.sage,fontSize:13.5,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><Check size={15}/> {lang==="tr"?"Kaydedildi!":"Saved!"}</span>}
+        </div>
+      </div>
+
+      {(profile.dietitianName||profile.clinicName)&&(
+        <div style={{marginTop:24}}>
+          <h4 style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:12}}>{lang==="tr"?"Rapor Başlığı Önizlemesi":"Report Header Preview"}</h4>
+          <div style={{background:"#fff",border:`1px solid ${T.line}`,borderRadius:12,padding:20}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",paddingBottom:14,borderBottom:"2px solid #0E2A3D"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#0E2A3D" strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke="#E8623F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <div>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:800,fontSize:15,color:"#0E2A3D"}}>{profile.clinicName||"NutriBase PRO"}</div>
+                  {profile.dietitianName&&<div style={{fontSize:11,color:"#0E2A3D",opacity:0.6}}>{profile.dietitianName}{profile.tagline&&` · ${profile.tagline}`}</div>}
+                </div>
+              </div>
+              <div style={{textAlign:"right",fontSize:10.5,color:"#0E2A3D",opacity:0.6}}>
+                {profile.phone&&<div>{profile.phone}</div>}
+                {profile.email&&<div>{profile.email}</div>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
