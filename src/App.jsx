@@ -851,6 +851,7 @@ function MBar({protein,carbs,fat,t}){
 function FoodPage({t,lang,isPro,T=C}){
   const[query,setQuery]=useState("");
   const[sel,setSel]=useState(null);
+  const[recentFoodIds,setRecentFoodIds]=useState([]);
   const[amt,setAmt]=useState("100");
   const[showAll,setShowAll]=useState(false);
   const[comp,setComp]=useState(null);
@@ -864,8 +865,15 @@ function FoodPage({t,lang,isPro,T=C}){
   const[rSel,setRSel]=useState(null);
   const[rAmt,setRAmt]=useState("100");
   const[viewRecipe,setViewRecipe]=useState(null);
+  const[scaleTarget,setScaleTarget]=useState("");
 
   useEffect(()=>{(async()=>{const rks=await sl("recipe:");const rs=[];for(const k of rks){const v=await sg(k);if(v)rs.push({...v,key:k});}rs.sort((a,b)=>b.ts-a.ts);setSavedRecipes(rs);})();},[]);
+  useEffect(()=>{(async()=>{const rf=await sg("recentFoods");if(rf)setRecentFoodIds(rf);})();},[]);
+  const addToRecent=async(foodId)=>{
+    const updated=[foodId,...recentFoodIds.filter(id=>id!==foodId)].slice(0,8);
+    setRecentFoodIds(updated);
+    await ss("recentFoods",updated);
+  };
   const[meals,setMeals]=useState({b:[],l:[],d:[],s:[]});
   const[addingTo,setAddingTo]=useState(null);
   const[mQuery,setMQuery]=useState("");
@@ -934,7 +942,7 @@ function FoodPage({t,lang,isPro,T=C}){
           <div style={{position:"relative",marginBottom:16}}><Search size={17} style={{position:"absolute",left:14,top:14,color:T.ink,opacity:0.4}}/><TIn value={query} onChange={e=>{setQuery(e.target.value);setSel(null);}} placeholder={tf.ph} style={{paddingLeft:42,fontSize:15,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
           {query.length>=2&&results.length===0&&<p style={{color:T.ink,opacity:0.5,fontSize:14}}>{tf.notFound}</p>}
           {results.length>0&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,overflow:"hidden",marginBottom:16}}>
-            {results.map((f,i)=><div key={f.id} style={{padding:"11px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",background:sel?.id===f.id?T.paperDim:T.paper}} onClick={()=>{setSel(f);setAmt("100");}}>
+            {results.map((f,i)=><div key={f.id} style={{padding:"11px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",background:sel?.id===f.id?T.paperDim:T.paper}} onClick={()=>{setSel(f);setAmt("100");addToRecent(f.id);}}>
               <div><div style={{fontSize:14,fontWeight:600,color:T.ink}}>{lang==="tr"?f.tr:f.en}</div><div style={{fontSize:12,color:T.ink,opacity:0.45}}>{tf.cats[f.cat]||f.cat}</div></div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:13,fontWeight:700,color:C.coral}}>{f.v[0]} kcal</span>
@@ -942,6 +950,22 @@ function FoodPage({t,lang,isPro,T=C}){
               </div>
             </div>)}
           </div>}
+          {!query&&recentFoodIds.length>0&&(()=>{
+            const recentFoods=recentFoodIds.map(id=>FOODS.find(f=>f.id===id)).filter(Boolean);
+            if(recentFoods.length===0)return null;
+            return(
+              <div style={{marginBottom:20}}>
+                <p style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>⭐ {lang==="tr"?"Sık Kullanılanlar":"Recently Used"}</p>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                  {recentFoods.map(f=>(
+                    <button key={f.id} onClick={()=>{setSel(f);setAmt("100");addToRecent(f.id);}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 12px",borderRadius:20,border:`1px solid ${T.line}`,background:T.paper,fontSize:12.5,cursor:"pointer",color:T.ink,fontFamily:"inherit"}}>
+                      {lang==="tr"?f.tr:f.en} <span style={{color:C.coral,fontWeight:700,fontSize:11}}>{f.v[0]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           {!query&&<div><p style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.5,letterSpacing:"0.05em",textTransform:"uppercase",marginBottom:12}}>{lang==="tr"?"Kategoriler":"Categories"}</p><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{cats.map(cat=><button key={cat} onClick={()=>setQuery(catD[cat]||cat)} style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${T.line}`,background:T.paper,fontSize:13,cursor:"pointer",color:T.ink,fontFamily:"inherit"}}>{tf.cats[cat]||cat}</button>)}</div></div>}
         </div>
         <div>
@@ -1050,6 +1074,23 @@ function FoodPage({t,lang,isPro,T=C}){
             {/* Live nutrition total */}
             {recipe.length>0&&<div>
               <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.5,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 14px"}}>{lang==="tr"?"Tarifin Besin Değerleri":"Recipe Nutrition"} ({recipe.reduce((s,i)=>s+i.amount,0)}g)</h4>
+
+              {/* One-click calorie rescale — inspired by BEBİS */}
+              <div style={{background:T.paperDim,borderRadius:10,padding:14,marginBottom:14}}>
+                <div style={{fontSize:11.5,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>⚡ {lang==="tr"?"Tek Tuşla Kalori Ölçekle":"One-Click Calorie Rescale"}</div>
+                <div style={{display:"flex",gap:8}}>
+                  <input type="number" value={scaleTarget} onChange={e=>setScaleTarget(e.target.value)} placeholder={lang==="tr"?"örn. 1600":"e.g. 1600"} style={{flex:1,padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+                  <button onClick={()=>{
+                    const currentKcal=recipe.reduce((s,item)=>s+item.food.v[0]*item.amount/100,0);
+                    const target=+scaleTarget;
+                    if(!target||currentKcal===0)return;
+                    const ratio=target/currentKcal;
+                    setRecipe(r=>r.map(item=>({...item,amount:Math.round(item.amount*ratio)})));
+                  }} disabled={!scaleTarget} style={{padding:"8px 16px",borderRadius:8,border:"none",background:scaleTarget?C.coral:T.line,color:scaleTarget?"#fff":T.ink,fontSize:12.5,fontWeight:700,cursor:scaleTarget?"pointer":"not-allowed",fontFamily:"inherit",opacity:scaleTarget?1:0.5}}>{lang==="tr"?"Ölçekle":"Rescale"}</button>
+                </div>
+                <p style={{fontSize:10.5,color:T.ink,opacity:0.45,margin:"8px 0 0",lineHeight:1.5}}>{lang==="tr"?"Tüm malzeme miktarları hedef kaloriye orantılı olarak otomatik güncellenir.":"All ingredient amounts are automatically updated proportionally to hit the target calorie."}</p>
+              </div>
+
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                 {(isPro?NUTRIENTS:NUTRIENTS.filter(n=>n.imp)).map(n=>{
                   const val=parseFloat(recipe.reduce((s,item)=>s+item.food.v[n.i]*item.amount/100,0).toFixed(1));
