@@ -2057,6 +2057,41 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
         </div>
       </div>
 
+      {/* Adherence Score — inspired by Practice Better's client accountability tracking */}
+      {(hist.length>0||nHist.length>0)&&(()=>{
+        const thirtyDaysAgo=Date.now()-30*24*60*60*1000;
+        const recentWeightLogs=hist.filter(h=>h.ts>=thirtyDaysAgo).length;
+        const recentNutriLogs=nHist.filter(h=>h.ts>=thirtyDaysAgo).length;
+        const recentNotes=clinNotes.filter(n=>n.ts>=thirtyDaysAgo).length;
+        // Score: weight logs (max 8 expected in 30d = weekly+), nutrition logs (max 20), capped and weighted
+        const weightScore=Math.min(recentWeightLogs/4,1)*40; // up to 40 pts if 4+ weight logs
+        const nutriScore=Math.min(recentNutriLogs/10,1)*40; // up to 40 pts if 10+ nutrition logs
+        const engagementScore=Math.min((recentWeightLogs+recentNutriLogs)>0?1:0,1)*20; // 20 pts if any activity
+        const total=Math.round(weightScore+nutriScore+engagementScore);
+        const level=total>=70?{l:lang==="tr"?"Yüksek Uyum":"High Adherence",col:C.sage,emoji:"🟢"}:total>=35?{l:lang==="tr"?"Orta Uyum":"Moderate Adherence",col:C.gold,emoji:"🟡"}:{l:lang==="tr"?"Düşük Uyum":"Low Adherence",col:C.coral,emoji:"🔴"};
+        return(
+          <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:"18px 22px",marginBottom:20}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:10}}>
+              <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.6,margin:0,display:"flex",alignItems:"center",gap:6}}>📈 {lang==="tr"?"Uyum Skoru":"Adherence Score"} <span style={{fontSize:10,fontWeight:500,opacity:0.6}}>({lang==="tr"?"son 30 gün":"last 30 days"})</span></h4>
+              <span style={{fontSize:12,fontWeight:700,color:level.col,display:"flex",alignItems:"center",gap:5}}>{level.emoji} {level.l}</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:16}}>
+              <div style={{fontSize:32,fontWeight:800,color:level.col,fontFamily:"'Source Serif 4',Georgia,serif",minWidth:64}}>{total}<span style={{fontSize:14,opacity:0.5}}>/100</span></div>
+              <div style={{flex:1}}>
+                <div style={{height:8,background:T.line,borderRadius:4,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${total}%`,background:level.col,borderRadius:4,transition:"width 0.3s"}}/>
+                </div>
+                <div style={{display:"flex",gap:16,marginTop:8,flexWrap:"wrap"}}>
+                  <span style={{fontSize:11,color:T.ink,opacity:0.55}}>⚖️ {recentWeightLogs} {lang==="tr"?"ölçüm":"measurements"}</span>
+                  <span style={{fontSize:11,color:T.ink,opacity:0.55}}>🍽️ {recentNutriLogs} {lang==="tr"?"besin kaydı":"nutrition entries"}</span>
+                  {recentNotes>0&&<span style={{fontSize:11,color:T.ink,opacity:0.55}}>📝 {recentNotes} {lang==="tr"?"klinik not":"clinical notes"}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Goals */}
       {(client.targetKcal||client.targetWater||client.nextAppt||client.targetWeight)&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}} className="g2">
