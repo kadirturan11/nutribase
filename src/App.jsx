@@ -2130,6 +2130,50 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
         ))}
       </div>
 
+      {/* Eating Habit Analysis — inspired by BEBİS's pattern detection */}
+      {nHist.length>=2&&(()=>{
+        const recentRecs=nHist.slice(0,7); // last up to 7 entries
+        const avg=(idx)=>{
+          const vals=recentRecs.map(r=>r.vals[idx]).filter(v=>v!=null&&!isNaN(v));
+          if(vals.length===0)return null;
+          return vals.reduce((s,v)=>s+v,0)/vals.length;
+        };
+        const flags=[];
+        const fiberAvg=avg(4);
+        if(fiberAvg!==null&&fiberAvg<20)flags.push({icon:"🌾",tr:`Ortalama lif alımı düşük (${fiberAvg.toFixed(1)}g/gün, önerilen 25-30g)`,en:`Average fiber intake is low (${fiberAvg.toFixed(1)}g/day, recommended 25-30g)`,severity:"warn"});
+        const sodiumAvg=avg(12);
+        if(sodiumAvg!==null&&sodiumAvg>2300)flags.push({icon:"🧂",tr:`Ortalama sodyum alımı yüksek (${Math.round(sodiumAvg)}mg/gün, önerilen <2300mg)`,en:`Average sodium intake is high (${Math.round(sodiumAvg)}mg/day, recommended <2300mg)`,severity:"warn"});
+        const sugarAvg=avg(6);
+        if(sugarAvg!==null&&sugarAvg>50)flags.push({icon:"🍬",tr:`Ortalama şeker alımı yüksek (${Math.round(sugarAvg)}g/gün)`,en:`Average sugar intake is high (${Math.round(sugarAvg)}g/day)`,severity:"warn"});
+        const proteinAvg=avg(1);
+        if(proteinAvg!==null&&proteinAvg<40)flags.push({icon:"🥩",tr:`Ortalama protein alımı düşük olabilir (${Math.round(proteinAvg)}g/gün)`,en:`Average protein intake may be low (${Math.round(proteinAvg)}g/day)`,severity:"info"});
+        const vitCAvg=avg(20);
+        if(vitCAvg!==null&&vitCAvg<75)flags.push({icon:"🍊",tr:`Vitamin C alımı yetersiz olabilir (${Math.round(vitCAvg)}mg/gün)`,en:`Vitamin C intake may be insufficient (${Math.round(vitCAvg)}mg/day)`,severity:"info"});
+        const calciumAvg=avg(14);
+        if(calciumAvg!==null&&calciumAvg<800)flags.push({icon:"🦴",tr:`Kalsiyum alımı düşük olabilir (${Math.round(calciumAvg)}mg/gün)`,en:`Calcium intake may be low (${Math.round(calciumAvg)}mg/day)`,severity:"info"});
+        const ironAvg=avg(15);
+        if(ironAvg!==null&&ironAvg<10)flags.push({icon:"🩸",tr:`Demir alımı düşük olabilir (${ironAvg.toFixed(1)}mg/gün)`,en:`Iron intake may be low (${ironAvg.toFixed(1)}mg/day)`,severity:"info"});
+
+        if(flags.length===0)return(
+          <div style={{background:"#E8F5E9",border:`1px solid ${C.sage}`,borderRadius:12,padding:16,marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:22}}>✅</span>
+            <span style={{fontSize:13.5,color:C.sage,fontWeight:600}}>{lang==="tr"?"Son kayıtlarda belirgin bir beslenme dengesizliği tespit edilmedi.":"No significant nutritional imbalance detected in recent records."}</span>
+          </div>
+        );
+        return(
+          <div style={{marginBottom:20}}>
+            <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>🔍 {lang==="tr"?"Beslenme Alışkanlığı Analizi":"Eating Habit Analysis"} <span style={{fontSize:10.5,fontWeight:500,opacity:0.6}}>({lang==="tr"?"son kayıtlara göre":"based on recent records"})</span></h4>
+            {flags.map((f,i)=>(
+              <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"10px 14px",background:f.severity==="warn"?C.coralSoft:T.paperDim,borderRadius:10,marginBottom:6}}>
+                <span style={{fontSize:16,flexShrink:0}}>{f.icon}</span>
+                <span style={{fontSize:13,color:f.severity==="warn"?C.coral:T.ink,fontWeight:f.severity==="warn"?600:500,lineHeight:1.5}}>{lang==="tr"?f.tr:f.en}</span>
+              </div>
+            ))}
+            <p style={{fontSize:10.5,color:T.ink,opacity:0.4,marginTop:8,lineHeight:1.5}}>{lang==="tr"?"Bu analiz otomatik ve genel referans değerlerine dayanır; klinik değerlendirmenin yerini tutmaz.":"This analysis is automatic and based on general reference values; it does not replace clinical assessment."}</p>
+          </div>
+        );
+      })()}
+
       {/* 26-value nutrition */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
         <div>
