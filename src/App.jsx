@@ -1130,6 +1130,7 @@ function TrackPage({t,lang,T=C}){
   const[loading,setLoading]=useState(true);
   const[waterMl,setWaterMl]=useState(0);
   const[waterGoal,setWaterGoal]=useState(2000);
+  const[allLoggedDates,setAllLoggedDates]=useState([]);
   const today=new Date().toISOString().slice(0,10);
 
   const load=useCallback(async()=>{
@@ -1139,6 +1140,11 @@ function TrackPage({t,lang,T=C}){
     items.sort((a,b)=>b.ts-a.ts);setEntries(items);
     const wSaved=await sg(`water:${today}`);
     if(wSaved){setWaterMl(wSaved.ml||0);setWaterGoal(wSaved.goal||2000);}
+    const waterKeys=await sl("water:");
+    const waterDates=waterKeys.map(k=>k.replace("water:",""));
+    const entryDates=items.map(e=>e.date);
+    const uniqueDates=[...new Set([...entryDates,...waterDates])].sort();
+    setAllLoggedDates(uniqueDates);
     setLoading(false);
   },[today]);
 
@@ -1162,9 +1168,48 @@ function TrackPage({t,lang,T=C}){
   return(
     <section style={{maxWidth:900,margin:"0 auto",padding:"48px 24px 80px"}}>
       <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px",color:T.ink}}>{t.track.title}</h1>
-      <p style={{color:T.ink,opacity:0.6,fontSize:15,margin:"0 0 32px"}}>{t.track.sub}</p>
+      <p style={{color:T.ink,opacity:0.6,fontSize:15,margin:"0 0 24px"}}>{t.track.sub}</p>
 
-      {/* Water Tracker */}
+      {/* Streak Tracker */}
+      {!loading&&allLoggedDates.length>0&&(()=>{
+        const sortedDates=[...allLoggedDates].sort();
+        let streak=0;
+        let checkDate=new Date();
+        const todayStr=checkDate.toISOString().slice(0,10);
+        const hasToday=sortedDates.includes(todayStr);
+        if(!hasToday)checkDate.setDate(checkDate.getDate()-1);
+        while(true){
+          const dStr=checkDate.toISOString().slice(0,10);
+          if(sortedDates.includes(dStr)){streak++;checkDate.setDate(checkDate.getDate()-1);}
+          else break;
+        }
+        const longestStreak=(()=>{
+          let longest=0,current=0,prevDate=null;
+          for(const d of sortedDates){
+            if(prevDate){
+              const diff=(new Date(d)-new Date(prevDate))/(1000*60*60*24);
+              current=diff===1?current+1:1;
+            }else current=1;
+            longest=Math.max(longest,current);
+            prevDate=d;
+          }
+          return longest;
+        })();
+        if(streak===0)return null;
+        return(
+          <div style={{background:"linear-gradient(135deg,#F59E0B,#E8623F)",borderRadius:14,padding:"18px 22px",marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <span style={{fontSize:32}}>🔥</span>
+              <div>
+                <div style={{fontSize:24,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{streak} {lang==="tr"?(streak===1?"gün":"gündür"):(streak===1?"day":"days")}</div>
+                <div style={{fontSize:12.5,color:"#fff",opacity:0.85,fontWeight:600}}>{lang==="tr"?"kesintisiz takip":"tracking streak"}</div>
+              </div>
+            </div>
+            {longestStreak>streak&&<div style={{textAlign:"right"}}><div style={{fontSize:11,color:"#fff",opacity:0.75}}>{lang==="tr"?"En uzun seri":"Longest streak"}</div><div style={{fontSize:16,fontWeight:700,color:"#fff"}}>{longestStreak} {lang==="tr"?"gün":"days"}</div></div>}
+          </div>
+        );
+      })()}
+
       <Card st={{marginBottom:28,background:T.paper,borderColor:T.line}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:12}}>
           <div>
@@ -1700,6 +1745,8 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[showSupForm,setShowSupForm]=useState(false);
   const[newSup,setNewSup]=useState({name:"",dose:"",freq:"",timing:""});
   const[dietPlan,setDietPlan]=useState(null);
+  const[showShoppingList,setShowShoppingList]=useState(false);
+  const[checkedItems,setCheckedItems]=useState({});
   const[dpDays,setDpDays]=useState(3);
   const[dpEdit,setDpEdit]=useState(null);
   const[dpEditTxt,setDpEditTxt]=useState("");
@@ -1850,6 +1897,25 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const updated={...dietPlan,days:dietPlan.days.filter((_,i)=>i!==idx).map((d,i)=>({...d,day:i+1}))};
     setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
   };
+
+  const generateShoppingList=()=>{
+    if(!dietPlan)return[];
+    const items=new Map();
+    dietPlan.days.forEach(day=>{
+      Object.values(day.meals).forEach(mealText=>{
+        if(!mealText)return;
+        mealText.split("+").forEach(chunk=>{
+          const clean=chunk.trim().replace(/^\d+\s*(adet|dilim|su bardağı|yemek kaşığı|tatlı kaşığı|gram|g|ml)?\s*/i,"").trim();
+          if(clean.length<2)return;
+          const key=clean.toLowerCase();
+          items.set(key,(items.get(key)||{label:clean,count:0}));
+          items.get(key).count++;
+        });
+      });
+    });
+    return[...items.values()].sort((a,b)=>b.count-a.count);
+  };
+  const toggleChecked=(key)=>setCheckedItems(prev=>({...prev,[key]:!prev[key]}));
 
   if(!client)return<section style={{maxWidth:800,margin:"0 auto",padding:"60px 24px"}}><Spin/></section>;
 
@@ -2076,10 +2142,39 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}} className="np">
         <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>📋 {lang==="tr"?"Diyet Planı":"Diet Plan"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Danışana özel yazılı diyet planı oluştur":"Create a custom written diet plan for this client"}</span></div>
         <div style={{display:"flex",gap:8}}>
+          {dietPlan&&<button onClick={()=>{setShowShoppingList(f=>!f);setCheckedItems({});}} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:showShoppingList?T.paperDim:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>🛒 {lang==="tr"?"Alışveriş Listesi":"Shopping List"}</button>}
           {dietPlan&&<button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={14}/> {lang==="tr"?"Yazdır":"Print"}</button>}
           {!dietPlan&&<button onClick={()=>setShowDpForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:C.coral,color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}><Plus size={14}/> {lang==="tr"?"Plan Oluştur":"Create Plan"}</button>}
         </div>
       </div>
+
+      {showShoppingList&&dietPlan&&(()=>{
+        const list=generateShoppingList();
+        const checkedCount=list.filter(item=>checkedItems[item.label.toLowerCase()]).length;
+        return(
+          <div className="np" style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:20,marginBottom:20}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <h4 style={{fontSize:14,fontWeight:700,color:T.ink,margin:0}}>🛒 {lang==="tr"?"Otomatik Alışveriş Listesi":"Auto-Generated Shopping List"}</h4>
+              <span style={{fontSize:12,color:T.ink,opacity:0.5}}>{checkedCount}/{list.length}</span>
+            </div>
+            {list.length===0&&<p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?"Plan öğünlerinden malzeme çıkarılamadı.":"Could not extract ingredients from plan meals."}</p>}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}} className="g2">
+              {list.map((item,i)=>{
+                const key=item.label.toLowerCase();
+                const checked=!!checkedItems[key];
+                return(
+                  <label key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",background:checked?T.paperDim:"transparent",borderRadius:6,cursor:"pointer"}}>
+                    <input type="checkbox" checked={checked} onChange={()=>toggleChecked(key)} style={{width:15,height:15,cursor:"pointer"}}/>
+                    <span style={{fontSize:13,color:T.ink,textDecoration:checked?"line-through":"none",opacity:checked?0.5:1}}>{item.label}</span>
+                    {item.count>1&&<span style={{fontSize:10.5,color:T.ink,opacity:0.4,marginLeft:"auto"}}>×{item.count}</span>}
+                  </label>
+                );
+              })}
+            </div>
+            <button onClick={()=>window.print()} style={{marginTop:14,display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={13}/> {lang==="tr"?"Listeyi Yazdır":"Print List"}</button>
+          </div>
+        );
+      })()}
 
       {showDpForm&&!dietPlan&&(
         <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:18,marginBottom:16}} className="np">
