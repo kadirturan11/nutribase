@@ -169,32 +169,41 @@ const FOODS = [
 const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,420,700,11,900,90,20,15,2.4,400,1.7];
 
 // Turkish Dietetics Exchange List System (Değişim Listesi Sistemi)
+// Official exchange values per Türkiye Diyetisyenler Derneği / Koç Üniversitesi Hastanesi standard
 const EXCHANGE_GROUPS = [
-  {id:"milk", nameTr:"Süt Grubu", nameEn:"Milk Group", icon:"🥛", kcal:90, protein:8, carb:12, fat:0,
-   foodsTr:[{n:"Süt (yağsız)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (yağsız)",a:"1 su bardağı (200g)"},{n:"Ayran",a:"1.5 su bardağı (300ml)"},{n:"Kefir",a:"1 su bardağı (200ml)"}],
-   foodsEn:[{n:"Skim milk",a:"1 cup (200ml)"},{n:"Non-fat yogurt",a:"1 cup (200g)"},{n:"Ayran",a:"1.5 cups (300ml)"},{n:"Kefir",a:"1 cup (200ml)"}]},
-  {id:"meatLow", nameTr:"Et Grubu (Az Yağlı)", nameEn:"Meat Group (Low-fat)", icon:"🍗", kcal:55, protein:7, carb:0, fat:3,
-   foodsTr:[{n:"Tavuk göğsü (derisiz)",a:"30g (1 kibrit kutusu)"},{n:"Balık (yağsız)",a:"30g"},{n:"Yumurta beyazı",a:"2 adet"},{n:"Lor peyniri",a:"30g"}],
-   foodsEn:[{n:"Chicken breast (skinless)",a:"30g"},{n:"Lean fish",a:"30g"},{n:"Egg white",a:"2 pieces"},{n:"Cottage cheese",a:"30g"}]},
-  {id:"meatMed", nameTr:"Et Grubu (Orta Yağlı)", nameEn:"Meat Group (Medium-fat)", icon:"🥩", kcal:75, protein:7, carb:0, fat:5,
-   foodsTr:[{n:"Kırmızı et (yağsız)",a:"30g"},{n:"Tavuk but (derili)",a:"30g"},{n:"Yumurta (tam)",a:"1 adet"},{n:"Beyaz peynir",a:"30g"}],
-   foodsEn:[{n:"Lean red meat",a:"30g"},{n:"Chicken thigh (with skin)",a:"30g"},{n:"Whole egg",a:"1 piece"},{n:"Feta cheese",a:"30g"}]},
-  {id:"meatHigh", nameTr:"Et Grubu (Yüksek Yağlı)", nameEn:"Meat Group (High-fat)", icon:"🥓", kcal:100, protein:7, carb:0, fat:8,
-   foodsTr:[{n:"Kaşar peyniri",a:"30g"},{n:"Sucuk",a:"30g"},{n:"Kıyma (yağlı)",a:"30g"},{n:"Sosis",a:"30g"}],
-   foodsEn:[{n:"Kashar cheese",a:"30g"},{n:"Sujuk",a:"30g"},{n:"Ground beef (fatty)",a:"30g"},{n:"Sausage",a:"30g"}]},
-  {id:"bread", nameTr:"Ekmek ve Tahıl Grubu", nameEn:"Bread & Starch Group", icon:"🍞", kcal:80, protein:3, carb:15, fat:0,
-   foodsTr:[{n:"Ekmek",a:"1 dilim (25g)"},{n:"Pirinç (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Makarna (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Bulgur (pişmiş)",a:"4 yemek kaşığı (90g)"},{n:"Patates (haşlanmış)",a:"1 adet orta (100g)"},{n:"Yulaf ezmesi",a:"3 yemek kaşığı (35g)"}],
-   foodsEn:[{n:"Bread",a:"1 slice (25g)"},{n:"Cooked rice",a:"4 tbsp (90g)"},{n:"Cooked pasta",a:"4 tbsp (90g)"},{n:"Cooked bulgur",a:"4 tbsp (90g)"},{n:"Boiled potato",a:"1 medium (100g)"},{n:"Oatmeal",a:"3 tbsp (35g)"}]},
-  {id:"vegetable", nameTr:"Sebze Grubu", nameEn:"Vegetable Group", icon:"🥦", kcal:25, protein:2, carb:5, fat:0,
-   foodsTr:[{n:"Karışık pişmiş sebze",a:"1 su bardağı (150g)"},{n:"Salata (çiğ)",a:"2 su bardağı (200g)"},{n:"Domates",a:"1 adet orta (100g)"},{n:"Brokoli (pişmiş)",a:"1 su bardağı (150g)"}],
-   foodsEn:[{n:"Mixed cooked vegetables",a:"1 cup (150g)"},{n:"Raw salad",a:"2 cups (200g)"},{n:"Tomato",a:"1 medium (100g)"},{n:"Cooked broccoli",a:"1 cup (150g)"}]},
-  {id:"fruit", nameTr:"Meyve Grubu", nameEn:"Fruit Group", icon:"🍎", kcal:60, protein:0, carb:15, fat:0,
-   foodsTr:[{n:"Elma",a:"1 adet küçük (100g)"},{n:"Muz",a:"1/2 adet (50g)"},{n:"Portakal",a:"1 adet orta (150g)"},{n:"Üzüm",a:"15 adet (75g)"},{n:"Çilek",a:"1 su bardağı (150g)"}],
-   foodsEn:[{n:"Apple",a:"1 small (100g)"},{n:"Banana",a:"1/2 piece (50g)"},{n:"Orange",a:"1 medium (150g)"},{n:"Grapes",a:"15 pieces (75g)"},{n:"Strawberries",a:"1 cup (150g)"}]},
-  {id:"fat", nameTr:"Yağ Grubu", nameEn:"Fat Group", icon:"🫒", kcal:45, protein:0, carb:0, fat:5,
-   foodsTr:[{n:"Zeytinyağı",a:"1 tatlı kaşığı (5g)"},{n:"Tereyağı",a:"1 tatlı kaşığı (5g)"},{n:"Ceviz",a:"2 adet"},{n:"Badem",a:"6 adet"},{n:"Tahin",a:"1 tatlı kaşığı (5g)"}],
-   foodsEn:[{n:"Olive oil",a:"1 tsp (5g)"},{n:"Butter",a:"1 tsp (5g)"},{n:"Walnut",a:"2 pieces"},{n:"Almond",a:"6 pieces"},{n:"Tahini",a:"1 tsp (5g)"}]},
+  {id:"milkFull", nameTr:"Süt Grubu (Tam Yağlı)", nameEn:"Milk Group (Whole-fat)", icon:"🥛", carb:9, protein:6, fat:6,
+   foodsTr:[{n:"Süt (tam yağlı)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (tam yağlı)",a:"¾ su bardağı (150g)"},{n:"Ev yoğurdu",a:"1 su bardağı (200g)"},{n:"Ayran",a:"1.5 su bardağı (300ml)"},{n:"Kefir",a:"1 su bardağı (200ml)"}],
+   foodsEn:[{n:"Whole milk",a:"1 cup (200ml)"},{n:"Whole-fat yogurt",a:"¾ cup (150g)"},{n:"Homemade yogurt",a:"1 cup (200g)"},{n:"Ayran",a:"1.5 cups (300ml)"},{n:"Kefir",a:"1 cup (200ml)"}]},
+  {id:"milkHalf", nameTr:"Süt Grubu (Yarım Yağlı)", nameEn:"Milk Group (Half-fat)", icon:"🥛", carb:9, protein:6, fat:3,
+   foodsTr:[{n:"Süt (yarım yağlı)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (yarım yağlı)",a:"¾ su bardağı (150g)"}],
+   foodsEn:[{n:"Half-fat milk",a:"1 cup (200ml)"},{n:"Half-fat yogurt",a:"¾ cup (150g)"}]},
+  {id:"milkFree", nameTr:"Süt Grubu (Yağsız)", nameEn:"Milk Group (Fat-free)", icon:"🥛", carb:9, protein:6, fat:0,
+   foodsTr:[{n:"Süt (yağsız)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (yağsız)",a:"¾ su bardağı (150g)"},{n:"Laktozsuz süt",a:"1 su bardağı (200ml)"}],
+   foodsEn:[{n:"Skim milk",a:"1 cup (200ml)"},{n:"Fat-free yogurt",a:"¾ cup (150g)"},{n:"Lactose-free milk",a:"1 cup (200ml)"}]},
+  {id:"meat", nameTr:"Et, Peynir, Yumurta Grubu", nameEn:"Meat, Cheese, Egg Group", icon:"🍗", carb:0, protein:6, fat:5,
+   foodsTr:[{n:"Kırmızı et (orta yağlı, kuşbaşı)",a:"3 orta boy (30g çiğ)"},{n:"Kıyma",a:"1 yemek kaşığı (30g çiğ)"},{n:"Köfte",a:"1 küçük yumurta boyutu (40g çiğ)"},{n:"Tavuk göğüs fileto",a:"¼ küçük boy (30g çiğ)"},{n:"Tavuk baget (kemiksiz)",a:"1 küçük boy (30g çiğ)"},{n:"Levrek",a:"1/5 küçük boy (55g çiğ)"},{n:"Somon",a:"2 parmak boyutu (40g çiğ)"},{n:"Yumurta (tavuk)",a:"1 küçük boy (55g)"},{n:"Beyaz peynir (tam yağlı)",a:"2 parmak boyutu (40g)"},{n:"Kaşar peyniri",a:"3 yarım parmak boyutu (30g)"},{n:"Lor peyniri",a:"3 yemek kaşığı (50g)"}],
+   foodsEn:[{n:"Red meat (medium-fat, diced)",a:"3 medium pieces (30g raw)"},{n:"Ground meat",a:"1 tbsp (30g raw)"},{n:"Meatball",a:"1 small egg size (40g raw)"},{n:"Chicken breast fillet",a:"¼ small piece (30g raw)"},{n:"Chicken drumstick (boneless)",a:"1 small piece (30g raw)"},{n:"Sea bass",a:"1/5 small piece (55g raw)"},{n:"Salmon",a:"2 finger-widths (40g raw)"},{n:"Egg (chicken)",a:"1 small (55g)"},{n:"Feta cheese (full-fat)",a:"2 finger-widths (40g)"},{n:"Kashar cheese",a:"3 half finger-widths (30g)"},{n:"Cottage cheese (lor)",a:"3 tbsp (50g)"}]},
+  {id:"bread", nameTr:"Ekmek, Tahıl, Kurubaklagil Grubu", nameEn:"Bread, Grain & Legume Group", icon:"🍞", carb:15, protein:2, fat:0,
+   foodsTr:[{n:"Beyaz/buğday ekmek",a:"1 ince dilim (25g)"},{n:"Çavdar/yulaf/tam buğday/kepekli ekmek",a:"1 ince dilim (30g)"},{n:"Pirinç pilavı (pişmiş)",a:"2 yemek kaşığı (20g çiğ)"},{n:"Bulgur pilavı (pişmiş)",a:"3 yemek kaşığı (20g çiğ)"},{n:"Makarna (pişmiş)",a:"3 yemek kaşığı (20g çiğ)"},{n:"Patates",a:"1 küçük boy (100g pişmiş)"},{n:"Nohut/kuru fasulye (pişmiş)",a:"3 yemek kaşığı (25g çiğ)"},{n:"Mercimek (pişmiş)",a:"2 yemek kaşığı (25g çiğ)"},{n:"Yulaf ezmesi",a:"2 yemek kaşığı (25g)"},{n:"Mısır (koçan)",a:"1 küçük boy (90g)"}],
+   foodsEn:[{n:"White/wheat bread",a:"1 thin slice (25g)"},{n:"Rye/oat/whole wheat bread",a:"1 thin slice (30g)"},{n:"Cooked rice",a:"2 tbsp (20g raw)"},{n:"Cooked bulgur",a:"3 tbsp (20g raw)"},{n:"Cooked pasta",a:"3 tbsp (20g raw)"},{n:"Potato",a:"1 small (100g cooked)"},{n:"Chickpeas/white beans (cooked)",a:"3 tbsp (25g raw)"},{n:"Lentils (cooked)",a:"2 tbsp (25g raw)"},{n:"Oatmeal",a:"2 tbsp (25g)"},{n:"Corn (on cob)",a:"1 small (90g)"}]},
+  {id:"vegetable", nameTr:"Sebze Grubu", nameEn:"Vegetable Group", icon:"🥦", carb:6, protein:2, fat:0,
+   foodsTr:[{n:"Domates",a:"1 büyük boy (200g)"},{n:"Salatalık",a:"2 orta boy (200g)"},{n:"Havuç (pişmiş)",a:"5-6 yemek kaşığı"},{n:"Brokoli (çiğ)",a:"7 karışık boy çiçek (125g)"},{n:"Ispanak (çiğ)",a:"1 orta bağ (200g)"},{n:"Patlıcan (çiğ)",a:"1 büyük boy (200g)"},{n:"Kabak (çiğ)",a:"1 büyük boy (250g)"},{n:"Karnabahar (çiğ)",a:"3 orta boy çiçek (150g)"},{n:"Taze fasulye (çiğ)",a:"6 orta boy (85g)"},{n:"Biber, dolmalık",a:"3 büyük boy (150g)"}],
+   foodsEn:[{n:"Tomato",a:"1 large (200g)"},{n:"Cucumber",a:"2 medium (200g)"},{n:"Carrot (cooked)",a:"5-6 tbsp"},{n:"Broccoli (raw)",a:"7 mixed florets (125g)"},{n:"Spinach (raw)",a:"1 medium bunch (200g)"},{n:"Eggplant (raw)",a:"1 large (200g)"},{n:"Zucchini (raw)",a:"1 large (250g)"},{n:"Cauliflower (raw)",a:"3 medium florets (150g)"},{n:"Green beans (raw)",a:"6 medium (85g)"},{n:"Bell pepper",a:"3 large (150g)"}]},
+  {id:"fruit", nameTr:"Meyve Grubu", nameEn:"Fruit Group", icon:"🍎", carb:15, protein:0, fat:0,
+   foodsTr:[{n:"Elma",a:"1 orta boy (120g net)"},{n:"Armut",a:"1 küçük boy (125g net)"},{n:"Muz",a:"1 küçük boy (85g net)"},{n:"Portakal",a:"1 orta boy (140g net)"},{n:"Mandalina",a:"2 orta boy (140g net)"},{n:"Çilek",a:"18 orta boy (300g)"},{n:"Üzüm",a:"25 karışık boy (100g)"},{n:"Karpuz",a:"1/8 orta boyun yarısı (220g net)"},{n:"Kiraz",a:"11 büyük boy (110g net)"},{n:"Kayısı",a:"7 orta boy (175g net)"},{n:"Kuru kayısı",a:"4 küçük boy (25g)"},{n:"Kuru üzüm",a:"1 yemek kaşığı (20g)"}],
+   foodsEn:[{n:"Apple",a:"1 medium (120g net)"},{n:"Pear",a:"1 small (125g net)"},{n:"Banana",a:"1 small (85g net)"},{n:"Orange",a:"1 medium (140g net)"},{n:"Tangerine",a:"2 medium (140g net)"},{n:"Strawberries",a:"18 medium (300g)"},{n:"Grapes",a:"25 mixed (100g)"},{n:"Watermelon",a:"1/8 half medium (220g net)"},{n:"Cherries",a:"11 large (110g net)"},{n:"Apricot",a:"7 medium (175g net)"},{n:"Dried apricot",a:"4 small (25g)"},{n:"Raisins",a:"1 tbsp (20g)"}]},
+  {id:"fat", nameTr:"Yağ Grubu", nameEn:"Fat Group", icon:"🫒", carb:0, protein:0, fat:5,
+   foodsTr:[{n:"Sıvı yağ (zeytinyağı, ayçiçek, mısır)",a:"1 tatlı kaşığı (5g)"},{n:"Siyah/yeşil zeytin",a:"10 orta boy (35g net)"},{n:"Avokado",a:"¼ küçük boy (40g net)"},{n:"Tereyağı",a:"1 tatlı kaşığı (5g)"}],
+   foodsEn:[{n:"Liquid oil (olive, sunflower, corn)",a:"1 tsp (5g)"},{n:"Black/green olives",a:"10 medium (35g net)"},{n:"Avocado",a:"¼ small (40g net)"},{n:"Butter",a:"1 tsp (5g)"}]},
+  {id:"nuts", nameTr:"Yağlı Tohumlar ve Sert Kabuklu Yemişler", nameEn:"Oil Seeds & Nuts Group", icon:"🥜", carb:1.5, protein:2, fat:5,
+   foodsTr:[{n:"Ceviz",a:"2 bütün orta boy (10g net)"},{n:"Badem",a:"10 orta boy (10g net)"},{n:"Fındık",a:"8 orta boy (10g net)"},{n:"Antep fıstığı",a:"15 orta boy (10g net)"},{n:"Yer fıstığı",a:"13 orta boy (10g net)"},{n:"Ay çekirdeği",a:"3 yemek kaşığı (10g net)"},{n:"Kabak çekirdeği",a:"2 yemek kaşığı (10g net)"}],
+   foodsEn:[{n:"Walnut",a:"2 whole medium (10g net)"},{n:"Almond",a:"10 medium (10g net)"},{n:"Hazelnut",a:"8 medium (10g net)"},{n:"Pistachio",a:"15 medium (10g net)"},{n:"Peanut",a:"13 medium (10g net)"},{n:"Sunflower seeds",a:"3 tbsp (10g net)"},{n:"Pumpkin seeds",a:"2 tbsp (10g net)"}]},
+  {id:"sugar", nameTr:"Şeker ve Şekerli Besinler Grubu", nameEn:"Sugar & Sweets Group", icon:"🍯", carb:15, protein:0, fat:0,
+   foodsTr:[{n:"Kesme şeker",a:"5-6 adet (15g)"},{n:"Toz şeker",a:"3 silme tatlı kaşığı (15g)"},{n:"Bal",a:"2.5 silme tatlı kaşığı (20g)"},{n:"Pekmez",a:"1 yemek kaşığı (20g)"},{n:"Reçel/marmelat",a:"3 silme tatlı kaşığı (15g)"},{n:"Çikolata",a:"3 küçük parça (20g)"}],
+   foodsEn:[{n:"Sugar cubes",a:"5-6 pieces (15g)"},{n:"Granulated sugar",a:"3 level tsp (15g)"},{n:"Honey",a:"2.5 level tsp (20g)"},{n:"Grape molasses",a:"1 tbsp (20g)"},{n:"Jam/marmalade",a:"3 level tsp (15g)"},{n:"Chocolate",a:"3 small pieces (20g)"}]},
 ];
+// Derived kcal per exchange (4-4-9 rule) computed at runtime via exchangeKcal()
+function exchangeKcal(g){ return Math.round(g.carb*4 + g.protein*4 + g.fat*9); }
 
 const COND = [
   {id:"diabetes2",tr:"Tip 2 Diyabet",en:"Type 2 Diabetes",icon:"🩸",
@@ -588,6 +597,21 @@ const sd=async k=>{try{localStorage.removeItem(LS+k);return true;}catch{return f
 const sl=async p=>{try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(LS+p))ks.push(k.slice(LS.length));}return ks;}catch{return[];}};
 
 function calcBMR({gender,age,height,weight}){const b=10*weight+6.25*height-5*age;return gender==="male"?b+5:b-161;}
+// WHO/Schofield weight-based equations (kcal/day) — standard reference in Turkish dietetics education
+function calcBMR_WHO({gender,age,weight}){
+  const W=weight;
+  if(gender==="male"){
+    if(age<18)return 17.5*W+651;
+    if(age<30)return 15.3*W+679;
+    if(age<60)return 11.6*W+879;
+    return 13.5*W+487;
+  }else{
+    if(age<18)return 12.2*W+746;
+    if(age<30)return 14.7*W+496;
+    if(age<60)return 8.7*W+829;
+    return 10.5*W+596;
+  }
+}
 const ACT=[1.2,1.375,1.55,1.725,1.9];
 function calcAll({gender,age,height,weight,actIdx,goal}){
   const bmr=calcBMR({gender,age:+age,height:+height,weight:+weight});
@@ -2716,6 +2740,9 @@ function ExchangeListPage({t,lang,nav,T=C}){
   const[selClientKey,setSelClientKey]=useState("");
   const[savedMsg,setSavedMsg]=useState(false);
   const[expandedGroup,setExpandedGroup]=useState(null);
+  const[showCalc,setShowCalc]=useState(false);
+  const[calcForm,setCalcForm]=useState({gender:"female",age:"30",height:"165",weight:"65",actIdx:1,formula:"mifflin",condition:""});
+  const[calcResult,setCalcResult]=useState(null);
 
   useEffect(()=>{(async()=>{
     const ks=await sl("client:");const items=[];
@@ -2726,9 +2753,56 @@ function ExchangeListPage({t,lang,nav,T=C}){
 
   const upd=(id,delta)=>setCounts(c=>({...c,[id]:Math.max(0,c[id]+delta)}));
 
+  // Fill calc form from selected client
+  const loadClientIntoCalc=(clientKey)=>{
+    const c=clients.find(cl=>cl.key===clientKey);
+    if(!c)return;
+    setCalcForm(f=>({...f,gender:c.gender||"female",age:c.age||f.age,height:c.height||f.height,weight:c.weight||f.weight,condition:c.condition||""}));
+  };
+
+  const runCalculation=()=>{
+    const {gender,age,height,weight,actIdx,formula}=calcForm;
+    const bmr=formula==="who"
+      ? calcBMR_WHO({gender,age:+age,weight:+weight})
+      : calcBMR({gender,age:+age,height:+height,weight:+weight});
+    const tdee=bmr*ACT[actIdx];
+    const target=Math.round(tdee);
+
+    // Standard macro split: 50% carb, 20% protein, 30% fat (adjustable via condition-aware notes)
+    const targetCarb=target*0.50/4;
+    const targetProtein=target*0.20/4;
+    const targetFat=target*0.30/9;
+
+    // Greedy allocation across exchange groups to approximate targets
+    const sc={};
+    EXCHANGE_GROUPS.forEach(g=>sc[g.id]=0);
+    // Milk: 2 exchanges default (prefer low-fat/free variant), Meat: based on protein need, Fat/nuts: based on fat need
+    sc.milkFree=2;
+    let remProtein=targetProtein-(sc.milkFree*6);
+    let meatCount=Math.max(2,Math.round(remProtein/6));
+    sc.meat=meatCount;
+    remProtein-=meatCount*6;
+    let remCarb=targetCarb-(sc.milkFree*9);
+    // distribute carbs across bread/fruit/vegetable roughly 55/25/20
+    const breadCount=Math.max(2,Math.round((remCarb*0.55)/15));
+    const fruitCount=Math.max(2,Math.round((remCarb*0.25)/15));
+    const vegCount=Math.max(3,Math.round((remCarb*0.20)/6));
+    sc.bread=breadCount;sc.fruit=fruitCount;sc.vegetable=vegCount;
+    let usedFat=(sc.milkFree*0)+(sc.meat*5);
+    let remFat=targetFat-usedFat;
+    const fatCount=Math.max(1,Math.round(remFat/5*0.6));
+    const nutsCount=Math.max(1,Math.round(remFat/5*0.4));
+    sc.fat=fatCount;sc.nuts=nutsCount;
+    sc.sugar=0;
+
+    setCounts(sc);
+    setCalcResult({bmr:Math.round(bmr),tdee:target,formula});
+    setShowCalc(false);
+  };
+
   const totals=EXCHANGE_GROUPS.reduce((acc,g)=>{
     const n=counts[g.id]||0;
-    acc.kcal+=n*g.kcal;acc.protein+=n*g.protein;acc.carb+=n*g.carb;acc.fat+=n*g.fat;
+    acc.kcal+=n*exchangeKcal(g);acc.protein+=n*g.protein;acc.carb+=n*g.carb;acc.fat+=n*g.fat;
     return acc;
   },{kcal:0,protein:0,carb:0,fat:0});
 
@@ -2746,7 +2820,81 @@ function ExchangeListPage({t,lang,nav,T=C}){
       <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",color:T.ink,display:"flex",alignItems:"center",gap:10}}>
         ⚖️ {lang==="tr"?"Değişim Listesi Sistemi":"Exchange List System"} <PBadge sm/>
       </h1>
-      <p style={{color:T.ink,opacity:0.6,fontSize:14.5,margin:"0 0 32px"}}>{lang==="tr"?"Türk diyetetik pratiğinde kullanılan standart besin değişim grupları. Her grup sabit kalori/makro değerine sahiptir; danışana kaç 'değişim' verileceğini belirleyip otomatik toplam hesaplayın.":"Standard food exchange groups used in Turkish dietetic practice. Each group has fixed calorie/macro values; set how many exchanges to assign and get automatic totals."}</p>
+      <p style={{color:T.ink,opacity:0.6,fontSize:14.5,margin:"0 0 20px"}}>{lang==="tr"?"Türk diyetetik pratiğinde kullanılan standart besin değişim grupları. Her grup sabit kalori/makro değerine sahiptir; danışana kaç 'değişim' verileceğini belirleyip otomatik toplam hesaplayın.":"Standard food exchange groups used in Turkish dietetic practice. Each group has fixed calorie/macro values; set how many exchanges to assign and get automatic totals."}</p>
+
+      {/* WHO/Mifflin auto-calculation trigger */}
+      <div style={{marginBottom:28}}>
+        <button onClick={()=>setShowCalc(f=>!f)} style={{display:"flex",alignItems:"center",gap:8,padding:"12px 20px",borderRadius:10,border:"none",background:C.coral,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>🧮 {lang==="tr"?"Otomatik Kalori Hesapla & Öner":"Auto-Calculate Calories & Suggest"}</button>
+
+        {showCalc&&(
+          <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:22,marginTop:14}}>
+            <h4 style={{fontSize:14,fontWeight:700,color:T.ink,margin:"0 0 16px"}}>{lang==="tr"?"Danışan Bilgileri ile Değişim Önerisi Oluştur":"Generate Exchange Suggestion from Client Info"}</h4>
+
+            {clients.length>0&&(
+              <div style={{marginBottom:16}}>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Danışandan Bilgi Çek (isteğe bağlı)":"Pull Info from Client (optional)"}</label>
+                <select onChange={e=>loadClientIntoCalc(e.target.value)} defaultValue="" style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",cursor:"pointer"}}>
+                  <option value="">{lang==="tr"?"Manuel gir...":"Enter manually..."}</option>
+                  {clients.map(c=><option key={c.key} value={c.key}>{c.name}</option>)}
+                </select>
+              </div>
+            )}
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}} className="g2">
+              <div>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Cinsiyet":"Gender"}</label>
+                <div style={{display:"flex",gap:6}}>
+                  {[{v:"female",l:lang==="tr"?"Kadın":"Female"},{v:"male",l:lang==="tr"?"Erkek":"Male"}].map(o=>(
+                    <button key={o.v} onClick={()=>setCalcForm(f=>({...f,gender:o.v}))} style={{flex:1,padding:"8px",borderRadius:8,fontSize:12.5,fontWeight:600,border:`1.5px solid ${calcForm.gender===o.v?C.ink:T.line}`,background:calcForm.gender===o.v?C.ink:"transparent",color:calcForm.gender===o.v?"#fff":T.ink,cursor:"pointer",fontFamily:"inherit"}}>{o.l}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Yaş":"Age"}</label>
+                <input type="number" value={calcForm.age} onChange={e=>setCalcForm(f=>({...f,age:e.target.value}))} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}} className="g2">
+              <div>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Boy (cm)":"Height (cm)"}</label>
+                <input type="number" value={calcForm.height} onChange={e=>setCalcForm(f=>({...f,height:e.target.value}))} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Kilo (kg)":"Weight (kg)"}</label>
+                <input type="number" value={calcForm.weight} onChange={e=>setCalcForm(f=>({...f,weight:e.target.value}))} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+              </div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Aktivite Düzeyi":"Activity Level"}</label>
+              <select value={calcForm.actIdx} onChange={e=>setCalcForm(f=>({...f,actIdx:Number(e.target.value)}))} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",cursor:"pointer"}}>
+                {t.calc.act.map((a,i)=><option key={i} value={i}>{a}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Hesaplama Formülü":"Calculation Formula"}</label>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>setCalcForm(f=>({...f,formula:"mifflin"}))} style={{flex:1,padding:"10px",borderRadius:8,fontSize:12.5,fontWeight:600,border:`1.5px solid ${calcForm.formula==="mifflin"?C.coral:T.line}`,background:calcForm.formula==="mifflin"?C.coralSoft:"transparent",color:calcForm.formula==="mifflin"?C.coral:T.ink,cursor:"pointer",fontFamily:"inherit"}}>Mifflin-St Jeor</button>
+                <button onClick={()=>setCalcForm(f=>({...f,formula:"who"}))} style={{flex:1,padding:"10px",borderRadius:8,fontSize:12.5,fontWeight:600,border:`1.5px solid ${calcForm.formula==="who"?C.coral:T.line}`,background:calcForm.formula==="who"?C.coralSoft:"transparent",color:calcForm.formula==="who"?C.coral:T.ink,cursor:"pointer",fontFamily:"inherit"}}>WHO / Schofield</button>
+              </div>
+              <p style={{fontSize:10.5,color:T.ink,opacity:0.45,marginTop:6,lineHeight:1.5}}>{lang==="tr"?"Mifflin-St Jeor boy+kiloya dayalıdır (güncel klinik standart). WHO/Schofield ise yaş grubu + kiloya dayalı klasik denklemdir.":"Mifflin-St Jeor is based on height+weight (modern clinical standard). WHO/Schofield is the classic age-group + weight-based equation."}</p>
+            </div>
+            {calcForm.condition&&(calcForm.condition.toLowerCase().includes("hiper")||calcForm.condition.toLowerCase().includes("böbrek")||calcForm.condition.toLowerCase().includes("kidney")||calcForm.condition.toLowerCase().includes("hyper"))&&(
+              <div style={{display:"flex",gap:8,padding:12,background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:8,marginBottom:16}}>
+                <AlertCircle size={15} color={C.gold} style={{flexShrink:0,marginTop:1}}/>
+                <span style={{fontSize:12,color:T.ink,opacity:0.8}}>{lang==="tr"?`Danışanın durumu "${calcForm.condition}" — süt/et grubu seçiminde az tuzlu/düşük sodyumlu ürünleri tercih edin.`:`Client condition is "${calcForm.condition}" — prefer low-salt/low-sodium options when selecting milk/meat items.`}</span>
+              </div>
+            )}
+            <button onClick={runCalculation} style={{width:"100%",padding:"12px",borderRadius:9,border:"none",background:C.ink,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{lang==="tr"?"Hesapla ve Değişimleri Öner":"Calculate & Suggest Exchanges"}</button>
+          </div>
+        )}
+
+        {calcResult&&(
+          <div style={{display:"flex",gap:16,alignItems:"center",background:T.paperDim,borderRadius:10,padding:"12px 16px",marginTop:12}}>
+            <Check size={16} color={C.sage}/>
+            <span style={{fontSize:13,color:T.ink}}>{lang==="tr"?"Hesaplandı":"Calculated"}: <strong>{calcResult.tdee} kcal</strong> ({calcResult.formula==="who"?"WHO/Schofield":"Mifflin-St Jeor"}, BMR: {calcResult.bmr} kcal) — {lang==="tr"?"aşağıdaki değişim sayıları otomatik önerildi, dilediğin gibi ayarlayabilirsin.":"exchange counts suggested below, adjust as needed."}</span>
+          </div>
+        )}
+      </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:28,alignItems:"start"}} className="g2">
         {/* Reference + Calculator */}
@@ -2763,7 +2911,7 @@ function ExchangeListPage({t,lang,nav,T=C}){
                     <span style={{fontSize:24}}>{g.icon}</span>
                     <div>
                       <div style={{fontSize:14.5,fontWeight:700,color:T.ink}}>{name}</div>
-                      <div style={{fontSize:11.5,color:T.ink,opacity:0.5}}>1 {lang==="tr"?"değişim":"exchange"} = {g.kcal} kcal · P:{g.protein}g K:{g.carb}g Y:{g.fat}g</div>
+                      <div style={{fontSize:11.5,color:T.ink,opacity:0.5}}>1 {lang==="tr"?"değişim":"exchange"} = {exchangeKcal(g)} kcal · P:{g.protein}g K:{g.carb}g Y:{g.fat}g</div>
                     </div>
                     {isExp?<ChevronUp size={16} style={{opacity:0.4,marginLeft:"auto"}}/>:<ChevronDown size={16} style={{opacity:0.4,marginLeft:"auto"}}/>}
                   </div>
