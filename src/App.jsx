@@ -880,8 +880,15 @@ function FoodPage({t,lang,isPro,T=C}){
   const[mSel,setMSel]=useState(null);
   const[mAmt,setMAmt]=useState("100");
   const today=new Date().toISOString().slice(0,10);
+  const[mood,setMood]=useState(null);
+  const[energy,setEnergy]=useState(null);
+  const[journalNote,setJournalNote]=useState("");
 
-  useEffect(()=>{(async()=>{const saved=await sg(`meals:${today}`);if(saved)setMeals(saved);})();},[today]);
+  useEffect(()=>{(async()=>{const saved=await sg(`meals:${today}`);if(saved)setMeals(saved);const j=await sg(`journal:${today}`);if(j){setMood(j.mood||null);setEnergy(j.energy||null);setJournalNote(j.note||"");}})();},[today]);
+
+  const saveJournal=async(newMood,newEnergy,newNote)=>{
+    await ss(`journal:${today}`,{mood:newMood!==undefined?newMood:mood,energy:newEnergy!==undefined?newEnergy:energy,note:newNote!==undefined?newNote:journalNote,date:today});
+  };
 
   const tf=t.food;
   const results=query.length<2?[]:FOODS.filter(f=>{const q=query.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,10);
@@ -1135,6 +1142,31 @@ function FoodPage({t,lang,isPro,T=C}){
         {allItems.length>0&&<div style={{background:C.ink,borderRadius:14,padding:"18px 24px",marginBottom:24,display:"flex",gap:32,flexWrap:"wrap"}}>
           {[{l:lang==="tr"?"Toplam Kalori":"Total Calories",v:Math.round(totalKcal),u:"kcal",hi:true},{l:"Protein",v:Math.round(totalP),u:"g"},{l:lang==="tr"?"Karbonhidrat":"Carbs",v:Math.round(totalC),u:"g"},{l:lang==="tr"?"Yağ":"Fat",v:Math.round(totalF),u:"g"},{l:lang==="tr"?"Lif":"Fiber",v:Math.round(totalFib),u:"g"}].map((item,i)=><div key={i}><div style={{fontSize:11,fontWeight:600,color:"#fff",opacity:0.55,marginBottom:4,letterSpacing:"0.05em",textTransform:"uppercase"}}>{item.l}</div><div style={{display:"flex",alignItems:"baseline",gap:4}}><span style={{fontSize:item.hi?28:22,fontWeight:800,color:"#fff",fontFamily:"'Source Serif 4',Georgia,serif"}}>{item.v}</span><span style={{fontSize:12,color:"#fff",opacity:0.6,fontWeight:600}}>{item.u}</span></div></div>)}
         </div>}
+
+        {/* Mood & Energy Journal — inspired by Practice Better's food & mood journal */}
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:24}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:T.ink,margin:"0 0 14px",display:"flex",alignItems:"center",gap:6}}>📝 {lang==="tr"?"Ruh Hali & Enerji Günlüğü":"Mood & Energy Journal"}</h3>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:14}} className="g2">
+            <div>
+              <div style={{fontSize:11.5,fontWeight:600,color:T.ink,opacity:0.6,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>{lang==="tr"?"Bugün Nasıl Hissediyorsun?":"How do you feel today?"}</div>
+              <div style={{display:"flex",gap:6}}>
+                {[{v:1,e:"😞"},{v:2,e:"😕"},{v:3,e:"😐"},{v:4,e:"🙂"},{v:5,e:"😄"}].map(m=>(
+                  <button key={m.v} onClick={()=>{setMood(m.v);saveJournal(m.v,undefined,undefined);}} style={{width:38,height:38,borderRadius:"50%",border:`2px solid ${mood===m.v?C.coral:T.line}`,background:mood===m.v?C.coralSoft:"transparent",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.e}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11.5,fontWeight:600,color:T.ink,opacity:0.6,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>⚡ {lang==="tr"?"Enerji Seviyesi":"Energy Level"}</div>
+              <div style={{display:"flex",gap:6}}>
+                {[1,2,3,4,5].map(lvl=>(
+                  <button key={lvl} onClick={()=>{setEnergy(lvl);saveJournal(undefined,lvl,undefined);}} style={{flex:1,height:38,borderRadius:8,border:`2px solid ${energy>=lvl?C.gold:T.line}`,background:energy>=lvl?C.gold:"transparent",cursor:"pointer"}}/>
+                ))}
+              </div>
+            </div>
+          </div>
+          <textarea value={journalNote} onChange={e=>setJournalNote(e.target.value)} onBlur={()=>saveJournal(undefined,undefined,journalNote)} rows={2} placeholder={lang==="tr"?"Bugün beslenme ile ilgili bir gözlem, sindirim sorunu, kabızlık vb...":"Any note about today's nutrition, digestion, bloating, etc..."} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none",resize:"vertical"}}/>
+        </div>
+
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}} className="g2">
           {slots.map(slot=>(
             <div key={slot.key} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:18,minHeight:180}}>
