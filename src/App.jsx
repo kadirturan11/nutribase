@@ -399,6 +399,55 @@ const EXCHANGE_GROUPS = [
 // Derived kcal per exchange (4-4-9 rule) computed at runtime via exchangeKcal()
 function exchangeKcal(g){ return Math.round(g.carb*4 + g.protein*4 + g.fat*9); }
 
+// Parses a free-text meal string like "2 yumurta + tam tahıllı ekmek + domates" and estimates
+// its nutritional content by fuzzy-matching each "+"-separated chunk against the FOODS database.
+// Portion size is inferred from leading quantity words when present, otherwise defaults to 100g
+// (or a food-appropriate typical portion for countable items like eggs).
+const PORTION_HINTS={"yumurta":55,"dilim":30,"adet":80,"bardak":200,"kaşık":15,"avuç":30,"porsiyon":150};
+function estimateMealNutrition(mealText){
+  if(!mealText||!mealText.trim())return null;
+  const chunks=mealText.split("+").map(c=>c.trim()).filter(Boolean);
+  let totals={kcal:0,protein:0,carb:0,fat:0};
+  let matchedCount=0;
+  chunks.forEach(chunk=>{
+    const lower=chunk.toLowerCase();
+    // extract a leading quantity multiplier, e.g. "2 yumurta" -> qty=2
+    const qtyMatch=lower.match(/^(\d+)\s*/);
+    const qty=qtyMatch?parseInt(qtyMatch[1]):1;
+    const cleanedName=lower.replace(/^\d+\s*/,"").trim();
+    // find best matching food by substring overlap
+    const match=FOODS.find(f=>{
+      const fn=f.tr.toLowerCase();
+      return cleanedName.includes(fn)||fn.includes(cleanedName)||cleanedName.split(" ").some(w=>w.length>3&&fn.includes(w));
+    });
+    if(!match)return;
+    matchedCount++;
+    // infer portion size
+    let portion=100;
+    for(const[hint,grams]of Object.entries(PORTION_HINTS)){
+      if(lower.includes(hint)){portion=grams;break;}
+    }
+    if(match.cat==="yumurta-süt"&&match.tr.toLowerCase().includes("yumurta"))portion=55;
+    const factor=(portion*qty)/100;
+    totals.kcal+=match.v[0]*factor;
+    totals.protein+=match.v[1]*factor;
+    totals.carb+=match.v[3]*factor;
+    totals.fat+=match.v[2]*factor;
+  });
+  if(matchedCount===0)return null;
+  return{kcal:Math.round(totals.kcal),protein:Math.round(totals.protein),carb:Math.round(totals.carb),fat:Math.round(totals.fat),matchedCount,totalChunks:chunks.length};
+}
+function estimateDayNutrition(meals){
+  const slots=["b","l","d","s"];
+  let day={kcal:0,protein:0,carb:0,fat:0};
+  let anyMatch=false;
+  slots.forEach(slot=>{
+    const est=estimateMealNutrition(meals[slot]);
+    if(est){anyMatch=true;day.kcal+=est.kcal;day.protein+=est.protein;day.carb+=est.carb;day.fat+=est.fat;}
+  });
+  return anyMatch?day:null;
+}
+
 const COND = [
   {id:"diabetes2",tr:"Tip 2 Diyabet",en:"Type 2 Diabetes",icon:"🩸",
    ovTr:"Kan şekeri regülasyonunu desteklemek için düşük glisemik indeksli, kompleks karbonhidrat ağırlıklı, düzenli öğün saatlerine dayalı bir yaklaşım.",
@@ -2820,6 +2869,36 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
             <button onClick={deleteDietPlan} style={{padding:"9px 12px",borderRadius:8,border:`1px solid ${C.coral}`,background:"transparent",color:C.coral,cursor:"pointer"}}><Trash2 size={14}/></button>
           </div>
 
+          {/* Live nutrition analysis summary — matches each meal's text against the food database */}
+          {(()=>{
+            const dayEstimates=dietPlan.days.map(d=>estimateDayNutrition(d.meals)).filter(Boolean);
+            if(dayEstimates.length===0)return null;
+            const avgKcal=Math.round(dayEstimates.reduce((s,d)=>s+d.kcal,0)/dayEstimates.length);
+            const avgProtein=Math.round(dayEstimates.reduce((s,d)=>s+d.protein,0)/dayEstimates.length);
+            const avgCarb=Math.round(dayEstimates.reduce((s,d)=>s+d.carb,0)/dayEstimates.length);
+            const avgFat=Math.round(dayEstimates.reduce((s,d)=>s+d.fat,0)/dayEstimates.length);
+            const target=client.targetKcal?Number(client.targetKcal):null;
+            const diffPct=target?Math.round(((avgKcal-target)/target)*100):null;
+            const isClose=diffPct!==null&&Math.abs(diffPct)<=10;
+            const isFar=diffPct!==null&&Math.abs(diffPct)>20;
+            const statusColor=target?(isClose?C.sage:isFar?C.coral:C.gold):T.ink;
+            return(
+              <div style={{background:C.ink,borderRadius:14,padding:"18px 22px",marginBottom:16}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
+                  <span style={{fontSize:11,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📊 {lang==="tr"?"Otomatik Besin Analizi":"Automatic Nutrition Analysis"} <span style={{fontWeight:500,opacity:0.7}}>({lang==="tr"?`${dayEstimates.length}/${dietPlan.days.length} gün eşleşti`:`${dayEstimates.length}/${dietPlan.days.length} days matched`})</span></span>
+                  {target&&<span style={{fontSize:12,fontWeight:700,color:statusColor,background:"rgba(255,255,255,0.1)",padding:"4px 10px",borderRadius:12}}>{diffPct>0?"+":""}{diffPct}% {lang==="tr"?"hedeften":"vs target"}</span>}
+                </div>
+                <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+                  <div><div style={{fontSize:10.5,color:"#fff",opacity:0.55,marginBottom:3,textTransform:"uppercase"}}>{lang==="tr"?"Günlük Ort.":"Daily Avg"}</div><div style={{fontSize:26,fontWeight:800,color:statusColor==="normal"?"#fff":statusColor,fontFamily:"'Source Serif 4',Georgia,serif"}}>{avgKcal}<span style={{fontSize:13,opacity:0.6,fontWeight:600}}> kcal</span></div>{target&&<div style={{fontSize:10.5,color:"#fff",opacity:0.5}}>{lang==="tr"?"Hedef":"Target"}: {target} kcal</div>}</div>
+                  <div><div style={{fontSize:10.5,color:"#fff",opacity:0.55,marginBottom:3,textTransform:"uppercase"}}>Protein</div><div style={{fontSize:18,fontWeight:700,color:"#fff"}}>{avgProtein}g</div></div>
+                  <div><div style={{fontSize:10.5,color:"#fff",opacity:0.55,marginBottom:3,textTransform:"uppercase"}}>{lang==="tr"?"Karb":"Carbs"}</div><div style={{fontSize:18,fontWeight:700,color:"#fff"}}>{avgCarb}g</div></div>
+                  <div><div style={{fontSize:10.5,color:"#fff",opacity:0.55,marginBottom:3,textTransform:"uppercase"}}>{lang==="tr"?"Yağ":"Fat"}</div><div style={{fontSize:18,fontWeight:700,color:"#fff"}}>{avgFat}g</div></div>
+                </div>
+                <p style={{fontSize:10.5,color:"#fff",opacity:0.4,marginTop:12,marginBottom:0,lineHeight:1.5}}>{lang==="tr"?"Bu analiz, öğün metinlerindeki besinleri veritabanıyla otomatik eşleştirerek tahmini olarak hesaplanır; kesin değer için gramaj netleştirilmelidir.":"This analysis is estimated by automatically matching meal text against the food database; clarify exact gram amounts for precise values."}</p>
+              </div>
+            );
+          })()}
+
           <div style={{overflowX:"auto"}} className="dp-table-wrap">
             <table style={{width:"100%",borderCollapse:"collapse",minWidth:600}}>
               <thead>
@@ -2829,14 +2908,22 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
                     const labels={b:lang==="tr"?"🌅 Kahvaltı":"🌅 Breakfast",l:lang==="tr"?"☀️ Öğle":"☀️ Lunch",d:lang==="tr"?"🌙 Akşam":"🌙 Dinner",s:lang==="tr"?"🍎 Ara Öğün":"🍎 Snack"};
                     return<th key={sk} style={{padding:"8px 10px",fontSize:11,fontWeight:700,color:T.ink,opacity:0.7,background:T.paperDim,border:`1px solid ${T.line}`,textAlign:"left"}}>{labels[sk]}</th>;
                   })}
+                  <th style={{width:76,padding:"8px 10px",fontSize:11,fontWeight:700,color:T.ink,opacity:0.7,background:T.paperDim,border:`1px solid ${T.line}`,textAlign:"center"}}>{lang==="tr"?"Toplam":"Total"}</th>
                   <th className="np" style={{width:36,background:T.paperDim,border:`1px solid ${T.line}`}}></th>
                 </tr>
               </thead>
               <tbody>
-                {dietPlan.days.map((d,di)=>(
+                {dietPlan.days.map((d,di)=>{
+                  const dayEst=estimateDayNutrition(d.meals);
+                  const target=client.targetKcal?Number(client.targetKcal):null;
+                  const dayDiffPct=target&&dayEst?Math.round(((dayEst.kcal-target)/target)*100):null;
+                  const dayColor=dayDiffPct===null?T.ink:Math.abs(dayDiffPct)<=10?C.sage:Math.abs(dayDiffPct)>20?C.coral:C.gold;
+                  return(
                   <tr key={di}>
                     <td style={{padding:"10px",fontSize:13,fontWeight:700,color:T.ink,background:T.paperDim,border:`1px solid ${T.line}`}}>{lang==="tr"?`Gün ${d.day}`:`Day ${d.day}`}</td>
-                    {["b","l","d","s"].map(sk=>(
+                    {["b","l","d","s"].map(sk=>{
+                      const mealEst=estimateMealNutrition(d.meals[sk]);
+                      return(
                       <td key={sk} onClick={()=>{setDpEdit({d:di,s:sk});setDpEditTxt(d.meals[sk]);}} style={{padding:0,border:`1px solid ${T.line}`,verticalAlign:"top",cursor:"pointer",minWidth:130,background:T.paper}}>
                         {dpEdit?.d===di&&dpEdit?.s===sk?(
                           <div onClick={e=>e.stopPropagation()} style={{padding:6}}>
@@ -2847,15 +2934,29 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
                             </div>
                           </div>
                         ):(
-                          <div style={{padding:"10px 12px",fontSize:12.5,lineHeight:1.5,color:T.ink,opacity:d.meals[sk]?1:0.2,minHeight:60}}>{d.meals[sk]||"+"}</div>
+                          <div style={{padding:"10px 12px",minHeight:60}}>
+                            <div style={{fontSize:12.5,lineHeight:1.5,color:T.ink,opacity:d.meals[sk]?1:0.2}}>{d.meals[sk]||"+"}</div>
+                            {mealEst&&<div className="np" style={{fontSize:10,fontWeight:700,color:C.coral,marginTop:4}}>~{mealEst.kcal} kcal</div>}
+                          </div>
                         )}
                       </td>
-                    ))}
+                      );
+                    })}
+                    <td style={{border:`1px solid ${T.line}`,textAlign:"center",background:T.paper,padding:"8px 4px"}}>
+                      {dayEst?(
+                        <div>
+                          <div style={{fontSize:13,fontWeight:800,color:dayColor}}>{dayEst.kcal}</div>
+                          <div style={{fontSize:9,color:T.ink,opacity:0.4}}>kcal</div>
+                          {dayDiffPct!==null&&<div style={{fontSize:9,fontWeight:700,color:dayColor}}>{dayDiffPct>0?"+":""}{dayDiffPct}%</div>}
+                        </div>
+                      ):<span style={{fontSize:10,color:T.ink,opacity:0.3}}>—</span>}
+                    </td>
                     <td className="np" style={{border:`1px solid ${T.line}`,textAlign:"center",background:T.paper}}>
                       {dietPlan.days.length>1&&<button onClick={()=>removeDietDay(di)} style={{background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.3}}><X size={13}/></button>}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
