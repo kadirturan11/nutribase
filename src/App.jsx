@@ -171,57 +171,167 @@ const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,4
 // Turkish Dietetics Exchange List System (Değişim Listesi Sistemi)
 // Official exchange values per Türkiye Diyetisyenler Derneği / Koç Üniversitesi Hastanesi standard
 // Clinical lab reference ranges (adult) with diet-relevant flagging rules
+// Comprehensive clinical lab panel (34 tests) with diet-relevant flagging + food-database matching.
+// Each abnormal tier can carry boostIdx (NUTRIENTS index to seek MORE of) and/or limitIdx (index to seek LESS of),
+// used to pull concrete food suggestions from the FOODS database at render time.
 const LAB_TESTS = [
-  {id:"hba1c", nameTr:"HbA1c", nameEn:"HbA1c", unit:"%",
-   ranges:[{max:5.7,label:"normal",tr:"Normal",en:"Normal"},{max:6.5,label:"warn",tr:"Prediyabet",en:"Prediabetes"},{max:99,label:"high",tr:"Diyabet aralığı",en:"Diabetes range"}],
-   adviceTr:"Kompleks karbonhidrat, düşük GI beslenme ve öğün sıklığı düzenlemesi önerilir.",
-   adviceEn:"Complex carbohydrates, low-GI eating, and regular meal timing are recommended."},
-  {id:"glucose", nameTr:"Açlık Kan Şekeri", nameEn:"Fasting Glucose", unit:"mg/dL",
-   ranges:[{max:100,label:"normal",tr:"Normal",en:"Normal"},{max:126,label:"warn",tr:"Prediyabet",en:"Prediabetes"},{max:999,label:"high",tr:"Diyabet aralığı",en:"Diabetes range"}],
-   adviceTr:"Basit şeker ve rafine karbonhidrat kısıtlaması, lifli gıdalar artırılmalı.",
-   adviceEn:"Restrict simple sugars and refined carbs; increase fiber-rich foods."},
-  {id:"ldl", nameTr:"LDL Kolesterol", nameEn:"LDL Cholesterol", unit:"mg/dL",
-   ranges:[{max:100,label:"normal",tr:"Optimal",en:"Optimal"},{max:130,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:999,label:"high",tr:"Yüksek",en:"High"}],
-   adviceTr:"Doymuş yağ ve trans yağ kısıtlanmalı; çözünür lif (yulaf, baklagil) ve omega-3 artırılmalı.",
-   adviceEn:"Restrict saturated and trans fats; increase soluble fiber (oats, legumes) and omega-3."},
-  {id:"hdl", nameTr:"HDL Kolesterol", nameEn:"HDL Cholesterol", unit:"mg/dL",
-   ranges:[{max:40,label:"high",tr:"Düşük (Risk)",en:"Low (Risk)"},{max:60,label:"warn",tr:"Kabul Edilebilir",en:"Acceptable"},{max:999,label:"normal",tr:"İyi",en:"Good"}],
-   adviceTr:"Zeytinyağı, yağlı balık ve düzenli fiziksel aktivite HDL'yi yükseltmeye yardımcı olur.",
-   adviceEn:"Olive oil, fatty fish, and regular physical activity help raise HDL."},
-  {id:"triglyceride", nameTr:"Trigliserit", nameEn:"Triglycerides", unit:"mg/dL",
-   ranges:[{max:150,label:"normal",tr:"Normal",en:"Normal"},{max:200,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:9999,label:"high",tr:"Yüksek",en:"High"}],
-   adviceTr:"Basit şeker, alkol ve rafine karbonhidrat kısıtlanmalı; Akdeniz tipi beslenme önerilir.",
-   adviceEn:"Restrict simple sugars, alcohol, and refined carbs; Mediterranean-style eating recommended."},
-  {id:"totalChol", nameTr:"Toplam Kolesterol", nameEn:"Total Cholesterol", unit:"mg/dL",
-   ranges:[{max:200,label:"normal",tr:"İstenen",en:"Desirable"},{max:240,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:9999,label:"high",tr:"Yüksek",en:"High"}],
-   adviceTr:"Doymuş yağ kısıtlaması ve lifli gıda artışı önerilir.",
-   adviceEn:"Reduce saturated fat and increase fiber intake."},
-  {id:"vitD", nameTr:"Vitamin D", nameEn:"Vitamin D", unit:"ng/mL",
-   ranges:[{max:20,label:"high",tr:"Eksiklik",en:"Deficient"},{max:30,label:"warn",tr:"Yetersiz",en:"Insufficient"},{max:999,label:"normal",tr:"Yeterli",en:"Sufficient"}],
-   adviceTr:"Yağlı balık, yumurta sarısı; güneşlenme ve takviye için hekime danışılmalı.",
-   adviceEn:"Fatty fish, egg yolk; consult physician for sun exposure and supplementation."},
-  {id:"vitB12", nameTr:"Vitamin B12", nameEn:"Vitamin B12", unit:"pg/mL",
-   ranges:[{max:200,label:"high",tr:"Düşük",en:"Low"},{max:300,label:"warn",tr:"Sınırda",en:"Borderline"},{max:9999,label:"normal",tr:"Normal",en:"Normal"}],
-   adviceTr:"Kırmızı et, yumurta, süt ürünleri artırılmalı; vegan/vejetaryenlerde takviye değerlendirilmeli.",
-   adviceEn:"Increase red meat, eggs, dairy; consider supplementation for vegans/vegetarians."},
-  {id:"ferritin", nameTr:"Ferritin", nameEn:"Ferritin", unit:"ng/mL",
-   ranges:[{max:15,label:"high",tr:"Demir Eksikliği",en:"Iron Deficiency"},{max:30,label:"warn",tr:"Düşük-Sınır",en:"Low-Borderline"},{max:999,label:"normal",tr:"Normal",en:"Normal"}],
-   adviceTr:"Kırmızı et, yeşil yapraklılar, C vitamini ile birlikte tüketim emilimi artırır.",
-   adviceEn:"Red meat, leafy greens; pairing with vitamin C enhances absorption."},
-  {id:"tsh", nameTr:"TSH", nameEn:"TSH", unit:"mIU/L",
-   ranges:[{max:0.4,label:"warn",tr:"Düşük",en:"Low"},{max:4.0,label:"normal",tr:"Normal",en:"Normal"},{max:99,label:"warn",tr:"Yüksek",en:"High"}],
-   adviceTr:"Tiroid fonksiyonu için iyot, selenyum ve çinko açısından dengeli beslenme önemlidir.",
-   adviceEn:"Balanced iodine, selenium, and zinc intake matters for thyroid function."},
-  {id:"creatinine", nameTr:"Kreatinin", nameEn:"Creatinine", unit:"mg/dL",
-   ranges:[{max:1.3,label:"normal",tr:"Normal",en:"Normal"},{max:1.8,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:99,label:"high",tr:"Yüksek",en:"High"}],
-   adviceTr:"Protein ve sodyum kısıtlaması gerekebilir; nefroloji diyetisyeni ile değerlendirilmeli.",
-   adviceEn:"Protein and sodium restriction may be needed; consult a renal dietitian."},
+  // ── Glisemik Kontrol ──
+  {id:"hba1c", cat:"glisemik", nameTr:"HbA1c", nameEn:"HbA1c", unit:"%",
+   ranges:[{max:5.7,label:"normal",tr:"Normal",en:"Normal"},
+     {max:6.5,label:"warn",tr:"Prediyabet",en:"Prediabetes",limitIdx:6,adviceTr:"Basit şeker ve rafine karbonhidrat kısıtlanmalı, düşük GI beslenmeye geçilmeli.",adviceEn:"Restrict simple sugar and refined carbs; shift to low-GI eating."},
+     {max:99,label:"high",tr:"Diyabet aralığı",en:"Diabetes range",limitIdx:6,adviceTr:"Karbonhidrat sayımı ve düzenli öğün saatleri ile birlikte şeker kısıtlaması şart.",adviceEn:"Carb counting and regular meal timing alongside sugar restriction is essential."}]},
+  {id:"glucose", cat:"glisemik", nameTr:"Açlık Kan Şekeri", nameEn:"Fasting Glucose", unit:"mg/dL",
+   ranges:[{max:100,label:"normal",tr:"Normal",en:"Normal"},
+     {max:126,label:"warn",tr:"Prediyabet",en:"Prediabetes",limitIdx:6,adviceTr:"Basit şeker kısıtlanmalı, lifli gıdalar ve düzenli öğün aralığı önerilir.",adviceEn:"Restrict simple sugars; increase fiber and keep regular meal intervals."},
+     {max:999,label:"high",tr:"Diyabet aralığı",en:"Diabetes range",limitIdx:6,adviceTr:"Doktor takibiyle birlikte sıkı karbonhidrat kontrolü gerekir.",adviceEn:"Strict carbohydrate control needed alongside physician follow-up."}]},
+  {id:"insulin", cat:"glisemik", nameTr:"Açlık İnsülin", nameEn:"Fasting Insulin", unit:"µIU/mL",
+   ranges:[{max:25,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"high",tr:"Yüksek (İnsülin Direnci Olası)",en:"High (Possible Insulin Resistance)",limitIdx:6,adviceTr:"Rafine karbonhidrat ve şeker kısıtlanmalı, lif ve protein artırılmalı, düzenli egzersiz önemli.",adviceEn:"Restrict refined carbs and sugar; increase fiber and protein; regular exercise matters."}]},
+  // ── Lipid Paneli ──
+  {id:"ldl", cat:"lipid", nameTr:"LDL Kolesterol", nameEn:"LDL Cholesterol", unit:"mg/dL",
+   ranges:[{max:100,label:"normal",tr:"Optimal",en:"Optimal"},
+     {max:130,label:"warn",tr:"Sınırda Yüksek",en:"Borderline",limitIdx:7,adviceTr:"Doymuş yağ kısıtlanmalı; çözünür lif (yulaf, baklagil) ve omega-3 artırılmalı.",adviceEn:"Restrict saturated fat; increase soluble fiber (oats, legumes) and omega-3."},
+     {max:999,label:"high",tr:"Yüksek",en:"High",limitIdx:7,adviceTr:"Doymuş/trans yağ ciddi kısıtlanmalı; bitkisel steroller ve lif önceliklendirilmeli.",adviceEn:"Significantly restrict saturated/trans fat; prioritize plant sterols and fiber."}]},
+  {id:"hdl", cat:"lipid", nameTr:"HDL Kolesterol", nameEn:"HDL Cholesterol", unit:"mg/dL",
+   ranges:[{max:40,label:"high",tr:"Düşük (Risk)",en:"Low (Risk)",boostIdx:9,adviceTr:"Zeytinyağı, yağlı balık ve kuruyemiş; düzenli aktivite HDL'yi yükseltir.",adviceEn:"Olive oil, fatty fish, and nuts; regular activity raises HDL."},
+     {max:60,label:"warn",tr:"Kabul Edilebilir",en:"Acceptable",boostIdx:9,adviceTr:"Omega-3 kaynaklarını artırmak faydalı olabilir.",adviceEn:"Increasing omega-3 sources may help."},
+     {max:999,label:"normal",tr:"İyi",en:"Good"}]},
+  {id:"triglyceride", cat:"lipid", nameTr:"Trigliserit", nameEn:"Triglycerides", unit:"mg/dL",
+   ranges:[{max:150,label:"normal",tr:"Normal",en:"Normal"},
+     {max:200,label:"warn",tr:"Sınırda Yüksek",en:"Borderline",limitIdx:6,adviceTr:"Basit şeker ve alkol kısıtlanmalı; Akdeniz tipi beslenme önerilir.",adviceEn:"Restrict simple sugar and alcohol; Mediterranean-style eating recommended."},
+     {max:9999,label:"high",tr:"Yüksek",en:"High",limitIdx:6,adviceTr:"Şeker, alkol ve rafine karbonhidrat ciddi kısıtlanmalı; omega-3 artırılmalı.",adviceEn:"Significantly restrict sugar, alcohol, and refined carbs; increase omega-3."}]},
+  {id:"totalChol", cat:"lipid", nameTr:"Toplam Kolesterol", nameEn:"Total Cholesterol", unit:"mg/dL",
+   ranges:[{max:200,label:"normal",tr:"İstenen",en:"Desirable"},
+     {max:240,label:"warn",tr:"Sınırda Yüksek",en:"Borderline",limitIdx:7,adviceTr:"Doymuş yağ kısıtlaması ve lifli gıda artışı önerilir.",adviceEn:"Reduce saturated fat and increase fiber intake."},
+     {max:9999,label:"high",tr:"Yüksek",en:"High",limitIdx:7,adviceTr:"Doymuş yağ ciddi kısıtlanmalı, bitkisel yağlar tercih edilmeli.",adviceEn:"Significantly restrict saturated fat; prefer plant-based oils."}]},
+  {id:"nonHdl", cat:"lipid", nameTr:"Non-HDL Kolesterol", nameEn:"Non-HDL Cholesterol", unit:"mg/dL",
+   ranges:[{max:130,label:"normal",tr:"Optimal",en:"Optimal"},
+     {max:160,label:"warn",tr:"Sınırda Yüksek",en:"Borderline",limitIdx:7,adviceTr:"Tüm aterojenik lipoproteinleri kapsar; doymuş yağ kısıtlaması önceliklidir.",adviceEn:"Covers all atherogenic lipoproteins; saturated fat restriction is priority."},
+     {max:9999,label:"high",tr:"Yüksek",en:"High",limitIdx:7,adviceTr:"Kapsamlı lipid-düşürücü beslenme yaklaşımı (Portfolio diyeti) değerlendirilebilir.",adviceEn:"A comprehensive lipid-lowering approach (Portfolio diet) may be considered."}]},
+  // ── Böbrek Fonksiyonu ──
+  {id:"creatinine", cat:"böbrek", nameTr:"Kreatinin", nameEn:"Creatinine", unit:"mg/dL",
+   ranges:[{max:1.3,label:"normal",tr:"Normal",en:"Normal"},
+     {max:1.8,label:"warn",tr:"Sınırda Yüksek",en:"Borderline",limitIdx:1,adviceTr:"Protein alımı ölçülü tutulmalı; nefroloji diyetisyeni ile değerlendirilmeli.",adviceEn:"Keep protein intake moderate; consult a renal dietitian."},
+     {max:99,label:"high",tr:"Yüksek",en:"High",limitIdx:1,adviceTr:"Protein, sodyum ve potasyum kısıtlaması gerekebilir; mutlaka nefroloji takibi gerekir.",adviceEn:"Protein, sodium, and potassium restriction may be needed; renal follow-up required."}]},
+  {id:"egfr", cat:"böbrek", nameTr:"eGFR", nameEn:"eGFR", unit:"mL/dk/1.73m²",
+   ranges:[{max:14,label:"high",tr:"Evre 5 (Ciddi)",en:"Stage 5 (Severe)",limitIdx:1,adviceTr:"Sıkı protein/potasyum/fosfor kısıtlaması; diyaliz diyetisyeni takibi şart.",adviceEn:"Strict protein/potassium/phosphorus restriction; dialysis dietitian follow-up essential."},
+     {max:29,label:"high",tr:"Evre 4",en:"Stage 4",limitIdx:1,adviceTr:"Protein kısıtlı, böbrek dostu beslenme planı gereklidir.",adviceEn:"Protein-restricted, kidney-friendly nutrition plan required."},
+     {max:59,label:"warn",tr:"Evre 3",en:"Stage 3",limitIdx:1,adviceTr:"Protein alımı izlenmeli, sodyum/fosfor kısıtlaması değerlendirilmeli.",adviceEn:"Monitor protein intake; consider sodium/phosphorus restriction."},
+     {max:999,label:"normal",tr:"Normal/Hafif Azalmış",en:"Normal/Mildly Decreased"}]},
+  {id:"bun", cat:"böbrek", nameTr:"BUN (Üre Azotu)", nameEn:"BUN", unit:"mg/dL",
+   ranges:[{max:20,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"high",tr:"Yüksek",en:"High",limitIdx:1,adviceTr:"Aşırı protein alımı değerlendirilmeli, bol su tüketimi önerilir.",adviceEn:"Assess for excess protein intake; encourage adequate water intake."}]},
+  {id:"uricAcid", cat:"böbrek", nameTr:"Ürik Asit", nameEn:"Uric Acid", unit:"mg/dL",
+   ranges:[{max:7.0,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"high",tr:"Yüksek",en:"High",limitIdx:1,adviceTr:"Pürin açısından zengin gıdalar (sakatat, deniz ürünleri) ve alkol kısıtlanmalı; bol su tüketilmeli.",adviceEn:"Restrict purine-rich foods (organ meats, seafood) and alcohol; increase water intake."}]},
+  // ── Karaciğer Fonksiyonu ──
+  {id:"alt", cat:"karaciğer", nameTr:"ALT (SGPT)", nameEn:"ALT (SGPT)", unit:"U/L",
+   ranges:[{max:40,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"high",tr:"Yüksek",en:"High",limitIdx:6,adviceTr:"Şeker, alkol ve işlenmiş gıda kısıtlanmalı; kilo yönetimi önceliklidir.",adviceEn:"Restrict sugar, alcohol, and processed foods; weight management is priority."}]},
+  {id:"ast", cat:"karaciğer", nameTr:"AST (SGOT)", nameEn:"AST (SGOT)", unit:"U/L",
+   ranges:[{max:40,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"high",tr:"Yüksek",en:"High",limitIdx:6,adviceTr:"Alkol ve rafine şeker kısıtlanmalı, Akdeniz tipi beslenme desteklenmeli.",adviceEn:"Restrict alcohol and refined sugar; support Mediterranean-style eating."}]},
+  // ── Elektrolitler & Mineraller ──
+  {id:"sodium", cat:"elektrolit", nameTr:"Sodyum", nameEn:"Sodium", unit:"mEq/L",
+   ranges:[{max:135,label:"warn",tr:"Düşük",en:"Low",adviceTr:"Hekim değerlendirmesi gerekir; aşırı su tüketimi kısıtlanmalı.",adviceEn:"Requires physician evaluation; may need fluid restriction."},
+     {max:145,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"warn",tr:"Yüksek",en:"High",limitIdx:12,adviceTr:"Tuz ve işlenmiş gıda kısıtlanmalı, bol su tüketilmeli.",adviceEn:"Restrict salt and processed foods; increase water intake."}]},
+  {id:"potassium", cat:"elektrolit", nameTr:"Potasyum", nameEn:"Potassium", unit:"mEq/L",
+   ranges:[{max:3.5,label:"warn",tr:"Düşük",en:"Low",boostIdx:13,adviceTr:"Potasyum açısından zengin gıdalar (muz, patates, baklagil) artırılmalı — böbrek fonksiyonu normalse.",adviceEn:"Increase potassium-rich foods (banana, potato, legumes) — if kidney function is normal."},
+     {max:5.0,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"high",tr:"Yüksek",en:"High",limitIdx:13,adviceTr:"Potasyum açısından zengin gıdalar (muz, patates, domates) kısıtlanmalı; nefroloji takibi önerilir.",adviceEn:"Restrict potassium-rich foods (banana, potato, tomato); nephrology follow-up recommended."}]},
+  {id:"calciumLab", cat:"elektrolit", nameTr:"Kalsiyum", nameEn:"Calcium", unit:"mg/dL",
+   ranges:[{max:8.5,label:"warn",tr:"Düşük",en:"Low",boostIdx:14,adviceTr:"Süt ürünleri, susam/tahin, yeşil yapraklılar artırılmalı; D vitamini kontrol edilmeli.",adviceEn:"Increase dairy, sesame/tahini, leafy greens; check vitamin D status."},
+     {max:10.5,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"warn",tr:"Yüksek",en:"High",adviceTr:"Hekim değerlendirmesi gerekir; aşırı kalsiyum takviyesi gözden geçirilmeli.",adviceEn:"Requires physician evaluation; review excess calcium supplementation."}]},
+  {id:"magnesiumLab", cat:"elektrolit", nameTr:"Magnezyum", nameEn:"Magnesium", unit:"mg/dL",
+   ranges:[{max:1.7,label:"warn",tr:"Düşük",en:"Low",boostIdx:16,adviceTr:"Yeşil yapraklılar, kuruyemiş, tam tahıl ve baklagil artırılmalı.",adviceEn:"Increase leafy greens, nuts, whole grains, and legumes."},
+     {max:2.2,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"warn",tr:"Yüksek",en:"High",limitIdx:16,adviceTr:"Böbrek fonksiyonu değerlendirilmeli; magnezyum takviyesi gözden geçirilmeli.",adviceEn:"Assess kidney function; review magnesium supplementation."}]},
+  {id:"phosphorus", cat:"elektrolit", nameTr:"Fosfor", nameEn:"Phosphorus", unit:"mg/dL",
+   ranges:[{max:2.5,label:"warn",tr:"Düşük",en:"Low",boostIdx:17,adviceTr:"Süt ürünleri, et, tam tahıl artırılmalı.",adviceEn:"Increase dairy, meat, and whole grains."},
+     {max:4.5,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"high",tr:"Yüksek",en:"High",limitIdx:17,adviceTr:"İşlenmiş gıda, kola ve fazla süt ürünü kısıtlanmalı; özellikle KBH'da önemlidir.",adviceEn:"Restrict processed foods, cola, and excess dairy; especially important in CKD."}]},
+  {id:"zincLab", cat:"elektrolit", nameTr:"Çinko", nameEn:"Zinc", unit:"µg/dL",
+   ranges:[{max:60,label:"warn",tr:"Düşük",en:"Low",boostIdx:18,adviceTr:"Kırmızı et, kabak çekirdeği, baklagil ve deniz ürünleri artırılmalı.",adviceEn:"Increase red meat, pumpkin seeds, legumes, and seafood."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  // ── Vitaminler ──
+  {id:"vitD", cat:"vitamin", nameTr:"Vitamin D (25-OH)", nameEn:"Vitamin D (25-OH)", unit:"ng/mL",
+   ranges:[{max:20,label:"high",tr:"Eksiklik",en:"Deficient",boostIdx:21,adviceTr:"Yağlı balık, yumurta sarısı artırılmalı; güneşlenme ve takviye için hekime danışılmalı.",adviceEn:"Increase fatty fish and egg yolk; consult physician for sun exposure and supplementation."},
+     {max:30,label:"warn",tr:"Yetersiz",en:"Insufficient",boostIdx:21,adviceTr:"D vitamini kaynaklarını artırmak faydalı olur.",adviceEn:"Increasing vitamin D sources would help."},
+     {max:999,label:"normal",tr:"Yeterli",en:"Sufficient"}]},
+  {id:"vitB12", cat:"vitamin", nameTr:"Vitamin B12", nameEn:"Vitamin B12", unit:"pg/mL",
+   ranges:[{max:200,label:"high",tr:"Düşük",en:"Low",boostIdx:23,adviceTr:"Kırmızı et, yumurta, süt ürünleri artırılmalı; vegan/vejetaryenlerde takviye değerlendirilmeli.",adviceEn:"Increase red meat, eggs, dairy; consider supplementation for vegans/vegetarians."},
+     {max:300,label:"warn",tr:"Sınırda",en:"Borderline",boostIdx:23,adviceTr:"Hayvansal protein kaynakları artırılmalı.",adviceEn:"Increase animal protein sources."},
+     {max:9999,label:"normal",tr:"Normal",en:"Normal"}]},
+  {id:"folate", cat:"vitamin", nameTr:"Folat", nameEn:"Folate", unit:"ng/mL",
+   ranges:[{max:3,label:"high",tr:"Düşük",en:"Low",boostIdx:24,adviceTr:"Yeşil yapraklılar, baklagil ve tam tahıl artırılmalı.",adviceEn:"Increase leafy greens, legumes, and whole grains."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  {id:"vitA", cat:"vitamin", nameTr:"Vitamin A", nameEn:"Vitamin A", unit:"µg/dL",
+   ranges:[{max:20,label:"warn",tr:"Düşük",en:"Low",boostIdx:19,adviceTr:"Havuç, ıspanak, yumurta sarısı gibi kaynaklar artırılmalı.",adviceEn:"Increase sources like carrot, spinach, and egg yolk."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  {id:"vitE", cat:"vitamin", nameTr:"Vitamin E", nameEn:"Vitamin E", unit:"mg/L",
+   ranges:[{max:5,label:"warn",tr:"Düşük",en:"Low",boostIdx:22,adviceTr:"Kuruyemiş, tohum ve bitkisel yağlar artırılmalı.",adviceEn:"Increase nuts, seeds, and plant oils."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  // ── Demir Paneli ──
+  {id:"ferritin", cat:"demir", nameTr:"Ferritin", nameEn:"Ferritin", unit:"ng/mL",
+   ranges:[{max:15,label:"high",tr:"Demir Eksikliği",en:"Iron Deficiency",boostIdx:15,adviceTr:"Kırmızı et, yeşil yapraklılar; C vitamini ile birlikte tüketim emilimi artırır.",adviceEn:"Red meat, leafy greens; pairing with vitamin C enhances absorption."},
+     {max:30,label:"warn",tr:"Düşük-Sınır",en:"Low-Borderline",boostIdx:15,adviceTr:"Demir açısından zengin gıdalar artırılabilir.",adviceEn:"Iron-rich foods may be increased."},
+     {max:300,label:"normal",tr:"Normal",en:"Normal"},
+     {max:9999,label:"warn",tr:"Yüksek",en:"High",adviceTr:"İnflamasyon veya demir yüklenmesi olabilir; hekim değerlendirmesi gerekir.",adviceEn:"May indicate inflammation or iron overload; needs physician evaluation."}]},
+  {id:"serumIron", cat:"demir", nameTr:"Serum Demir", nameEn:"Serum Iron", unit:"µg/dL",
+   ranges:[{max:60,label:"warn",tr:"Düşük",en:"Low",boostIdx:15,adviceTr:"Demir açısından zengin gıdalar (kırmızı et, mercimek) C vitaminiyle birlikte tüketilmeli.",adviceEn:"Iron-rich foods (red meat, lentils) should be paired with vitamin C."},
+     {max:170,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"warn",tr:"Yüksek",en:"High",adviceTr:"Hekim değerlendirmesi gerekir.",adviceEn:"Requires physician evaluation."}]},
+  {id:"hemoglobin", cat:"demir", nameTr:"Hemoglobin", nameEn:"Hemoglobin", unit:"g/dL",
+   ranges:[{max:12,label:"warn",tr:"Düşük (Anemi)",en:"Low (Anemia)",boostIdx:15,adviceTr:"Demir, B12 ve folat açısından zengin gıdalar artırılmalı.",adviceEn:"Increase foods rich in iron, B12, and folate."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  {id:"hematocrit", cat:"demir", nameTr:"Hematokrit", nameEn:"Hematocrit", unit:"%",
+   ranges:[{max:36,label:"warn",tr:"Düşük",en:"Low",boostIdx:15,adviceTr:"Demir açısından zengin beslenme ve altta yatan neden araştırılmalı.",adviceEn:"Iron-rich diet and investigation of underlying cause recommended."},
+     {max:999,label:"normal",tr:"Normal",en:"Normal"}]},
+  // ── Tiroid ──
+  {id:"tsh", cat:"tiroid", nameTr:"TSH", nameEn:"TSH", unit:"mIU/L",
+   ranges:[{max:0.4,label:"warn",tr:"Düşük (Hipertiroidi olası)",en:"Low (Possible Hyperthyroid)",adviceTr:"Aşırı iyot alımından kaçınılmalı; hekim takibi önemlidir.",adviceEn:"Avoid excess iodine intake; physician follow-up important."},
+     {max:4.0,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"warn",tr:"Yüksek (Hipotiroidi olası)",en:"High (Possible Hypothyroid)",adviceTr:"İyot, selenyum ve çinko açısından dengeli beslenme önemlidir (deniz ürünleri, Brezilya fındığı).",adviceEn:"Balanced iodine, selenium, and zinc intake matters (seafood, Brazil nuts)."}]},
+  {id:"freeT4", cat:"tiroid", nameTr:"Serbest T4", nameEn:"Free T4", unit:"ng/dL",
+   ranges:[{max:0.8,label:"warn",tr:"Düşük",en:"Low",adviceTr:"İyot ve selenyum kaynaklarına dikkat edilmeli; hekim takibi şart.",adviceEn:"Pay attention to iodine and selenium sources; physician follow-up essential."},
+     {max:1.8,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"warn",tr:"Yüksek",en:"High",adviceTr:"Hekim değerlendirmesi gerekir.",adviceEn:"Requires physician evaluation."}]},
+  // ── İnflamasyon ──
+  {id:"hscrp", cat:"inflamasyon", nameTr:"hs-CRP", nameEn:"hs-CRP", unit:"mg/L",
+   ranges:[{max:1.0,label:"normal",tr:"Düşük Risk",en:"Low Risk"},
+     {max:3.0,label:"warn",tr:"Orta Risk",en:"Moderate Risk",boostIdx:9,adviceTr:"Anti-inflamatuar beslenme (omega-3, renkli sebze-meyve, zerdeçal) desteklenmeli.",adviceEn:"Support anti-inflammatory eating (omega-3, colorful produce, turmeric)."},
+     {max:999,label:"high",tr:"Yüksek Risk",en:"High Risk",boostIdx:9,adviceTr:"İşlenmiş gıda ve rafine şeker kısıtlanmalı; omega-3 ve antioksidan kaynakları artırılmalı.",adviceEn:"Restrict processed foods and refined sugar; increase omega-3 and antioxidant sources."}]},
+  {id:"homocysteine", cat:"inflamasyon", nameTr:"Homosistein", nameEn:"Homocysteine", unit:"µmol/L",
+   ranges:[{max:15,label:"normal",tr:"Normal",en:"Normal"},
+     {max:999,label:"high",tr:"Yüksek",en:"High",boostIdx:24,adviceTr:"Folat, B12 ve B6 açısından zengin gıdalar artırılmalı (yeşil yapraklılar, baklagil, et).",adviceEn:"Increase foods rich in folate, B12, and B6 (leafy greens, legumes, meat)."}]},
+  // ── Protein Durumu ──
+  {id:"albumin", cat:"protein", nameTr:"Albümin", nameEn:"Albumin", unit:"g/dL",
+   ranges:[{max:3.5,label:"warn",tr:"Düşük",en:"Low",boostIdx:1,adviceTr:"Kaliteli protein alımı artırılmalı; altta yatan neden araştırılmalı.",adviceEn:"Increase quality protein intake; investigate underlying cause."},
+     {max:5.5,label:"normal",tr:"Normal",en:"Normal"}]},
+  {id:"totalProtein", cat:"protein", nameTr:"Total Protein", nameEn:"Total Protein", unit:"g/dL",
+   ranges:[{max:6.0,label:"warn",tr:"Düşük",en:"Low",boostIdx:1,adviceTr:"Günlük protein alımı gözden geçirilmeli.",adviceEn:"Review daily protein intake."},
+     {max:8.3,label:"normal",tr:"Normal",en:"Normal"},
+     {max:99,label:"warn",tr:"Yüksek",en:"High",adviceTr:"Hekim değerlendirmesi gerekir.",adviceEn:"Requires physician evaluation."}]},
 ];
 function getLabStatus(testId,value){
   const test=LAB_TESTS.find(t=>t.id===testId);
   if(!test||value==null||isNaN(value))return null;
   for(const r of test.ranges){if(value<=r.max)return r;}
   return test.ranges[test.ranges.length-1];
+}
+const LAB_CATEGORIES={glisemik:{tr:"🩸 Glisemik Kontrol",en:"🩸 Glycemic Control"},lipid:{tr:"🫀 Lipid Paneli",en:"🫀 Lipid Panel"},böbrek:{tr:"🫘 Böbrek Fonksiyonu",en:"🫘 Kidney Function"},karaciğer:{tr:"🫁 Karaciğer Fonksiyonu",en:"🫁 Liver Function"},elektrolit:{tr:"⚡ Elektrolit & Mineral",en:"⚡ Electrolytes & Minerals"},vitamin:{tr:"☀️ Vitaminler",en:"☀️ Vitamins"},demir:{tr:"🩹 Demir Paneli",en:"🩹 Iron Panel"},tiroid:{tr:"🦋 Tiroid",en:"🦋 Thyroid"},inflamasyon:{tr:"🔥 İnflamasyon",en:"🔥 Inflammation"},protein:{tr:"🥩 Protein Durumu",en:"🥩 Protein Status"}};
+// Suggest concrete foods from FOODS database for a given nutrient index — best (boost) or worst (limit) options
+function suggestFoodsByNutrient(nutrientIdx,mode,lang,count=5){
+  if(nutrientIdx==null)return[];
+  const sorted=[...FOODS].filter(f=>!["fastfood","tatlı","içecek"].includes(f.cat)).sort((a,b)=>mode==="boost"?b.v[nutrientIdx]-a.v[nutrientIdx]:a.v[nutrientIdx]-b.v[nutrientIdx]);
+  return sorted.slice(0,count).map(f=>({name:lang==="tr"?f.tr:f.en,value:f.v[nutrientIdx]}));
+}
+function suggestFoodsToLimit(nutrientIdx,lang,count=4){
+  if(nutrientIdx==null)return[];
+  const sorted=[...FOODS].sort((a,b)=>b.v[nutrientIdx]-a.v[nutrientIdx]);
+  return sorted.slice(0,count).map(f=>({name:lang==="tr"?f.tr:f.en,value:f.v[nutrientIdx]}));
 }
 
 // Official exchange values per Türkiye Diyetisyenler Derneği / Koç Üniversitesi Hastanesi standard
@@ -1929,6 +2039,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[showLabForm,setShowLabForm]=useState(false);
   const[newLab,setNewLab]=useState({date:new Date().toISOString().slice(0,10)});
   const[expandedLab,setExpandedLab]=useState(null);
+  const[trendTestId,setTrendTestId]=useState("hba1c");
   const[dietitianProfile,setDietitianProfile]=useState(null);
   const[showSessionForm,setShowSessionForm]=useState(false);
   const[newSession,setNewSession]=useState({date:new Date().toISOString().slice(0,10),fee:"",paid:true,notes:""});
@@ -2245,13 +2356,24 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
             <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Tahlil Tarihi":"Test Date"}</label>
             <input type="date" value={newLab.date} onChange={e=>setNewLab(l=>({...l,date:e.target.value}))} style={{padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",outline:"none"}}/>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
-            {LAB_TESTS.map(test=>(
-              <div key={test.id}>
-                <label style={{display:"block",fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.03em"}}>{lang==="tr"?test.nameTr:test.nameEn} ({test.unit})</label>
-                <input type="number" step="0.01" value={newLab[test.id]||""} onChange={e=>setNewLab(l=>({...l,[test.id]:e.target.value}))} placeholder="—" style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
-              </div>
-            ))}
+          <div>
+            {Object.entries(LAB_CATEGORIES).map(([catKey,catInfo])=>{
+              const testsInCat=LAB_TESTS.filter(t=>t.cat===catKey);
+              if(testsInCat.length===0)return null;
+              return(
+                <div key={catKey} style={{marginBottom:18}}>
+                  <div style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:10}}>{lang==="tr"?catInfo.tr:catInfo.en}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+                    {testsInCat.map(test=>(
+                      <div key={test.id}>
+                        <label style={{display:"block",fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.03em"}}>{lang==="tr"?test.nameTr:test.nameEn} ({test.unit})</label>
+                        <input type="number" step="0.01" value={newLab[test.id]||""} onChange={e=>setNewLab(l=>({...l,[test.id]:e.target.value}))} placeholder="—" style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <div style={{display:"flex",gap:10,marginTop:16}}>
             <button onClick={addLabResult} style={{padding:"9px 18px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
@@ -2261,6 +2383,38 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       )}
 
       {labResults.length===0&&!showLabForm&&<div className="np" style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:24,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz tahlil sonucu eklenmedi.":"No lab results added yet."}</div>}
+
+      {labResults.length>1&&(()=>{
+        const testsWithData=LAB_TESTS.filter(test=>labResults.filter(r=>r[test.id]!==undefined&&r[test.id]!=="").length>=2);
+        if(testsWithData.length===0)return null;
+        const activeTest=LAB_TESTS.find(t=>t.id===trendTestId)&&testsWithData.some(t=>t.id===trendTestId)?LAB_TESTS.find(t=>t.id===trendTestId):testsWithData[0];
+        const points=[...labResults].filter(r=>r[activeTest.id]!==undefined&&r[activeTest.id]!=="").sort((a,b)=>new Date(a.date)-new Date(b.date)).map(r=>({date:r.date,value:parseFloat(r[activeTest.id])}));
+        const vals=points.map(p=>p.value);
+        const mn=Math.min(...vals)*0.9,mx=Math.max(...vals)*1.1,rng=mx-mn||1;
+        const W=760,H=140,P=28;
+        const pathPts=points.map((p,i)=>{const x=P+(i/Math.max(points.length-1,1))*(W-P*2);const y=H-P-((p.value-mn)/rng)*(H-P*2);return`${x},${y}`;});
+        const latestStatus=getLabStatus(activeTest.id,points[points.length-1].value);
+        const lineColor=latestStatus?.label==="normal"?C.sage:latestStatus?.label==="warn"?C.gold:C.coral;
+        return(
+          <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:20,marginBottom:20}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
+              <h4 style={{fontSize:13,fontWeight:700,color:T.ink,opacity:0.6,margin:0,textTransform:"uppercase",letterSpacing:"0.04em"}}>📈 {lang==="tr"?"Tahlil Trend Grafiği":"Lab Trend Chart"}</h4>
+              <select value={trendTestId} onChange={e=>setTrendTestId(e.target.value)} style={{padding:"7px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:12.5,fontFamily:"inherit",cursor:"pointer"}}>
+                {testsWithData.map(test=><option key={test.id} value={test.id}>{lang==="tr"?test.nameTr:test.nameEn}</option>)}
+              </select>
+            </div>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}} preserveAspectRatio="none">
+              {[0.25,0.5,0.75].map((f,i)=>{const y=P+f*(H-P*2);const v=(mx-f*rng).toFixed(1);return<g key={i}><line x1={P} y1={y} x2={W-P} y2={y} stroke={T.line} strokeWidth="1" strokeDasharray="3 5" opacity="0.5"/><text x={P-4} y={y+3} textAnchor="end" fontSize="9" fill={T.ink} opacity="0.4">{v}</text></g>;})}
+              <polyline points={pathPts.join(" ")} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round"/>
+              {points.map((p,i)=>{const x=P+(i/Math.max(points.length-1,1))*(W-P*2);const y=H-P-((p.value-mn)/rng)*(H-P*2);return<circle key={i} cx={x} cy={y} r="4" fill={lineColor}/>;})}
+            </svg>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingLeft:P,paddingRight:P}}>
+              {[points[0],points[points.length-1]].filter(Boolean).map((p,i)=><span key={i} style={{fontSize:10,color:T.ink,opacity:0.4}}>{p.date}</span>)}
+            </div>
+            <div style={{marginTop:10,fontSize:12,color:T.ink,opacity:0.6}}>{lang==="tr"?"Son değer":"Latest"}: <strong style={{color:lineColor}}>{points[points.length-1].value} {activeTest.unit}</strong> ({lang==="tr"?latestStatus?.tr:latestStatus?.en})</div>
+          </div>
+        );
+      })()}
 
       {labResults.length>0&&(
         <div style={{marginBottom:28}}>
@@ -2295,14 +2449,38 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
                       })}
                     </div>
                     {abnormal.length>0&&(
-                      <div style={{background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:10,padding:14}}>
-                        <div style={{fontSize:11.5,fontWeight:700,color:T.ink,opacity:0.7,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>💡 {lang==="tr"?"Beslenme Önerileri":"Nutrition Recommendations"}</div>
-                        {abnormal.map(test=>(
-                          <div key={test.id} style={{display:"flex",gap:8,marginBottom:6,fontSize:12.5,color:T.ink,opacity:0.85,lineHeight:1.5}}>
-                            <span style={{fontWeight:700,flexShrink:0}}>{lang==="tr"?test.nameTr:test.nameEn}:</span>
-                            <span>{lang==="tr"?test.adviceTr:test.adviceEn}</span>
-                          </div>
-                        ))}
+                      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                        {abnormal.map(test=>{
+                          const val=parseFloat(rec[test.id]);
+                          const status=getLabStatus(test.id,val);
+                          if(!status)return null;
+                          const boostFoods=status.boostIdx!=null?suggestFoodsByNutrient(status.boostIdx,"boost",lang,5):[];
+                          const limitFoods=status.limitIdx!=null?suggestFoodsToLimit(status.limitIdx,lang,4):[];
+                          return(
+                            <div key={test.id} style={{background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:10,padding:14}}>
+                              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                                <span style={{fontSize:12.5,fontWeight:700,color:T.ink}}>{lang==="tr"?test.nameTr:test.nameEn} — <span style={{color:status.label==="high"?C.coral:C.gold}}>{lang==="tr"?status.tr:status.en}</span></span>
+                              </div>
+                              <p style={{fontSize:12.5,color:T.ink,opacity:0.85,lineHeight:1.5,margin:"0 0 10px"}}>{lang==="tr"?status.adviceTr:status.adviceEn}</p>
+                              {boostFoods.length>0&&(
+                                <div style={{marginBottom:8}}>
+                                  <div style={{fontSize:10.5,fontWeight:700,color:C.sage,textTransform:"uppercase",letterSpacing:"0.03em",marginBottom:5}}>✓ {lang==="tr"?"Bunları Ye":"Foods to Eat"}</div>
+                                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                                    {boostFoods.map((f,fi)=><span key={fi} style={{fontSize:11.5,fontWeight:600,background:"#E8F5E9",color:C.sage,padding:"4px 10px",borderRadius:14}}>{f.name}</span>)}
+                                  </div>
+                                </div>
+                              )}
+                              {limitFoods.length>0&&(
+                                <div>
+                                  <div style={{fontSize:10.5,fontWeight:700,color:C.coral,textTransform:"uppercase",letterSpacing:"0.03em",marginBottom:5}}>✗ {lang==="tr"?"Bunlardan Kaçın":"Foods to Limit"}</div>
+                                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                                    {limitFoods.map((f,fi)=><span key={fi} style={{fontSize:11.5,fontWeight:600,background:C.coralSoft,color:C.coral,padding:"4px 10px",borderRadius:14}}>{f.name}</span>)}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     <button onClick={()=>delLabResult(rec.id)} className="np" style={{marginTop:10,display:"flex",alignItems:"center",gap:5,background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.4,fontSize:12,fontFamily:"inherit"}}><Trash2 size={12}/> {lang==="tr"?"Bu Kaydı Sil":"Delete This Record"}</button>
