@@ -322,6 +322,35 @@ function getLabStatus(testId,value){
   return test.ranges[test.ranges.length-1];
 }
 const LAB_CATEGORIES={glisemik:{tr:"🩸 Glisemik Kontrol",en:"🩸 Glycemic Control"},lipid:{tr:"🫀 Lipid Paneli",en:"🫀 Lipid Panel"},böbrek:{tr:"🫘 Böbrek Fonksiyonu",en:"🫘 Kidney Function"},karaciğer:{tr:"🫁 Karaciğer Fonksiyonu",en:"🫁 Liver Function"},elektrolit:{tr:"⚡ Elektrolit & Mineral",en:"⚡ Electrolytes & Minerals"},vitamin:{tr:"☀️ Vitaminler",en:"☀️ Vitamins"},demir:{tr:"🩹 Demir Paneli",en:"🩹 Iron Panel"},tiroid:{tr:"🦋 Tiroid",en:"🦋 Thyroid"},inflamasyon:{tr:"🔥 İnflamasyon",en:"🔥 Inflammation"},protein:{tr:"🥩 Protein Durumu",en:"🥩 Protein Status"}};
+
+// Condition-specific macro distribution (% of total kcal) + exchange-group nudges, based on standard
+// clinical dietetic guidelines (ADA, KDOQI, DASH, ESPEN). Default (no condition) = balanced 50/20/30.
+const CONDITION_MACRO_PROFILES={
+  default:{carb:50,protein:20,fat:30,noteTr:"Dengeli standart dağılım.",noteEn:"Balanced standard distribution."},
+  diabetes1:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü, kompleks/düşük GI kaynaklar önceliklendirilmeli.",noteEn:"Carb ratio lowered; prioritize complex/low-GI sources."},
+  diabetes2:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü, kompleks/düşük GI kaynaklar önceliklendirilmeli.",noteEn:"Carb ratio lowered; prioritize complex/low-GI sources."},
+  gestationalDiabetes:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü; küçük sık öğünler önerilir.",noteEn:"Carb ratio lowered; small frequent meals recommended."},
+  metabolicSyndrome:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü, Akdeniz tipi yağ profili önerilir.",noteEn:"Carb ratio lowered; Mediterranean-style fat profile recommended."},
+  obesity:{carb:40,protein:30,fat:30,noteTr:"Doygunluk için protein oranı artırıldı, karbonhidrat düşürüldü.",noteEn:"Protein increased for satiety; carbs reduced.",meatBoost:true},
+  ckd:{carb:55,protein:12,fat:33,noteTr:"⚠️ Protein oranı böbrek koruması için ciddi düşürüldü — evreye göre nefroloji diyetisyeni ile kesinleştirilmeli.",noteEn:"⚠️ Protein significantly lowered for renal protection — must be finalized with a renal dietitian by stage.",meatReduce:true,vegReduce:true},
+  gout:{carb:50,protein:15,fat:35,noteTr:"Pürin yükünü azaltmak için et grubu miktarı sınırlandı, süt grubu önceliklendirildi.",noteEn:"Meat group limited to reduce purine load; dairy prioritized.",meatReduce:true,milkBoost:true},
+  dyslipidemia:{carb:50,protein:20,fat:30,noteTr:"Yağ kaynakları doymamış yağ ağırlıklı seçilmeli (yağ/kuruyemiş grubu önceliklendirildi).",noteEn:"Fat sources should favor unsaturated fats (fat/nuts groups prioritized).",unsaturatedFatFocus:true},
+  hypertension:{carb:50,protein:20,fat:30,noteTr:"DASH prensipleri: her gruptan az tuzlu/işlenmemiş seçenekler tercih edilmeli.",noteEn:"DASH principles: prefer low-sodium/unprocessed options within each group."},
+  sportsNutrition:{carb:50,protein:25,fat:25,noteTr:"Performans ve toparlanma için protein oranı artırıldı.",noteEn:"Protein increased for performance and recovery.",meatBoost:true},
+  sarcopenia:{carb:45,protein:30,fat:25,noteTr:"Kas kütlesi korunması için protein oranı belirgin artırıldı.",noteEn:"Protein significantly increased to preserve muscle mass.",meatBoost:true},
+  pregnancy:{carb:45,protein:25,fat:30,noteTr:"Fetal gelişim için protein oranı artırıldı.",noteEn:"Protein increased to support fetal development.",milkBoost:true},
+  osteoporosis:{carb:50,protein:20,fat:30,noteTr:"Kemik sağlığı için süt grubu önceliklendirildi.",noteEn:"Dairy group prioritized for bone health.",milkBoost:true},
+  celiac:{carb:50,protein:20,fat:30,noteTr:"Ekmek/tahıl grubunda sadece glütensiz kaynaklar kullanılmalı (pirinç, mısır, kinoa).",noteEn:"Only gluten-free sources should be used in the bread/grain group (rice, corn, quinoa)."},
+  fattyLiver:{carb:45,protein:20,fat:35,noteTr:"Basit şeker payı azaltıldı; doymamış yağ kaynakları önceliklendirilmeli.",noteEn:"Simple sugar share reduced; unsaturated fat sources prioritized.",unsaturatedFatFocus:true},
+};
+function getMacroProfile(conditionText){
+  if(!conditionText)return CONDITION_MACRO_PROFILES.default;
+  const lower=conditionText.toLowerCase();
+  const match=COND.find(c=>lower.includes(c.tr.toLowerCase())||lower.includes(c.en.toLowerCase())||c.tr.toLowerCase().includes(lower));
+  if(match&&CONDITION_MACRO_PROFILES[match.id])return{...CONDITION_MACRO_PROFILES[match.id],matchedId:match.id};
+  return CONDITION_MACRO_PROFILES.default;
+}
+
 // Suggest concrete foods from FOODS database for a given nutrient index — best (boost) or worst (limit) options
 function suggestFoodsByNutrient(nutrientIdx,mode,lang,count=5){
   if(nutrientIdx==null)return[];
@@ -3295,42 +3324,66 @@ function ExchangeListPage({t,lang,nav,T=C}){
   };
 
   const runCalculation=()=>{
-    const {gender,age,height,weight,actIdx,formula}=calcForm;
+    const {gender,age,height,weight,actIdx,formula,condition}=calcForm;
     const bmr=formula==="who"
       ? calcBMR_WHO({gender,age:+age,weight:+weight})
       : calcBMR({gender,age:+age,height:+height,weight:+weight});
     const tdee=bmr*ACT[actIdx];
     const target=Math.round(tdee);
 
-    // Standard macro split: 50% carb, 20% protein, 30% fat (adjustable via condition-aware notes)
-    const targetCarb=target*0.50/4;
-    const targetProtein=target*0.20/4;
-    const targetFat=target*0.30/9;
+    const profile=getMacroProfile(condition);
+    const targetCarbG=target*profile.carb/100/4;
+    const targetProteinG=target*profile.protein/100/4;
+    const targetFatG=target*profile.fat/100/9;
 
-    // Greedy allocation across exchange groups to approximate targets
     const sc={};
     EXCHANGE_GROUPS.forEach(g=>sc[g.id]=0);
-    // Milk: 2 exchanges default (prefer low-fat/free variant), Meat: based on protein need, Fat/nuts: based on fat need
-    sc.milkFree=2;
-    let remProtein=targetProtein-(sc.milkFree*6);
-    let meatCount=Math.max(2,Math.round(remProtein/6));
+
+    // 1) Fixed baseline groups — scale mildly with calorie tier, nudged by condition flags.
+    //    These are relatively constant regardless of calorie target (volume/micronutrient driven, not calorie driven).
+    let milkCount = target<1500?2:target<2500?2:3;
+    if(profile.milkBoost)milkCount+=1;
+    let vegCount = target<1500?4:target<2500?5:6;
+    if(profile.vegReduce)vegCount=Math.max(2,vegCount-2); // e.g. CKD: potassium restriction
+    let fruitCount = target<1500?2:target<2500?3:4;
+    sc.milkFree=milkCount;
+    sc.vegetable=vegCount;
+    sc.fruit=fruitCount;
+
+    // 2) What the fixed groups already cover
+    const coveredCarb = milkCount*9 + vegCount*6 + fruitCount*15;
+    const coveredProteinFixed = milkCount*6 + vegCount*2;
+
+    // 3) Bread/grain group absorbs most remaining carbohydrate need
+    const remainingCarbForBread = Math.max(0, targetCarbG - coveredCarb);
+    let breadCount = Math.max(3, Math.min(16, Math.round(remainingCarbForBread/15)));
+    sc.bread=breadCount;
+    const breadProtein = breadCount*2;
+
+    // 4) Meat group absorbs remaining protein need — clamped to a clinically sane range
+    //    (30g raw per exchange; 4-10 exchanges ≈ 120-300g meat/day, standard adult range).
+    const remainingProteinForMeat = targetProteinG - coveredProteinFixed - breadProtein;
+    let meatMin=3, meatMax=10;
+    if(profile.meatReduce){meatMax=6;} // CKD / gout: keep on the lower end
+    if(profile.meatBoost){meatMin=6;meatMax=12;} // athletes / sarcopenia: allow higher end
+    let meatCount = Math.max(meatMin, Math.min(meatMax, Math.round(remainingProteinForMeat/6)));
     sc.meat=meatCount;
-    remProtein-=meatCount*6;
-    let remCarb=targetCarb-(sc.milkFree*9);
-    // distribute carbs across bread/fruit/vegetable roughly 55/25/20
-    const breadCount=Math.max(2,Math.round((remCarb*0.55)/15));
-    const fruitCount=Math.max(2,Math.round((remCarb*0.25)/15));
-    const vegCount=Math.max(3,Math.round((remCarb*0.20)/6));
-    sc.bread=breadCount;sc.fruit=fruitCount;sc.vegetable=vegCount;
-    let usedFat=(sc.milkFree*0)+(sc.meat*5);
-    let remFat=targetFat-usedFat;
-    const fatCount=Math.max(1,Math.round(remFat/5*0.6));
-    const nutsCount=Math.max(1,Math.round(remFat/5*0.4));
-    sc.fat=fatCount;sc.nuts=nutsCount;
+
+    // 5) Fat group + nuts absorb remaining fat need, after accounting for meat's inherent fat content
+    const coveredFat = meatCount*5;
+    const remainingFat = Math.max(0, targetFatG - coveredFat);
+    const unsatSplit = profile.unsaturatedFatFocus?0.75:0.6; // favor fat-group (mostly olive oil) if dyslipidemia/fatty liver
+    let fatCount = Math.max(1, Math.min(10, Math.round((remainingFat*unsatSplit)/5)));
+    let nutsCount = Math.max(1, Math.min(6, Math.round((remainingFat*(1-unsatSplit))/5)));
+    sc.fat=fatCount;
+    sc.nuts=nutsCount;
+
+    // 6) Sugar/sweets exchanges default to 0 — intentionally minimized regardless of calorie target
     sc.sugar=0;
+    sc.milkFull=0;sc.milkHalf=0;
 
     setCounts(sc);
-    setCalcResult({bmr:Math.round(bmr),tdee:target,formula});
+    setCalcResult({bmr:Math.round(bmr),tdee:target,formula,profile});
     setShowCalc(false);
   };
 
@@ -3423,9 +3476,17 @@ function ExchangeListPage({t,lang,nav,T=C}){
         )}
 
         {calcResult&&(
-          <div style={{display:"flex",gap:16,alignItems:"center",background:T.paperDim,borderRadius:10,padding:"12px 16px",marginTop:12}}>
-            <Check size={16} color={C.sage}/>
-            <span style={{fontSize:13,color:T.ink}}>{lang==="tr"?"Hesaplandı":"Calculated"}: <strong>{calcResult.tdee} kcal</strong> ({calcResult.formula==="who"?"WHO/Schofield":"Mifflin-St Jeor"}, BMR: {calcResult.bmr} kcal) — {lang==="tr"?"aşağıdaki değişim sayıları otomatik önerildi, dilediğin gibi ayarlayabilirsin.":"exchange counts suggested below, adjust as needed."}</span>
+          <div style={{background:T.paperDim,borderRadius:10,padding:"12px 16px",marginTop:12}}>
+            <div style={{display:"flex",gap:16,alignItems:"center"}}>
+              <Check size={16} color={C.sage}/>
+              <span style={{fontSize:13,color:T.ink}}>{lang==="tr"?"Hesaplandı":"Calculated"}: <strong>{calcResult.tdee} kcal</strong> ({calcResult.formula==="who"?"WHO/Schofield":"Mifflin-St Jeor"}, BMR: {calcResult.bmr} kcal) — {lang==="tr"?"aşağıdaki değişim sayıları otomatik önerildi, dilediğin gibi ayarlayabilirsin.":"exchange counts suggested below, adjust as needed."}</span>
+            </div>
+            {calcResult.profile&&(
+              <div style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${T.line}`,fontSize:12,color:T.ink,opacity:0.75,display:"flex",gap:10,alignItems:"flex-start"}}>
+                <span style={{fontWeight:700,flexShrink:0}}>{lang==="tr"?"Makro Dağılımı":"Macro Split"}: {calcResult.profile.carb}/{calcResult.profile.protein}/{calcResult.profile.fat}%</span>
+                <span>{lang==="tr"?calcResult.profile.noteTr:calcResult.profile.noteEn}</span>
+              </div>
+            )}
           </div>
         )}
       </div>
