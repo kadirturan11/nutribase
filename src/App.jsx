@@ -326,7 +326,7 @@ const LAB_CATEGORIES={glisemik:{tr:"🩸 Glisemik Kontrol",en:"🩸 Glycemic Con
 // Condition-specific macro distribution (% of total kcal) + exchange-group nudges, based on standard
 // clinical dietetic guidelines (ADA, KDOQI, DASH, ESPEN). Default (no condition) = balanced 50/20/30.
 const CONDITION_MACRO_PROFILES={
-  default:{carb:50,protein:20,fat:30,noteTr:"Dengeli standart dağılım.",noteEn:"Balanced standard distribution."},
+  default:{carb:50,protein:15,fat:35,noteTr:"Dengeli, ekonomik açıdan sürdürülebilir standart dağılım.",noteEn:"Balanced, economically sustainable standard distribution."},
   diabetes1:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü, kompleks/düşük GI kaynaklar önceliklendirilmeli.",noteEn:"Carb ratio lowered; prioritize complex/low-GI sources."},
   diabetes2:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü, kompleks/düşük GI kaynaklar önceliklendirilmeli.",noteEn:"Carb ratio lowered; prioritize complex/low-GI sources."},
   gestationalDiabetes:{carb:45,protein:20,fat:35,noteTr:"Karbonhidrat oranı düşürüldü; küçük sık öğünler önerilir.",noteEn:"Carb ratio lowered; small frequent meals recommended."},
@@ -375,8 +375,8 @@ const EXCHANGE_GROUPS = [
    foodsTr:[{n:"Süt (yağsız)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (yağsız)",a:"¾ su bardağı (150g)"},{n:"Laktozsuz süt",a:"1 su bardağı (200ml)"}],
    foodsEn:[{n:"Skim milk",a:"1 cup (200ml)"},{n:"Fat-free yogurt",a:"¾ cup (150g)"},{n:"Lactose-free milk",a:"1 cup (200ml)"}]},
   {id:"meat", nameTr:"Et, Peynir, Yumurta Grubu", nameEn:"Meat, Cheese, Egg Group", icon:"🍗", carb:0, protein:6, fat:5,
-   foodsTr:[{n:"Kırmızı et (orta yağlı, kuşbaşı)",a:"3 orta boy (30g çiğ)"},{n:"Kıyma",a:"1 yemek kaşığı (30g çiğ)"},{n:"Köfte",a:"1 küçük yumurta boyutu (40g çiğ)"},{n:"Tavuk göğüs fileto",a:"¼ küçük boy (30g çiğ)"},{n:"Tavuk baget (kemiksiz)",a:"1 küçük boy (30g çiğ)"},{n:"Levrek",a:"1/5 küçük boy (55g çiğ)"},{n:"Somon",a:"2 parmak boyutu (40g çiğ)"},{n:"Yumurta (tavuk)",a:"1 küçük boy (55g)"},{n:"Beyaz peynir (tam yağlı)",a:"2 parmak boyutu (40g)"},{n:"Kaşar peyniri",a:"3 yarım parmak boyutu (30g)"},{n:"Lor peyniri",a:"3 yemek kaşığı (50g)"}],
-   foodsEn:[{n:"Red meat (medium-fat, diced)",a:"3 medium pieces (30g raw)"},{n:"Ground meat",a:"1 tbsp (30g raw)"},{n:"Meatball",a:"1 small egg size (40g raw)"},{n:"Chicken breast fillet",a:"¼ small piece (30g raw)"},{n:"Chicken drumstick (boneless)",a:"1 small piece (30g raw)"},{n:"Sea bass",a:"1/5 small piece (55g raw)"},{n:"Salmon",a:"2 finger-widths (40g raw)"},{n:"Egg (chicken)",a:"1 small (55g)"},{n:"Feta cheese (full-fat)",a:"2 finger-widths (40g)"},{n:"Kashar cheese",a:"3 half finger-widths (30g)"},{n:"Cottage cheese (lor)",a:"3 tbsp (50g)"}]},
+   foodsTr:[{n:"Yumurta (tavuk)",a:"1 küçük boy (55g)",budget:true},{n:"Tavuk göğüs fileto",a:"¼ küçük boy (30g çiğ)",budget:true},{n:"Tavuk baget (kemiksiz)",a:"1 küçük boy (30g çiğ)",budget:true},{n:"Mercimek (ekstra, ekmek grubuna ek)",a:"2 yemek kaşığı (25g çiğ)",budget:true},{n:"Kıyma (dana, ekonomik)",a:"1 yemek kaşığı (30g çiğ)",budget:true},{n:"Hamsi",a:"5 orta boy (45g çiğ)",budget:true},{n:"İstavrit",a:"4 küçük boy (60g çiğ)",budget:true},{n:"Lor peyniri",a:"3 yemek kaşığı (50g)",budget:true},{n:"Kırmızı et (orta yağlı, kuşbaşı)",a:"3 orta boy (30g çiğ)"},{n:"Köfte",a:"1 küçük yumurta boyutu (40g çiğ)"},{n:"Beyaz peynir (tam yağlı)",a:"2 parmak boyutu (40g)"},{n:"Kaşar peyniri",a:"3 yarım parmak boyutu (30g)"},{n:"Levrek",a:"1/5 küçük boy (55g çiğ)"},{n:"Somon",a:"2 parmak boyutu (40g çiğ)"}],
+   foodsEn:[{n:"Egg (chicken)",a:"1 small (55g)",budget:true},{n:"Chicken breast fillet",a:"¼ small piece (30g raw)",budget:true},{n:"Chicken drumstick (boneless)",a:"1 small piece (30g raw)",budget:true},{n:"Lentils (extra, in addition to bread group)",a:"2 tbsp (25g raw)",budget:true},{n:"Ground beef (economical)",a:"1 tbsp (30g raw)",budget:true},{n:"Anchovy",a:"5 medium (45g raw)",budget:true},{n:"Horse mackerel",a:"4 small (60g raw)",budget:true},{n:"Cottage cheese (lor)",a:"3 tbsp (50g)",budget:true},{n:"Red meat (medium-fat, diced)",a:"3 medium pieces (30g raw)"},{n:"Meatball",a:"1 small egg size (40g raw)"},{n:"Feta cheese (full-fat)",a:"2 finger-widths (40g)"},{n:"Kashar cheese",a:"3 half finger-widths (30g)"},{n:"Sea bass",a:"1/5 small piece (55g raw)"},{n:"Salmon",a:"2 finger-widths (40g raw)"}]},
   {id:"bread", nameTr:"Ekmek, Tahıl, Kurubaklagil Grubu", nameEn:"Bread, Grain & Legume Group", icon:"🍞", carb:15, protein:2, fat:0,
    foodsTr:[{n:"Beyaz/buğday ekmek",a:"1 ince dilim (25g)"},{n:"Çavdar/yulaf/tam buğday/kepekli ekmek",a:"1 ince dilim (30g)"},{n:"Pirinç pilavı (pişmiş)",a:"2 yemek kaşığı (20g çiğ)"},{n:"Bulgur pilavı (pişmiş)",a:"3 yemek kaşığı (20g çiğ)"},{n:"Makarna (pişmiş)",a:"3 yemek kaşığı (20g çiğ)"},{n:"Patates",a:"1 küçük boy (100g pişmiş)"},{n:"Nohut/kuru fasulye (pişmiş)",a:"3 yemek kaşığı (25g çiğ)"},{n:"Mercimek (pişmiş)",a:"2 yemek kaşığı (25g çiğ)"},{n:"Yulaf ezmesi",a:"2 yemek kaşığı (25g)"},{n:"Mısır (koçan)",a:"1 küçük boy (90g)"}],
    foodsEn:[{n:"White/wheat bread",a:"1 thin slice (25g)"},{n:"Rye/oat/whole wheat bread",a:"1 thin slice (30g)"},{n:"Cooked rice",a:"2 tbsp (20g raw)"},{n:"Cooked bulgur",a:"3 tbsp (20g raw)"},{n:"Cooked pasta",a:"3 tbsp (20g raw)"},{n:"Potato",a:"1 small (100g cooked)"},{n:"Chickpeas/white beans (cooked)",a:"3 tbsp (25g raw)"},{n:"Lentils (cooked)",a:"2 tbsp (25g raw)"},{n:"Oatmeal",a:"2 tbsp (25g)"},{n:"Corn (on cob)",a:"1 small (90g)"}]},
@@ -3363,7 +3363,7 @@ function ExchangeListPage({t,lang,nav,T=C}){
     // 4) Meat group absorbs remaining protein need — clamped to a clinically sane range
     //    (30g raw per exchange; 4-10 exchanges ≈ 120-300g meat/day, standard adult range).
     const remainingProteinForMeat = targetProteinG - coveredProteinFixed - breadProtein;
-    let meatMin=3, meatMax=10;
+    let meatMin=3, meatMax=8;
     if(profile.meatReduce){meatMax=6;} // CKD / gout: keep on the lower end
     if(profile.meatBoost){meatMin=6;meatMax=12;} // athletes / sarcopenia: allow higher end
     let meatCount = Math.max(meatMin, Math.min(meatMax, Math.round(remainingProteinForMeat/6)));
@@ -3513,14 +3513,35 @@ function ExchangeListPage({t,lang,nav,T=C}){
                 </div>
                 {isExp&&(
                   <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.line}`}}>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}} className="g2">
-                      {foods.map((f,i)=>(
-                        <div key={i} style={{background:T.paperDim,borderRadius:8,padding:"8px 12px"}}>
-                          <div style={{fontSize:12.5,fontWeight:600,color:T.ink}}>{f.n}</div>
-                          <div style={{fontSize:11,color:T.ink,opacity:0.55}}>{f.a}</div>
+                    {(()=>{
+                      const hasBudgetFlags=foods.some(f=>f.budget);
+                      const budgetFoods=hasBudgetFlags?foods.filter(f=>f.budget):foods;
+                      const premiumFoods=hasBudgetFlags?foods.filter(f=>!f.budget):[];
+                      return(<>
+                        {hasBudgetFlags&&<div style={{fontSize:10.5,fontWeight:700,color:C.sage,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:8}}>💰 {lang==="tr"?"Ekonomik Seçenekler":"Budget-Friendly Options"}</div>}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:premiumFoods.length>0?14:0}} className="g2">
+                          {budgetFoods.map((f,i)=>(
+                            <div key={i} style={{background:T.paperDim,borderRadius:8,padding:"8px 12px"}}>
+                              <div style={{fontSize:12.5,fontWeight:600,color:T.ink}}>{f.n}</div>
+                              <div style={{fontSize:11,color:T.ink,opacity:0.55}}>{f.a}</div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                        {premiumFoods.length>0&&(
+                          <div>
+                            <div style={{fontSize:10.5,fontWeight:700,color:T.ink,opacity:0.4,textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:8}}>{lang==="tr"?"Diğer Seçenekler":"Other Options"}</div>
+                            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}} className="g2">
+                              {premiumFoods.map((f,i)=>(
+                                <div key={i} style={{background:T.paperDim,borderRadius:8,padding:"8px 12px",opacity:0.75}}>
+                                  <div style={{fontSize:12.5,fontWeight:600,color:T.ink}}>{f.n}</div>
+                                  <div style={{fontSize:11,color:T.ink,opacity:0.55}}>{f.a}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>);
+                    })()}
                   </div>
                 )}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12,paddingTop:12,borderTop:`1px solid ${T.line}`}}>
