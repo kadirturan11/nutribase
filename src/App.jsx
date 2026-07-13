@@ -170,6 +170,61 @@ const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,4
 
 // Turkish Dietetics Exchange List System (Değişim Listesi Sistemi)
 // Official exchange values per Türkiye Diyetisyenler Derneği / Koç Üniversitesi Hastanesi standard
+// Clinical lab reference ranges (adult) with diet-relevant flagging rules
+const LAB_TESTS = [
+  {id:"hba1c", nameTr:"HbA1c", nameEn:"HbA1c", unit:"%",
+   ranges:[{max:5.7,label:"normal",tr:"Normal",en:"Normal"},{max:6.5,label:"warn",tr:"Prediyabet",en:"Prediabetes"},{max:99,label:"high",tr:"Diyabet aralığı",en:"Diabetes range"}],
+   adviceTr:"Kompleks karbonhidrat, düşük GI beslenme ve öğün sıklığı düzenlemesi önerilir.",
+   adviceEn:"Complex carbohydrates, low-GI eating, and regular meal timing are recommended."},
+  {id:"glucose", nameTr:"Açlık Kan Şekeri", nameEn:"Fasting Glucose", unit:"mg/dL",
+   ranges:[{max:100,label:"normal",tr:"Normal",en:"Normal"},{max:126,label:"warn",tr:"Prediyabet",en:"Prediabetes"},{max:999,label:"high",tr:"Diyabet aralığı",en:"Diabetes range"}],
+   adviceTr:"Basit şeker ve rafine karbonhidrat kısıtlaması, lifli gıdalar artırılmalı.",
+   adviceEn:"Restrict simple sugars and refined carbs; increase fiber-rich foods."},
+  {id:"ldl", nameTr:"LDL Kolesterol", nameEn:"LDL Cholesterol", unit:"mg/dL",
+   ranges:[{max:100,label:"normal",tr:"Optimal",en:"Optimal"},{max:130,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:999,label:"high",tr:"Yüksek",en:"High"}],
+   adviceTr:"Doymuş yağ ve trans yağ kısıtlanmalı; çözünür lif (yulaf, baklagil) ve omega-3 artırılmalı.",
+   adviceEn:"Restrict saturated and trans fats; increase soluble fiber (oats, legumes) and omega-3."},
+  {id:"hdl", nameTr:"HDL Kolesterol", nameEn:"HDL Cholesterol", unit:"mg/dL",
+   ranges:[{max:40,label:"high",tr:"Düşük (Risk)",en:"Low (Risk)"},{max:60,label:"warn",tr:"Kabul Edilebilir",en:"Acceptable"},{max:999,label:"normal",tr:"İyi",en:"Good"}],
+   adviceTr:"Zeytinyağı, yağlı balık ve düzenli fiziksel aktivite HDL'yi yükseltmeye yardımcı olur.",
+   adviceEn:"Olive oil, fatty fish, and regular physical activity help raise HDL."},
+  {id:"triglyceride", nameTr:"Trigliserit", nameEn:"Triglycerides", unit:"mg/dL",
+   ranges:[{max:150,label:"normal",tr:"Normal",en:"Normal"},{max:200,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:9999,label:"high",tr:"Yüksek",en:"High"}],
+   adviceTr:"Basit şeker, alkol ve rafine karbonhidrat kısıtlanmalı; Akdeniz tipi beslenme önerilir.",
+   adviceEn:"Restrict simple sugars, alcohol, and refined carbs; Mediterranean-style eating recommended."},
+  {id:"totalChol", nameTr:"Toplam Kolesterol", nameEn:"Total Cholesterol", unit:"mg/dL",
+   ranges:[{max:200,label:"normal",tr:"İstenen",en:"Desirable"},{max:240,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:9999,label:"high",tr:"Yüksek",en:"High"}],
+   adviceTr:"Doymuş yağ kısıtlaması ve lifli gıda artışı önerilir.",
+   adviceEn:"Reduce saturated fat and increase fiber intake."},
+  {id:"vitD", nameTr:"Vitamin D", nameEn:"Vitamin D", unit:"ng/mL",
+   ranges:[{max:20,label:"high",tr:"Eksiklik",en:"Deficient"},{max:30,label:"warn",tr:"Yetersiz",en:"Insufficient"},{max:999,label:"normal",tr:"Yeterli",en:"Sufficient"}],
+   adviceTr:"Yağlı balık, yumurta sarısı; güneşlenme ve takviye için hekime danışılmalı.",
+   adviceEn:"Fatty fish, egg yolk; consult physician for sun exposure and supplementation."},
+  {id:"vitB12", nameTr:"Vitamin B12", nameEn:"Vitamin B12", unit:"pg/mL",
+   ranges:[{max:200,label:"high",tr:"Düşük",en:"Low"},{max:300,label:"warn",tr:"Sınırda",en:"Borderline"},{max:9999,label:"normal",tr:"Normal",en:"Normal"}],
+   adviceTr:"Kırmızı et, yumurta, süt ürünleri artırılmalı; vegan/vejetaryenlerde takviye değerlendirilmeli.",
+   adviceEn:"Increase red meat, eggs, dairy; consider supplementation for vegans/vegetarians."},
+  {id:"ferritin", nameTr:"Ferritin", nameEn:"Ferritin", unit:"ng/mL",
+   ranges:[{max:15,label:"high",tr:"Demir Eksikliği",en:"Iron Deficiency"},{max:30,label:"warn",tr:"Düşük-Sınır",en:"Low-Borderline"},{max:999,label:"normal",tr:"Normal",en:"Normal"}],
+   adviceTr:"Kırmızı et, yeşil yapraklılar, C vitamini ile birlikte tüketim emilimi artırır.",
+   adviceEn:"Red meat, leafy greens; pairing with vitamin C enhances absorption."},
+  {id:"tsh", nameTr:"TSH", nameEn:"TSH", unit:"mIU/L",
+   ranges:[{max:0.4,label:"warn",tr:"Düşük",en:"Low"},{max:4.0,label:"normal",tr:"Normal",en:"Normal"},{max:99,label:"warn",tr:"Yüksek",en:"High"}],
+   adviceTr:"Tiroid fonksiyonu için iyot, selenyum ve çinko açısından dengeli beslenme önemlidir.",
+   adviceEn:"Balanced iodine, selenium, and zinc intake matters for thyroid function."},
+  {id:"creatinine", nameTr:"Kreatinin", nameEn:"Creatinine", unit:"mg/dL",
+   ranges:[{max:1.3,label:"normal",tr:"Normal",en:"Normal"},{max:1.8,label:"warn",tr:"Sınırda Yüksek",en:"Borderline"},{max:99,label:"high",tr:"Yüksek",en:"High"}],
+   adviceTr:"Protein ve sodyum kısıtlaması gerekebilir; nefroloji diyetisyeni ile değerlendirilmeli.",
+   adviceEn:"Protein and sodium restriction may be needed; consult a renal dietitian."},
+];
+function getLabStatus(testId,value){
+  const test=LAB_TESTS.find(t=>t.id===testId);
+  if(!test||value==null||isNaN(value))return null;
+  for(const r of test.ranges){if(value<=r.max)return r;}
+  return test.ranges[test.ranges.length-1];
+}
+
+// Official exchange values per Türkiye Diyetisyenler Derneği / Koç Üniversitesi Hastanesi standard
 const EXCHANGE_GROUPS = [
   {id:"milkFull", nameTr:"Süt Grubu (Tam Yağlı)", nameEn:"Milk Group (Whole-fat)", icon:"🥛", carb:9, protein:6, fat:6,
    foodsTr:[{n:"Süt (tam yağlı)",a:"1 su bardağı (200ml)"},{n:"Yoğurt (tam yağlı)",a:"¾ su bardağı (150g)"},{n:"Ev yoğurdu",a:"1 su bardağı (200g)"},{n:"Ayran",a:"1.5 su bardağı (300ml)"},{n:"Kefir",a:"1 su bardağı (200ml)"}],
@@ -1870,6 +1925,10 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
   const[photoUploading,setPhotoUploading]=useState(false);
   const[viewingPhoto,setViewingPhoto]=useState(null);
   const[sessions,setSessions]=useState([]);
+  const[labResults,setLabResults]=useState([]);
+  const[showLabForm,setShowLabForm]=useState(false);
+  const[newLab,setNewLab]=useState({date:new Date().toISOString().slice(0,10)});
+  const[expandedLab,setExpandedLab]=useState(null);
   const[dietitianProfile,setDietitianProfile]=useState(null);
   const[showSessionForm,setShowSessionForm]=useState(false);
   const[newSession,setNewSession]=useState({date:new Date().toISOString().slice(0,10),fee:"",paid:true,notes:""});
@@ -1900,6 +1959,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const supData=await sg(`${clientId}:supps`);if(supData)setSupps(supData);
     const photosData=await sg(`${clientId}:progressPhotos`);if(photosData)setProgressPhotos(photosData);
     const sessData=await sg(`${clientId}:sessions`);if(sessData)setSessions(sessData);
+    const labData=await sg(`${clientId}:labResults`);if(labData)setLabResults(labData);
     const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);
     const dpData=await sg(`${clientId}:dietPlan`);
     if(dpData){setDietPlan(dpData);setDpNotes(dpData.notes||"");setDpTitle(dpData.title||"");setDpDays(dpData.days?.length||3);}
@@ -1990,6 +2050,22 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     const updated=sessions.filter(s=>s.id!==id);
     setSessions(updated);
     await ss(`${clientId}:sessions`,updated);
+  };
+
+  const addLabResult=async()=>{
+    const hasAnyValue=LAB_TESTS.some(test=>newLab[test.id]!==undefined&&newLab[test.id]!=="");
+    if(!hasAnyValue)return;
+    const record={...newLab,id:Date.now(),ts:Date.now()};
+    const updated=[record,...labResults].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    setLabResults(updated);
+    await ss(`${clientId}:labResults`,updated);
+    setNewLab({date:new Date().toISOString().slice(0,10)});
+    setShowLabForm(false);
+  };
+  const delLabResult=async(id)=>{
+    const updated=labResults.filter(r=>r.id!==id);
+    setLabResults(updated);
+    await ss(`${clientId}:labResults`,updated);
   };
 
   const createDietPlan=async()=>{
@@ -2156,6 +2232,87 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
           </div>
         );
       })()}
+
+      {/* Lab Results Tracking */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}} className="np">
+        <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>🧪 {lang==="tr"?"Tahlil Sonuçları":"Lab Results"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"HbA1c, lipid paneli, vitamin ve mineral takibi":"HbA1c, lipid panel, vitamin & mineral tracking"}</span></div>
+        <button onClick={()=>setShowLabForm(f=>!f)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Plus size={14}/> {lang==="tr"?"Tahlil Ekle":"Add Lab Result"}</button>
+      </div>
+
+      {showLabForm&&(
+        <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:20,marginBottom:16}}>
+          <div style={{marginBottom:14}}>
+            <label style={{display:"block",fontSize:11,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:5,textTransform:"uppercase"}}>{lang==="tr"?"Tahlil Tarihi":"Test Date"}</label>
+            <input type="date" value={newLab.date} onChange={e=>setNewLab(l=>({...l,date:e.target.value}))} style={{padding:"9px 12px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:14,fontFamily:"inherit",outline:"none"}}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="g3">
+            {LAB_TESTS.map(test=>(
+              <div key={test.id}>
+                <label style={{display:"block",fontSize:10.5,fontWeight:600,color:T.ink,opacity:0.55,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.03em"}}>{lang==="tr"?test.nameTr:test.nameEn} ({test.unit})</label>
+                <input type="number" step="0.01" value={newLab[test.id]||""} onChange={e=>setNewLab(l=>({...l,[test.id]:e.target.value}))} placeholder="—" style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+              </div>
+            ))}
+          </div>
+          <div style={{display:"flex",gap:10,marginTop:16}}>
+            <button onClick={addLabResult} style={{padding:"9px 18px",borderRadius:8,background:C.ink,color:"#fff",border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit"}}>{lang==="tr"?"Kaydet":"Save"}</button>
+            <button onClick={()=>setShowLabForm(false)} style={{padding:"9px 18px",borderRadius:8,background:"transparent",color:T.ink,border:`1px solid ${T.line}`,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>{lang==="tr"?"Vazgeç":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+
+      {labResults.length===0&&!showLabForm&&<div className="np" style={{border:`1.5px dashed ${T.line}`,borderRadius:12,padding:24,textAlign:"center",color:T.ink,opacity:0.4,fontSize:14,marginBottom:28}}>{lang==="tr"?"Henüz tahlil sonucu eklenmedi.":"No lab results added yet."}</div>}
+
+      {labResults.length>0&&(
+        <div style={{marginBottom:28}}>
+          {labResults.map((rec,ri)=>{
+            const abnormal=LAB_TESTS.filter(test=>{
+              const st=getLabStatus(test.id,parseFloat(rec[test.id]));
+              return st&&st.label!=="normal";
+            });
+            return(
+              <div key={rec.id} style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,marginBottom:10,overflow:"hidden"}}>
+                <div onClick={()=>setExpandedLab(expandedLab===ri?null:ri)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 18px",cursor:"pointer"}}>
+                  <span style={{fontSize:14,fontWeight:700,color:T.ink}}>{rec.date}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    {abnormal.length>0?<span style={{fontSize:11.5,fontWeight:700,color:C.coral,background:C.coralSoft,padding:"3px 10px",borderRadius:12}}>{abnormal.length} {lang==="tr"?"anormal değer":"abnormal value(s)"}</span>:<span style={{fontSize:11.5,fontWeight:700,color:C.sage,background:"#E8F5E9",padding:"3px 10px",borderRadius:12}}>✓ {lang==="tr"?"Normal":"Normal"}</span>}
+                    {expandedLab===ri?<ChevronUp size={16} style={{opacity:0.4}}/>:<ChevronDown size={16} style={{opacity:0.4}}/>}
+                  </div>
+                </div>
+                {expandedLab===ri&&(
+                  <div style={{padding:"0 18px 18px"}}>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}} className="g3">
+                      {LAB_TESTS.filter(test=>rec[test.id]!==undefined&&rec[test.id]!=="").map(test=>{
+                        const val=parseFloat(rec[test.id]);
+                        const status=getLabStatus(test.id,val);
+                        const color=status?.label==="normal"?C.sage:status?.label==="warn"?C.gold:C.coral;
+                        return(
+                          <div key={test.id} style={{background:T.paperDim,borderRadius:8,padding:"10px 12px",borderLeft:`3px solid ${color}`}}>
+                            <div style={{fontSize:10,fontWeight:600,color:T.ink,opacity:0.55,marginBottom:2}}>{lang==="tr"?test.nameTr:test.nameEn}</div>
+                            <div style={{display:"flex",alignItems:"baseline",gap:4}}><span style={{fontSize:15,fontWeight:800,color:T.ink}}>{val}</span><span style={{fontSize:10,color:T.ink,opacity:0.4}}>{test.unit}</span></div>
+                            {status&&<div style={{fontSize:10,fontWeight:700,color}}>{lang==="tr"?status.tr:status.en}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {abnormal.length>0&&(
+                      <div style={{background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:10,padding:14}}>
+                        <div style={{fontSize:11.5,fontWeight:700,color:T.ink,opacity:0.7,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.04em"}}>💡 {lang==="tr"?"Beslenme Önerileri":"Nutrition Recommendations"}</div>
+                        {abnormal.map(test=>(
+                          <div key={test.id} style={{display:"flex",gap:8,marginBottom:6,fontSize:12.5,color:T.ink,opacity:0.85,lineHeight:1.5}}>
+                            <span style={{fontWeight:700,flexShrink:0}}>{lang==="tr"?test.nameTr:test.nameEn}:</span>
+                            <span>{lang==="tr"?test.adviceTr:test.adviceEn}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button onClick={()=>delLabResult(rec.id)} className="np" style={{marginTop:10,display:"flex",alignItems:"center",gap:5,background:"none",border:"none",cursor:"pointer",color:T.ink,opacity:0.4,fontSize:12,fontFamily:"inherit"}}><Trash2 size={12}/> {lang==="tr"?"Bu Kaydı Sil":"Delete This Record"}</button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Goals */}
       {(client.targetKcal||client.targetWater||client.nextAppt||client.targetWeight)&&(
@@ -2709,7 +2866,59 @@ function TemplatesPage({t,lang,nav,setSel,T=C}){
 function TemplateDetail({t,lang,id,nav,T=C}){
   const c=COND.find(x=>x.id===id);
   const[dietitianProfile,setDietitianProfile]=useState(null);
-  useEffect(()=>{(async()=>{const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);})();},[]);
+  const[clients,setClients]=useState([]);
+  const[selClientKey,setSelClientKey]=useState("");
+  const[showGenForm,setShowGenForm]=useState(false);
+  const[genDays,setGenDays]=useState(30);
+  const[genMsg,setGenMsg]=useState(null);
+  const[generating,setGenerating]=useState(false);
+
+  useEffect(()=>{(async()=>{
+    const dp=await sg("dietitianProfile");if(dp)setDietitianProfile(dp);
+    const ks=await sl("client:");const items=[];
+    for(const k of ks){const v=await sg(k);if(v&&v.name)items.push({...v,key:k});}
+    items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    setClients(items);
+  })();},[]);
+
+  const generate30DayPlan=async()=>{
+    if(!c||!selClientKey)return;
+    setGenerating(true);
+    const avoidTr=(c.avTr||[]).join(" ").toLowerCase();
+    const avoidEn=(c.avEn||[]).join(" ").toLowerCase();
+    const avoidKeywords=[...avoidTr.split(/[\s,()]+/),...avoidEn.split(/[\s,()]+/)].filter(w=>w.length>3);
+    const isExcluded=food=>{
+      const name=(food.tr+" "+food.en).toLowerCase();
+      if(["fastfood","tatlı","içecek"].includes(food.cat))return true;
+      return avoidKeywords.some(kw=>name.includes(kw));
+    };
+    const pool={
+      protein:FOODS.filter(f=>["yumurta-süt"].includes(f.cat)&&!isExcluded(f)),
+      meat:FOODS.filter(f=>["et","balık","baklagil"].includes(f.cat)&&!isExcluded(f)),
+      grain:FOODS.filter(f=>f.cat==="tahıl"&&!isExcluded(f)),
+      veg:FOODS.filter(f=>f.cat==="sebze"&&!isExcluded(f)),
+      fruit:FOODS.filter(f=>f.cat==="meyve"&&!isExcluded(f)),
+      nuts:FOODS.filter(f=>f.cat==="kuruyemiş"&&!isExcluded(f)),
+    };
+    const pick=(arr,idx)=>arr.length>0?arr[idx%arr.length]:null;
+    const name=f=>f?(lang==="tr"?f.tr:f.en):"";
+
+    const days=Array(genDays).fill(null).map((_,i)=>{
+      const b=[pick(pool.protein,i),pick(pool.grain,i)].filter(Boolean).map(name).join(" + ");
+      const l=[pick(pool.meat,i),pick(pool.grain,i+1),pick(pool.veg,i)].filter(Boolean).map(name).join(" + ");
+      const d=[pick(pool.meat,i+1),pick(pool.veg,i+1),pick(pool.grain,i+2)].filter(Boolean).map(name).join(" + ");
+      const s=[pick(pool.fruit,i),pick(pool.nuts,i)].filter(Boolean).map(name).join(" + ");
+      return{day:i+1,meals:{b,l,d,s}};
+    });
+
+    const plan={title:`${lang==="tr"?c.nameTr||c.tr:c.nameEn||c.en} — ${genDays} ${lang==="tr"?"Günlük Plan":"Day Plan"}`,days,notes:lang==="tr"?"Bu plan otomatik oluşturulmuştur; danışana özel olarak gözden geçirilip onaylanmalıdır.":"This plan was auto-generated; must be reviewed and approved for the specific client.",createdAt:Date.now()};
+    await ss(`${selClientKey}:dietPlan`,plan);
+    setGenerating(false);
+    setGenMsg({type:"success",text:lang==="tr"?`${genDays} günlük plan oluşturuldu ve danışana kaydedildi!`:`${genDays}-day plan generated and saved to client!`});
+    setTimeout(()=>setGenMsg(null),4000);
+    setShowGenForm(false);
+  };
+
   if(!c)return null;
   const res=lang==="tr"?c.resTr:c.resEn;
   const rec=lang==="tr"?c.recTr:c.recEn;
@@ -2747,6 +2956,46 @@ function TemplateDetail({t,lang,id,nav,T=C}){
       <Btn ch={<><Printer size={14}/> {t.tpl.print}</>} vr="ghost" onClick={()=>window.print()} st={{fontSize:13,padding:"8px 14px"}}/>
     </div>
     <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:24}}><span style={{fontSize:44}}>{c.icon}</span><div><h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:28,fontWeight:700,margin:"0 0 6px"}}>{lang==="tr"?c.tr:c.en}</h1><PBadge sm/></div></div>
+
+    {/* 30-Day Auto Plan Generator */}
+    <div className="np" style={{background:C.ink,borderRadius:14,padding:20,marginBottom:20}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div>
+          <h4 style={{fontSize:14,fontWeight:700,color:"#fff",margin:"0 0 4px",display:"flex",alignItems:"center",gap:6}}>🗓️ {lang==="tr"?"Otomatik Çok Günlü Plan Oluştur":"Auto-Generate Multi-Day Plan"}</h4>
+          <p style={{fontSize:12,color:"#fff",opacity:0.65,margin:0}}>{lang==="tr"?"Bu duruma uygun besinlerden otomatik olarak çeşitlendirilmiş bir diyet planı oluşturup danışana kaydet.":"Automatically build a varied diet plan from condition-appropriate foods and save it to a client."}</p>
+        </div>
+        <button onClick={()=>setShowGenForm(f=>!f)} style={{padding:"10px 18px",borderRadius:9,border:"none",background:C.coral,color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{lang==="tr"?"Plan Oluştur":"Generate Plan"}</button>
+      </div>
+
+      {showGenForm&&(
+        <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.15)"}}>
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:12,marginBottom:14}} className="g2">
+            <div>
+              <label style={{display:"block",fontSize:11,fontWeight:700,color:"#fff",opacity:0.7,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Danışan Seç":"Select Client"}</label>
+              <select value={selClientKey} onChange={e=>setSelClientKey(e.target.value)} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"none",background:"#fff",color:C.ink,fontSize:14,fontFamily:"inherit",cursor:"pointer"}}>
+                <option value="">{lang==="tr"?"Danışan seç...":"Select client..."}</option>
+                {clients.map(cl=><option key={cl.key} value={cl.key}>{cl.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{display:"block",fontSize:11,fontWeight:700,color:"#fff",opacity:0.7,marginBottom:6,textTransform:"uppercase"}}>{lang==="tr"?"Kaç Gün?":"How many days?"}</label>
+              <input type="number" min="1" max="30" value={genDays} onChange={e=>setGenDays(Math.max(1,Math.min(30,+e.target.value||1)))} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"none",background:"#fff",color:C.ink,fontSize:14,fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+          </div>
+          {selClientKey&&(
+            <p style={{fontSize:11.5,color:"#FFD9B8",marginBottom:12}}>⚠️ {lang==="tr"?"Bu danışanın mevcut bir diyet planı varsa üzerine yazılacaktır.":"If this client already has an existing diet plan, it will be overwritten."}</p>
+          )}
+          <button onClick={generate30DayPlan} disabled={!selClientKey||generating} style={{width:"100%",padding:"11px",borderRadius:8,border:"none",background:selClientKey?"#fff":"rgba(255,255,255,0.2)",color:selClientKey?C.ink:"#fff",fontSize:13.5,fontWeight:700,cursor:selClientKey&&!generating?"pointer":"not-allowed",fontFamily:"inherit",opacity:selClientKey?1:0.6}}>{generating?(lang==="tr"?"Oluşturuluyor...":"Generating..."):(lang==="tr"?`${genDays} Günlük Planı Oluştur ve Kaydet`:`Generate & Save ${genDays}-Day Plan`)}</button>
+        </div>
+      )}
+      {genMsg&&(
+        <div style={{marginTop:14,display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+          <Check size={15} color="#fff"/>
+          <span style={{fontSize:12.5,color:"#fff"}}>{genMsg.text}</span>
+        </div>
+      )}
+    </div>
+
     <Card st={{marginBottom:20}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 10px"}}>{t.tpl.overview}</h3><p style={{margin:0,fontSize:15,lineHeight:1.65}}>{lang==="tr"?c.ovTr:c.ovEn}</p></Card>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:20}} className="g2">
       <Card st={{}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 12px",color:C.sage}}>{t.tpl.rec}</h3>{rec.map((r,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:9,fontSize:13.5}}><Check size={14} color={C.sage} style={{flexShrink:0,marginTop:2}}/> {r}</div>)}</Card>
