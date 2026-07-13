@@ -2029,6 +2029,27 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
     setDietPlan(updated);await ss(`${clientId}:dietPlan`,updated);
   };
 
+  const STORE_SECTIONS={
+    sebze:{tr:"🥬 Sebze & Meyve",en:"🥬 Produce"},
+    meyve:{tr:"🥬 Sebze & Meyve",en:"🥬 Produce"},
+    et:{tr:"🥩 Et & Şarküteri",en:"🥩 Meat & Deli"},
+    balık:{tr:"🐟 Balık",en:"🐟 Fish"},
+    "yumurta-süt":{tr:"🥛 Süt Ürünleri",en:"🥛 Dairy"},
+    tahıl:{tr:"🍞 Fırın & Tahıl",en:"🍞 Bakery & Grains"},
+    baklagil:{tr:"🫘 Bakliyat",en:"🫘 Dry Goods"},
+    kuruyemiş:{tr:"🥜 Kuruyemiş",en:"🥜 Nuts & Seeds"},
+    yağ:{tr:"🫒 Yağ & Sos",en:"🫒 Oils & Condiments"},
+    içecek:{tr:"🧃 İçecekler",en:"🧃 Beverages"},
+    yemek:{tr:"🍽️ Diğer",en:"🍽️ Other"},
+    fastfood:{tr:"🍽️ Diğer",en:"🍽️ Other"},
+    tatlı:{tr:"🍽️ Diğer",en:"🍽️ Other"},
+    diğer:{tr:"🍽️ Diğer",en:"🍽️ Other"},
+  };
+  const guessCategory=(label)=>{
+    const lower=label.toLowerCase();
+    const match=FOODS.find(f=>f.tr.toLowerCase().includes(lower)||lower.includes(f.tr.toLowerCase())||f.en.toLowerCase().includes(lower));
+    return match?match.cat:"diğer";
+  };
   const generateShoppingList=()=>{
     if(!dietPlan)return[];
     const items=new Map();
@@ -2039,12 +2060,22 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
           const clean=chunk.trim().replace(/^\d+\s*(adet|dilim|su bardağı|yemek kaşığı|tatlı kaşığı|gram|g|ml)?\s*/i,"").trim();
           if(clean.length<2)return;
           const key=clean.toLowerCase();
-          items.set(key,(items.get(key)||{label:clean,count:0}));
+          items.set(key,(items.get(key)||{label:clean,count:0,cat:guessCategory(clean)}));
           items.get(key).count++;
         });
       });
     });
-    return[...items.values()].sort((a,b)=>b.count-a.count);
+    const list=[...items.values()];
+    // Group by category
+    const grouped={};
+    list.forEach(item=>{
+      const sec=STORE_SECTIONS[item.cat]||STORE_SECTIONS.diğer;
+      const secLabel=lang==="tr"?sec.tr:sec.en;
+      if(!grouped[secLabel])grouped[secLabel]=[];
+      grouped[secLabel].push(item);
+    });
+    Object.values(grouped).forEach(arr=>arr.sort((a,b)=>b.count-a.count));
+    return grouped;
   };
   const toggleChecked=(key)=>setCheckedItems(prev=>({...prev,[key]:!prev[key]}));
 
@@ -2359,29 +2390,36 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       </div>
 
       {showShoppingList&&dietPlan&&(()=>{
-        const list=generateShoppingList();
-        const checkedCount=list.filter(item=>checkedItems[item.label.toLowerCase()]).length;
+        const grouped=generateShoppingList();
+        const sections=Object.keys(grouped);
+        const allItems=sections.flatMap(s=>grouped[s]);
+        const checkedCount=allItems.filter(item=>checkedItems[item.label.toLowerCase()]).length;
         return(
           <div className="np" style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,padding:20,marginBottom:20}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <h4 style={{fontSize:14,fontWeight:700,color:T.ink,margin:0}}>🛒 {lang==="tr"?"Otomatik Alışveriş Listesi":"Auto-Generated Shopping List"}</h4>
-              <span style={{fontSize:12,color:T.ink,opacity:0.5}}>{checkedCount}/{list.length}</span>
+              <span style={{fontSize:12,color:T.ink,opacity:0.5}}>{checkedCount}/{allItems.length}</span>
             </div>
-            {list.length===0&&<p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?"Plan öğünlerinden malzeme çıkarılamadı.":"Could not extract ingredients from plan meals."}</p>}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}} className="g2">
-              {list.map((item,i)=>{
-                const key=item.label.toLowerCase();
-                const checked=!!checkedItems[key];
-                return(
-                  <label key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",background:checked?T.paperDim:"transparent",borderRadius:6,cursor:"pointer"}}>
-                    <input type="checkbox" checked={checked} onChange={()=>toggleChecked(key)} style={{width:15,height:15,cursor:"pointer"}}/>
-                    <span style={{fontSize:13,color:T.ink,textDecoration:checked?"line-through":"none",opacity:checked?0.5:1}}>{item.label}</span>
-                    {item.count>1&&<span style={{fontSize:10.5,color:T.ink,opacity:0.4,marginLeft:"auto"}}>×{item.count}</span>}
-                  </label>
-                );
-              })}
-            </div>
-            <button onClick={()=>window.print()} style={{marginTop:14,display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={13}/> {lang==="tr"?"Listeyi Yazdır":"Print List"}</button>
+            {allItems.length===0&&<p style={{fontSize:13,color:T.ink,opacity:0.5,margin:0}}>{lang==="tr"?"Plan öğünlerinden malzeme çıkarılamadı.":"Could not extract ingredients from plan meals."}</p>}
+            {sections.map(section=>(
+              <div key={section} style={{marginBottom:16}}>
+                <div style={{fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:8,paddingBottom:6,borderBottom:`1px solid ${T.line}`}}>{section} <span style={{fontWeight:500,opacity:0.6}}>({grouped[section].length})</span></div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}} className="g2">
+                  {grouped[section].map((item,i)=>{
+                    const key=item.label.toLowerCase();
+                    const checked=!!checkedItems[key];
+                    return(
+                      <label key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",background:checked?T.paperDim:"transparent",borderRadius:6,cursor:"pointer"}}>
+                        <input type="checkbox" checked={checked} onChange={()=>toggleChecked(key)} style={{width:15,height:15,cursor:"pointer"}}/>
+                        <span style={{fontSize:13,color:T.ink,textDecoration:checked?"line-through":"none",opacity:checked?0.5:1}}>{item.label}</span>
+                        {item.count>1&&<span style={{fontSize:10.5,color:T.ink,opacity:0.4,marginLeft:"auto"}}>×{item.count}</span>}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",color:T.ink,fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}><Printer size={13}/> {lang==="tr"?"Listeyi Yazdır":"Print List"}</button>
           </div>
         );
       })()}
