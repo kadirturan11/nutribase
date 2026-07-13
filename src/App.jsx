@@ -1427,6 +1427,26 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[search,setSearch]=useState("");
   const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active",phone:"",email:""});
   const[revenueStats,setRevenueStats]=useState(null);
+  const[lowAdherenceClients,setLowAdherenceClients]=useState([]);
+
+  const loadAdherence=async(clientList)=>{
+    const thirtyDaysAgo=Date.now()-30*24*60*60*1000;
+    const lowList=[];
+    for(const c of clientList){
+      if(c.status!=="active"&&c.status)continue; // skip paused/completed
+      const histKeys=await sl(`${c.key}:history:`);
+      const nutriKeys=await sl(`${c.key}:nutri:`);
+      let recentWeight=0,recentNutri=0;
+      for(const k of histKeys){const v=await sg(k);if(v&&v.ts>=thirtyDaysAgo)recentWeight++;}
+      for(const k of nutriKeys){const v=await sg(k);if(v&&v.ts>=thirtyDaysAgo)recentNutri++;}
+      const weightScore=Math.min(recentWeight/4,1)*40;
+      const nutriScore=Math.min(recentNutri/10,1)*40;
+      const engagementScore=(recentWeight+recentNutri)>0?20:0;
+      const total=Math.round(weightScore+nutriScore+engagementScore);
+      if(total<35&&(histKeys.length>0||nutriKeys.length>0)) lowList.push({...c,score:total});
+    }
+    setLowAdherenceClients(lowList);
+  };
 
   const loadRevenue=async(clientList)=>{
     const today=new Date();
@@ -1461,6 +1481,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         setClients(items);
         loadRevenue(items);
+        loadAdherence(items);
       }catch(e){console.error("load error",e);}
       setLoading(false);
     })();
@@ -1475,6 +1496,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
       items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
       setClients(items);
       loadRevenue(items);
+      loadAdherence(items);
     }catch(e){console.error(e);}
     setLoading(false);
   };
@@ -1697,6 +1719,18 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {lowAdherenceClients.length>0&&(
+              <div style={{background:T.paper,border:`1px solid ${C.coral}40`,borderRadius:12,padding:18,marginBottom:8}}>
+                <h4 style={{fontSize:12.5,fontWeight:700,color:C.coral,opacity:0.9,textTransform:"uppercase",letterSpacing:"0.05em",margin:"0 0 12px"}}>🔴 {lang==="tr"?"Düşük Uyumlu Danışanlar":"Low Adherence Clients"} <span style={{fontWeight:500,opacity:0.7}}>({lang==="tr"?"son 30 gün":"last 30 days"})</span></h4>
+                {lowAdherenceClients.map(c=>(
+                  <div key={c.key} onClick={()=>{setSel(c.key);nav("clientProfile");}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:`1px solid ${T.paperDim}`,cursor:"pointer"}}>
+                    <span style={{fontSize:14,fontWeight:600,color:T.ink}}>{c.name}</span>
+                    <span style={{fontSize:12.5,fontWeight:700,color:C.coral}}>{c.score}/100</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
