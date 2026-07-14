@@ -414,10 +414,13 @@ function estimateMealNutrition(mealText){
   let matchedCount=0;
   chunks.forEach(chunk=>{
     const lower=chunk.toLowerCase();
-    // extract a leading quantity multiplier, e.g. "2 yumurta" -> qty=2
-    const qtyMatch=lower.match(/^(\d+)\s*/);
+    // Direct gram amount, e.g. "120g yumurta" or "120 g yumurta" — explicit weight, not a count multiplier.
+    const gramMatch=lower.match(/^(\d+)\s*g(?:r|ram)?\b\s*/);
+    // Count-based quantity, e.g. "2 yumurta" -> qty=2 units of a typical portion.
+    const qtyMatch=!gramMatch?lower.match(/^(\d+)\s*/):null;
     const qty=qtyMatch?parseInt(qtyMatch[1]):1;
-    const cleanedName=lower.replace(/^\d+\s*/,"").trim();
+    const explicitGrams=gramMatch?parseInt(gramMatch[1]):null;
+    const cleanedName=lower.replace(/^\d+\s*g(?:r|ram)?\b\s*/,"").replace(/^\d+\s*/,"").trim();
     // find best matching food by substring overlap
     const match=FOODS.find(f=>{
       if(!f||!f.tr)return false;
@@ -426,13 +429,19 @@ function estimateMealNutrition(mealText){
     });
     if(!match)return;
     matchedCount++;
-    // infer portion size
-    let portion=100;
-    for(const[hint,grams]of Object.entries(PORTION_HINTS)){
-      if(lower.includes(hint)){portion=grams;break;}
+    let factor;
+    if(explicitGrams!==null){
+      // Explicit gram amount given directly — use it as-is, no portion guessing needed.
+      factor=explicitGrams/100;
+    }else{
+      // infer typical portion size for count-based quantities
+      let portion=100;
+      for(const[hint,grams]of Object.entries(PORTION_HINTS)){
+        if(lower.includes(hint)){portion=grams;break;}
+      }
+      if(match.cat==="yumurta-süt"&&match.tr.toLowerCase().includes("yumurta"))portion=55;
+      factor=(portion*qty)/100;
     }
-    if(match.cat==="yumurta-süt"&&match.tr.toLowerCase().includes("yumurta"))portion=55;
-    const factor=(portion*qty)/100;
     totals.kcal+=match.v[0]*factor;
     totals.protein+=match.v[1]*factor;
     totals.carb+=match.v[3]*factor;
@@ -3223,11 +3232,42 @@ function TemplateDetail({t,lang,id,nav,econMode=false,T=C}){
     const pick=(arr,idx)=>arr.length>0?arr[idx%arr.length]:null;
     const name=f=>f?(lang==="tr"?f.tr:f.en):"";
 
+    // Determine target calorie for portion scaling: use client's own target if set,
+    // otherwise estimate from their weight/height/age using Mifflin-St Jeor at moderate activity.
+    const selectedClient=clients.find(cl=>cl.key===selClientKey);
+    let dayTargetKcal=selectedClient?.targetKcal?Number(selectedClient.targetKcal):null;
+    if(!dayTargetKcal&&selectedClient?.weight&&selectedClient?.height&&selectedClient?.age){
+      const bmr=calcBMR({gender:selectedClient.gender||"female",age:+selectedClient.age,height:+selectedClient.height,weight:+selectedClient.weight});
+      dayTargetKcal=Math.round(bmr*1.375); // light activity default
+    }
+    // Meal-slot calorie distribution (breakfast/lunch/dinner/snack)
+    const slotShare={b:0.25,l:0.30,d:0.30,s:0.15};
+    // Scale a list of picked foods (100g baseline each) so their combined kcal hits the slot target
+    const buildMeal=(foods,slotKcalTarget)=>{
+      const validFoods=foods.filter(Boolean);
+      if(validFoods.length===0)return"";
+      if(!slotKcalTarget){
+        // no calorie target available — fall back to plain 100g listing
+        return validFoods.map(name).join(" + ");
+      }
+      const baseTotal=validFoods.reduce((s,f)=>s+f.v[0],0); // combined kcal at 100g each
+      if(baseTotal<=0)return validFoods.map(name).join(" + ");
+      const ratio=slotKcalTarget/baseTotal;
+      return validFoods.map(f=>{
+        const grams=Math.max(20,Math.round(100*ratio/10)*10); // round to nearest 10g, floor 20g
+        return`${grams}g ${lang==="tr"?f.tr:f.en}`;
+      }).join(" + ");
+    };
+
     const days=Array(genDays).fill(null).map((_,i)=>{
-      const b=[pick(pool.protein,i),pick(pool.grain,i)].filter(Boolean).map(name).join(" + ");
-      const l=[pick(pool.meat,i),pick(pool.grain,i+1),pick(pool.veg,i)].filter(Boolean).map(name).join(" + ");
-      const d=[pick(pool.meat,i+1),pick(pool.veg,i+1),pick(pool.grain,i+2)].filter(Boolean).map(name).join(" + ");
-      const s=[pick(pool.fruit,i),pick(pool.nuts,i)].filter(Boolean).map(name).join(" + ");
+      const bFoods=[pick(pool.protein,i),pick(pool.grain,i)];
+      const lFoods=[pick(pool.meat,i),pick(pool.grain,i+1),pick(pool.veg,i)];
+      const dFoods=[pick(pool.meat,i+1),pick(pool.veg,i+1),pick(pool.grain,i+2)];
+      const sFoods=[pick(pool.fruit,i),pick(pool.nuts,i)];
+      const b=buildMeal(bFoods,dayTargetKcal?dayTargetKcal*slotShare.b:null);
+      const l=buildMeal(lFoods,dayTargetKcal?dayTargetKcal*slotShare.l:null);
+      const d=buildMeal(dFoods,dayTargetKcal?dayTargetKcal*slotShare.d:null);
+      const s=buildMeal(sFoods,dayTargetKcal?dayTargetKcal*slotShare.s:null);
       return{day:i+1,meals:{b,l,d,s}};
     });
 
