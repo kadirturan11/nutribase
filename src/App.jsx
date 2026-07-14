@@ -41,7 +41,7 @@ const NUTRIENTS = [
 ];
 
 // Food DB — 26 values per 100g (TurKomp + USDA)
-const FOODS = [
+const FOODS_RAW = [
   {id:1, tr:"Beyaz Ekmek",           en:"White Bread",           cat:"tahıl",cost:1,      v:[265,9,3.2,49,2.7,37,5,0.7,0.6,1.4,0,0,491,115,151,2.9,26,108,0.7,0,0,0,0.2,0,29,0.1]},
   {id:2, tr:"Tam Buğday Ekmeği",     en:"Whole Wheat Bread",     cat:"tahıl",cost:1,      v:[247,13,4.2,41,6.9,38,5.7,0.8,0.7,1.9,0,0,448,248,73,3.9,82,253,1.9,0,0.1,0,0.5,0,43,0.3]},
   {id:3, tr:"Pirinç Pilavı",         en:"Cooked Rice",           cat:"tahıl",cost:1,      v:[130,2.7,0.3,28,0.4,69,0,0.1,0.1,0.1,0,0,1,35,10,0.2,12,43,0.5,0,0,0,0,0,3,0.1]},
@@ -98,7 +98,6 @@ const FOODS = [
   {id:54,tr:"Pekmez",                en:"Grape Molasses",        cat:"diğer",cost:1,      v:[284,0.4,0.1,74,0,22,68,0,0,0,0,0,21,370,55,2.8,18,24,0.1,0,1.4,0,0,0,0,0.1]},
   {id:55,tr:"Bal",                   en:"Honey",                 cat:"diğer",cost:1,      v:[304,0.3,0,82.4,0.2,17,82.1,0,0,0,0,0,4,52,6,0.4,2,4,0.2,0,0.5,0,0,0,2,0]},
   {id:56,tr:"Humus",                 en:"Hummus",                cat:"baklagil",cost:1,   v:[166,7.9,9.6,14.3,6,65,0.3,1.4,5.2,2.4,0,0,379,228,38,2.4,36,176,1.5,0,3.9,0,0.6,0,72,0.2]},
-,
   {id:57, tr:"Mısır (Haşlanmış)",   en:"Boiled Corn",          cat:"sebze",cost:1,      v:[96,3.4,1.5,21,2.4,73,4.5,0.2,0.4,0.7,0,0,15,270,2,0.5,26,89,0.5,11,6.8,0,0.1,0,42,0.1]},
   {id:58, tr:"Mantar",              en:"Mushroom",              cat:"sebze",cost:1,      v:[22,3.1,0.3,3.3,1,92,2,0,0,0.1,0,0,5,318,3,0.5,9,86,0.5,0,2.1,0.1,0,0,17,0.1]},
   {id:59, tr:"Bezelye (Haşlanmış)", en:"Boiled Peas",           cat:"sebze",cost:1,      v:[84,5.4,0.4,15.6,5.5,79,5.7,0.1,0,0.2,0,0,3,271,27,1.5,39,117,1.8,38,14,0,0.1,0,63,0.2]},
@@ -164,6 +163,10 @@ const FOODS = [
   {id:119,tr:"Erik",                 en:"Plum",                 cat:"meyve",cost:1,      v:[46,0.7,0.3,11.4,1.4,87,9.9,0,0,0.1,0,0,0,157,6,0.2,7,16,0.1,17,9.5,0,0.3,0,5,0.1]},
   {id:120,tr:"Greyfurt",             en:"Grapefruit",           cat:"meyve",cost:1,      v:[42,0.8,0.1,10.7,1.6,88,6.9,0,0,0,0,0,0,135,22,0.1,9,18,0.1,58,31,0,0.1,0,10,0]}
 ];
+// Defensive guard: filter out any malformed/incomplete entries (e.g. from manual copy-paste
+// corruption when moving this file between editors) so every other part of the app can safely
+// assume every FOODS item has valid tr/en/cat/v fields, without needing to null-check everywhere.
+const FOODS = FOODS_RAW.filter(f=>f&&typeof f.tr==="string"&&typeof f.en==="string"&&Array.isArray(f.v)&&f.v.length>=26);
 
 // Daily Reference Intakes (adult, 2000 kcal diet — WHO/FDA/EFSA)
 const DRI = [2000,50,78,275,28,null,50,20,null,null,null,300,2300,4700,1000,18,420,700,11,900,90,20,15,2.4,400,1.7];
@@ -417,6 +420,7 @@ function estimateMealNutrition(mealText){
     const cleanedName=lower.replace(/^\d+\s*/,"").trim();
     // find best matching food by substring overlap
     const match=FOODS.find(f=>{
+      if(!f||!f.tr)return false;
       const fn=f.tr.toLowerCase();
       return cleanedName.includes(fn)||fn.includes(cleanedName)||cleanedName.split(" ").some(w=>w.length>3&&fn.includes(w));
     });
