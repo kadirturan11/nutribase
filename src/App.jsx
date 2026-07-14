@@ -1170,8 +1170,8 @@ function FoodPage({t,lang,isPro,econMode=false,T=C}){
 
   const tf=t.food;
   const results=query.length<2?[]:FOODS.filter(f=>{const q=query.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0).slice(0,10);
-  const compResults=compQuery.length<2?[]:FOODS.filter(f=>{const q=compQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,10);
-  const mResults=mQuery.length<2?[]:FOODS.filter(f=>{const q=mQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).slice(0,8);
+  const compResults=compQuery.length<2?[]:FOODS.filter(f=>{const q=compQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0).slice(0,10);
+  const mResults=mQuery.length<2?[]:FOODS.filter(f=>{const q=mQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q)||f.en.toLowerCase().includes(q);}).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0).slice(0,8);
   const dispN=isPro||showAll?NUTRIENTS:NUTRIENTS.filter(n=>n.imp);
   const cv=(base,g)=>{const v=base*(+g)/100;return v%1===0?v:parseFloat(v.toFixed(2));};
   const pct=(val,dri)=>dri?Math.min(Math.round(val/dri*100),999):null;
@@ -1327,7 +1327,7 @@ function FoodPage({t,lang,isPro,econMode=false,T=C}){
             {/* Ingredient search */}
             <div style={{position:"relative",marginBottom:10}}><Search size={15} style={{position:"absolute",left:12,top:12,opacity:0.4}}/><TIn value={rQuery} onChange={e=>{setRQuery(e.target.value);setRSel(null);}} placeholder={lang==="tr"?"Malzeme ara...":"Search ingredient..."} style={{paddingLeft:36,fontSize:14,background:T.paper,color:T.ink,borderColor:T.line}}/></div>
             {rQuery.length>=2&&!rSel&&<div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:10,overflow:"hidden",marginBottom:10}}>
-              {FOODS.filter(f=>{const q=rQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q);}).slice(0,8).map((f,i)=>(
+              {FOODS.filter(f=>{const q=rQuery.toLowerCase();return(lang==="tr"?f.tr:f.en).toLowerCase().includes(q)||f.tr.toLowerCase().includes(q);}).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0).slice(0,8).map((f,i)=>(
                 <div key={f.id} onClick={()=>{setRSel(f);setRAmt("100");setRQuery("");}} style={{padding:"9px 14px",borderTop:i>0?`1px solid ${T.line}`:"none",cursor:"pointer",fontSize:13.5,display:"flex",justifyContent:"space-between",color:T.ink}}>
                   <span>{lang==="tr"?f.tr:f.en}</span><span style={{color:C.coral,fontWeight:700}}>{f.v[0]} kcal</span>
                 </div>
@@ -3247,6 +3247,30 @@ function TemplateDetail({t,lang,id,nav,econMode=false,T=C}){
   const rec=lang==="tr"?c.recTr:c.recEn;
   const av=lang==="tr"?c.avTr:c.avEn;
   const menu=lang==="tr"?c.mTr:c.mEn;
+
+  // Compute concrete "eat this instead" suggestions from the food database — foods that pass
+  // this condition's avoid-keyword filter, grouped by category, so avoid-list phrases like
+  // "Şekerli içecekler" get paired with real, safe alternatives instead of staying abstract.
+  const avoidAllText=(av||[]).join(" ").toLowerCase();
+  const avoidKw=avoidAllText.split(/[\s,()]+/).filter(w=>w.length>3);
+  const isSafe=food=>{
+    const name=(food.tr+" "+food.en).toLowerCase();
+    if(["fastfood","tatlı","içecek"].includes(food.cat))return false;
+    if(econMode&&(food.cost||1)>=3)return false;
+    return!avoidKw.some(kw=>name.includes(kw));
+  };
+  const swapCategories=[
+    {cat:"meyve",labelTr:"🍎 Meyve",labelEn:"🍎 Fruit"},
+    {cat:"sebze",labelTr:"🥦 Sebze",labelEn:"🥦 Vegetable"},
+    {cat:"tahıl",labelTr:"🍞 Tahıl",labelEn:"🍞 Grain"},
+    {cat:"et",labelTr:"🍗 Protein",labelEn:"🍗 Protein"},
+    {cat:"kuruyemiş",labelTr:"🥜 Kuruyemiş",labelEn:"🥜 Nuts"},
+  ];
+  const swapSuggestions=swapCategories.map(sc=>({
+    ...sc,
+    items:FOODS.filter(f=>f.cat===sc.cat&&isSafe(f)).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0).slice(0,4)
+  })).filter(sc=>sc.items.length>0);
+
   return<section style={{maxWidth:820,margin:"0 auto",padding:"40px 24px 90px"}}>
     <style>{`
       @media print {
@@ -3333,6 +3357,23 @@ function TemplateDetail({t,lang,id,nav,econMode=false,T=C}){
       <Card st={{}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 12px",color:C.sage}}>{t.tpl.rec}</h3>{rec.map((r,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:9,fontSize:13.5}}><Check size={14} color={C.sage} style={{flexShrink:0,marginTop:2}}/> {r}</div>)}</Card>
       <Card st={{}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 12px",color:C.coral}}>{t.tpl.avoid}</h3>{av.map((r,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:9,fontSize:13.5}}><X size={14} color={C.coral} style={{flexShrink:0,marginTop:2}}/> {r}</div>)}</Card>
     </div>
+
+    {swapSuggestions.length>0&&(
+      <Card st={{marginBottom:20,background:"#F0F7F0",border:`1px solid ${C.sage}40`}}>
+        <h3 style={{fontSize:13,fontWeight:700,color:C.sage,margin:"0 0 4px",display:"flex",alignItems:"center",gap:6}}>🔄 {lang==="tr"?"Bunun Yerine Ne Yiyebilirim?":"What Can I Eat Instead?"}{econMode&&<span style={{fontSize:10,fontWeight:700,background:C.sage,color:"#fff",padding:"2px 8px",borderRadius:10}}>💰 {lang==="tr"?"Ekonomik":"Budget"}</span>}</h3>
+        <p style={{fontSize:12,color:T.ink,opacity:0.6,margin:"0 0 14px"}}>{lang==="tr"?"Yukarıdaki kısıtlamalara uygun, veritabanımızdan seçilmiş güvenli alternatifler:":"Safe alternatives selected from our food database that respect the restrictions above:"}</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
+          {swapSuggestions.map(sc=>(
+            <div key={sc.cat}>
+              <div style={{fontSize:11.5,fontWeight:700,color:T.ink,opacity:0.7,marginBottom:6}}>{lang==="tr"?sc.labelTr:sc.labelEn}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {sc.items.map(f=><span key={f.id} style={{fontSize:12,fontWeight:600,background:"#fff",border:`1px solid ${C.sage}40`,color:C.sage,padding:"4px 10px",borderRadius:14}}>{lang==="tr"?f.tr:f.en}</span>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    )}
     <Card st={{marginBottom:20}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 14px"}}>{t.tpl.res}</h3><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{res.map((r,i)=><span key={i} style={{fontSize:12.5,fontWeight:600,background:C.paperDim,padding:"6px 12px",borderRadius:20}}>{r}</span>)}</div></Card>
     <Card st={{marginBottom:20}}><h3 style={{fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",opacity:0.5,margin:"0 0 16px"}}>{t.tpl.menu}</h3>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="g2">
