@@ -3234,8 +3234,11 @@ function TemplateDetail({t,lang,id,nav,econMode=false,T=C}){
     const plan={title:`${lang==="tr"?c.nameTr||c.tr:c.nameEn||c.en} — ${genDays} ${lang==="tr"?"Günlük Plan":"Day Plan"}`,days,notes:lang==="tr"?"Bu plan otomatik oluşturulmuştur; danışana özel olarak gözden geçirilip onaylanmalıdır.":"This plan was auto-generated; must be reviewed and approved for the specific client.",createdAt:Date.now()};
     await ss(`${selClientKey}:dietPlan`,plan);
     setGenerating(false);
-    setGenMsg({type:"success",text:lang==="tr"?`${genDays} günlük plan oluşturuldu ve danışana kaydedildi!`:`${genDays}-day plan generated and saved to client!`});
-    setTimeout(()=>setGenMsg(null),4000);
+    const dayEstimates=days.map(d=>estimateDayNutrition(d.meals)).filter(Boolean);
+    const avgKcal=dayEstimates.length>0?Math.round(dayEstimates.reduce((s,d)=>s+d.kcal,0)/dayEstimates.length):null;
+    const avgProtein=dayEstimates.length>0?Math.round(dayEstimates.reduce((s,d)=>s+d.protein,0)/dayEstimates.length):null;
+    setGenMsg({type:"success",text:lang==="tr"?`${genDays} günlük plan oluşturuldu ve danışana kaydedildi!`:`${genDays}-day plan generated and saved to client!`,avgKcal,avgProtein});
+    setTimeout(()=>setGenMsg(null),8000);
     setShowGenForm(false);
   };
 
@@ -3309,9 +3312,18 @@ function TemplateDetail({t,lang,id,nav,econMode=false,T=C}){
         </div>
       )}
       {genMsg&&(
-        <div style={{marginTop:14,display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-          <Check size={15} color="#fff"/>
-          <span style={{fontSize:12.5,color:"#fff"}}>{genMsg.text}</span>
+        <div style={{marginTop:14,background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"12px 16px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <Check size={15} color="#fff"/>
+            <span style={{fontSize:12.5,color:"#fff"}}>{genMsg.text}</span>
+          </div>
+          {genMsg.avgKcal&&(
+            <div style={{display:"flex",gap:20,marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.15)"}}>
+              <div><div style={{fontSize:10,color:"#fff",opacity:0.6,textTransform:"uppercase"}}>{lang==="tr"?"Tahmini Günlük Ort.":"Est. Daily Avg"}</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{genMsg.avgKcal} kcal</div></div>
+              {genMsg.avgProtein&&<div><div style={{fontSize:10,color:"#fff",opacity:0.6,textTransform:"uppercase"}}>Protein</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{genMsg.avgProtein}g</div></div>}
+              <button onClick={()=>nav("clients")} style={{marginLeft:"auto",fontSize:11.5,fontWeight:700,color:"#fff",background:"rgba(255,255,255,0.15)",border:"none",borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:"inherit"}}>{lang==="tr"?"Danışan Profiline Git →":"Go to Client Profile →"}</button>
+            </div>
+          )}
         </div>
       )}
     </div>
