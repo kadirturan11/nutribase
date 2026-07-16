@@ -1689,8 +1689,36 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
   const[showForm,setShowForm]=useState(false);
   const[search,setSearch]=useState("");
   const[form,setForm]=useState({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active",phone:"",email:""});
+  const[kcalAuto,setKcalAuto]=useState(true);
+  const[waterAuto,setWaterAuto]=useState(true);
   const[revenueStats,setRevenueStats]=useState(null);
   const[lowAdherenceClients,setLowAdherenceClients]=useState([]);
+
+  // Auto-calculate target water (35ml per kg — standard clinical rule of thumb) whenever
+  // weight changes, unless the dietitian has manually typed a different value.
+  useEffect(()=>{
+    if(!waterAuto)return;
+    const w=+form.weight;
+    if(!w)return;
+    const liters=(w*0.035).toFixed(1);
+    setForm(f=>f.targetWater===liters?f:{...f,targetWater:liters});
+  },[form.weight,waterAuto]);
+
+  // Auto-calculate target calories from height/weight/age/gender (Mifflin-St Jeor, moderate
+  // activity), nudged by keywords found in the condition/notes field (kilo alma/verme etc.),
+  // unless the dietitian has manually typed a different value.
+  useEffect(()=>{
+    if(!kcalAuto)return;
+    const age=+form.age,height=+form.height,weight=+form.weight;
+    if(!age||!height||!weight)return;
+    const bmr=calcBMR({gender:form.gender,age,height,weight});
+    let target=bmr*1.375; // light-to-moderate activity default for a new client estimate
+    const noteText=((form.condition||"")+" "+(form.notes||"")).toLowerCase();
+    if(/kilo al|zayıf|kas kütlesi|sarkope|weight gain|bulk/.test(noteText))target+=350;
+    else if(/kilo ver|zayıfla|obez|fazla kilo|weight loss|obesity/.test(noteText))target-=400;
+    const kcal=Math.round(target/10)*10;
+    setForm(f=>f.targetKcal===String(kcal)?f:{...f,targetKcal:String(kcal)});
+  },[form.age,form.height,form.weight,form.gender,form.condition,form.notes,kcalAuto]);
 
   const loadAdherence=async(clientList)=>{
     const thirtyDaysAgo=Date.now()-30*24*60*60*1000;
@@ -1770,6 +1798,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     const id="client:"+Date.now();
     await ss(id,{...form,createdAt:Date.now(),id});
     setForm({name:"",age:"",gender:"female",height:"",weight:"",condition:"",notes:"",targetKcal:"",targetWater:"",nextAppt:"",targetWeight:"",status:"active",phone:"",email:""});
+    setKcalAuto(true);setWaterAuto(true);
     setShowForm(false);
     reload();
   };
@@ -2005,9 +2034,10 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
         <div style={{background:T.paper,border:`1px solid ${T.line}`,borderRadius:14,padding:24,marginBottom:24}}>
           <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 20px",color:T.ink}}>{lang==="tr"?"Yeni Danışan Ekle":"Add New Client"}</h3>
           <form onSubmit={add}>
-            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:14,marginBottom:14}} className="g2">
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Ad / Kod *":"Name / Code *"}</label><input required value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder={lang==="tr"?"örn. Danışan-001":"e.g. Client-001"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Yaş":"Age"}</label><input type="number" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Cinsiyet":"Gender"}</label><div style={{display:"flex",gap:6}}>{[{v:"female",l:lang==="tr"?"Kadın":"Female"},{v:"male",l:lang==="tr"?"Erkek":"Male"}].map(o=><button key={o.v} type="button" onClick={()=>setForm(f=>({...f,gender:o.v}))} style={{flex:1,padding:"11px 8px",borderRadius:8,fontSize:12.5,fontWeight:600,border:`1.5px solid ${form.gender===o.v?C.ink:T.line}`,background:form.gender===o.v?C.ink:"transparent",color:form.gender===o.v?"#fff":T.ink,cursor:"pointer",fontFamily:"inherit"}}>{o.l}</button>)}</div></div>
             </div>
             <div style={{marginBottom:14}}>
               <label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Durum":"Status"}</label>
@@ -2027,8 +2057,16 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>✉️ {lang==="tr"?"E-posta":"Email"}</label><input type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="ornek@email.com" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}} className="g3">
-              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}</label><input type="number" value={form.targetKcal} onChange={e=>setForm(f=>({...f,targetKcal:e.target.value}))} placeholder="1800" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
-              <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Su (L)":"Target Water (L)"}</label><input type="number" value={form.targetWater} onChange={e=>setForm(f=>({...f,targetWater:e.target.value}))} placeholder="2.5" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
+              <div>
+                <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Kalori (kcal)":"Target Calories"}{kcalAuto&&<span style={{fontSize:9,fontWeight:700,background:C.sage,color:"#fff",padding:"1px 6px",borderRadius:8,textTransform:"none",letterSpacing:0}}>⚡ {lang==="tr"?"Otomatik":"Auto"}</span>}</label>
+                <input type="number" value={form.targetKcal} onChange={e=>{setKcalAuto(false);setForm(f=>({...f,targetKcal:e.target.value}));}} placeholder={lang==="tr"?"Boy/kilo/yaş girince otomatik hesaplanır":"Auto-calculated from height/weight/age"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${kcalAuto?C.sage:T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+                {!kcalAuto&&<button type="button" onClick={()=>setKcalAuto(true)} style={{fontSize:10.5,color:C.sage,background:"none",border:"none",cursor:"pointer",padding:"4px 0",fontFamily:"inherit",fontWeight:600}}>🔄 {lang==="tr"?"Otomatiğe dön":"Reset to auto"}</button>}
+              </div>
+              <div>
+                <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="tr"?"Hedef Su (L)":"Target Water (L)"}{waterAuto&&<span style={{fontSize:9,fontWeight:700,background:C.sage,color:"#fff",padding:"1px 6px",borderRadius:8,textTransform:"none",letterSpacing:0}}>⚡ {lang==="tr"?"Otomatik":"Auto"}</span>}</label>
+                <input type="number" value={form.targetWater} onChange={e=>{setWaterAuto(false);setForm(f=>({...f,targetWater:e.target.value}));}} placeholder={lang==="tr"?"Kilo girince otomatik (kg×0.035)":"Auto (weight×0.035)"} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${waterAuto?C.sage:T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/>
+                {!waterAuto&&<button type="button" onClick={()=>setWaterAuto(true)} style={{fontSize:10.5,color:C.sage,background:"none",border:"none",cursor:"pointer",padding:"4px 0",fontFamily:"inherit",fontWeight:600}}>🔄 {lang==="tr"?"Otomatiğe dön":"Reset to auto"}</button>}
+              </div>
               <div><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>🎯 {lang==="tr"?"Hedef Kilo (kg)":"Target Weight (kg)"}</label><input type="number" value={form.targetWeight} onChange={e=>setForm(f=>({...f,targetWeight:e.target.value}))} placeholder="65" style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
             </div>
             <div style={{marginBottom:14}}><label style={{display:"block",fontSize:12,fontWeight:700,color:T.ink,opacity:0.6,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📅 {lang==="tr"?"Sonraki Randevu":"Next Appointment"}</label><input type="date" value={form.nextAppt||""} onChange={e=>setForm(f=>({...f,nextAppt:e.target.value}))} style={{width:"100%",padding:"11px 14px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:15,fontFamily:"inherit",boxSizing:"border-box",outline:"none"}}/></div>
