@@ -3640,6 +3640,75 @@ function ExchangeListPage({t,lang,nav,econMode=false,T=C}){
     setTimeout(()=>setSavedMsg(false),2500);
   };
 
+  const[genDietMsg,setGenDietMsg]=useState(null);
+  const[genDietDays,setGenDietDays]=useState(7);
+  const[generatingDiet,setGeneratingDiet]=useState(false);
+
+  // Maps each exchange group to the FOODS categories it draws from, so real food items
+  // (with correct gram portions matching that exchange's official kcal value) can be picked.
+  const GROUP_TO_FOODS_CAT={
+    milkFull:["yumurta-süt"],milkHalf:["yumurta-süt"],milkFree:["yumurta-süt"],
+    meat:["et","balık","baklagil"],bread:["tahıl"],vegetable:["sebze"],
+    fruit:["meyve"],fat:["yağ"],nuts:["kuruyemiş"],sugar:["diğer"],
+  };
+  const generateDietFromExchanges=async()=>{
+    if(!selClientKey||totalExchanges===0)return;
+    setGeneratingDiet(true);
+    const client=clients.find(cl=>cl.key===selClientKey);
+    const isSafe=food=>{
+      if(["fastfood","tatlı","içecek"].includes(food.cat))return false;
+      if(econMode&&(food.cost||1)>=3)return false;
+      if(client?.condition){
+        const cond=COND.find(c=>client.condition.toLowerCase().includes(c.tr.toLowerCase())||client.condition.toLowerCase().includes(c.en.toLowerCase()));
+        if(cond){
+          const avoidText=[...(cond.avTr||[]),...(cond.avEn||[])].join(" ").toLowerCase();
+          const kws=avoidText.split(/[\s,()]+/).filter(w=>w.length>3);
+          const name=(food.tr+" "+food.en).toLowerCase();
+          if(kws.some(kw=>name.includes(kw)))return false;
+        }
+      }
+      return true;
+    };
+    // For each exchange group with count>0, build a pool of matching FOODS and the gram
+    // amount per single exchange (scaled so its kcal matches that group's official value).
+    const groupPools={};
+    EXCHANGE_GROUPS.forEach(g=>{
+      if(!counts[g.id])return;
+      const cats=GROUP_TO_FOODS_CAT[g.id]||[];
+      const pool=FOODS.filter(f=>cats.includes(f.cat)&&isSafe(f)).sort((a,b)=>econMode?(a.cost||1)-(b.cost||1):0);
+      if(pool.length===0)return;
+      const kcalPerExchange=exchangeKcal(g);
+      groupPools[g.id]={pool,count:counts[g.id],kcalPerExchange};
+    });
+    // Meal slot assignment: which exchange groups typically appear in which meal
+    const slotGroups={
+      b:["milkFull","milkHalf","milkFree","bread","fruit"],
+      l:["meat","bread","vegetable","fat"],
+      d:["meat","vegetable","bread","fat"],
+      s:["fruit","nuts","milkFull","milkHalf","milkFree"],
+    };
+    const days=Array(genDietDays).fill(null).map((_,dayIdx)=>{
+      const meals={b:[],l:[],d:[],s:[]};
+      Object.entries(groupPools).forEach(([gid,{pool,count,kcalPerExchange}])=>{
+        // distribute this group's exchanges across the slots it belongs to
+        const targetSlots=Object.entries(slotGroups).filter(([,groups])=>groups.includes(gid)).map(([slot])=>slot);
+        if(targetSlots.length===0)return;
+        for(let e=0;e<count;e++){
+          const slot=targetSlots[e%targetSlots.length];
+          const food=pool[(dayIdx+e)%pool.length];
+          const grams=Math.max(10,Math.round((kcalPerExchange/food.v[0])*100/5)*5);
+          meals[slot].push(`${grams}g ${lang==="tr"?food.tr:food.en}`);
+        }
+      });
+      return{day:dayIdx+1,meals:{b:meals.b.join(" + "),l:meals.l.join(" + "),d:meals.d.join(" + "),s:meals.s.join(" + ")}};
+    });
+    const plan={title:lang==="tr"?`Değişim Listesi Planı (${totalExchanges} değişim, ${totals.kcal} kcal)`:`Exchange List Plan (${totalExchanges} exchanges, ${totals.kcal} kcal)`,days,notes:lang==="tr"?"Bu plan seçilen değişim sayılarından otomatik oluşturulmuştur; danışana özel olarak gözden geçirilip onaylanmalıdır.":"This plan was auto-generated from the selected exchange counts; must be reviewed and approved for the specific client.",createdAt:Date.now()};
+    await ss(`${selClientKey}:dietPlan`,plan);
+    setGeneratingDiet(false);
+    setGenDietMsg(lang==="tr"?`${genDietDays} günlük diyet planı oluşturuldu ve danışana kaydedildi!`:`${genDietDays}-day diet plan generated and saved!`);
+    setTimeout(()=>setGenDietMsg(null),5000);
+  };
+
   return(
     <section style={{maxWidth:1100,margin:"0 auto",padding:"48px 24px 80px"}}>
       <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,fontWeight:700,margin:"0 0 6px",color:T.ink,display:"flex",alignItems:"center",gap:10}}>
@@ -3823,6 +3892,19 @@ function ExchangeListPage({t,lang,nav,econMode=false,T=C}){
             <button onClick={saveToClient} disabled={!selClientKey||totalExchanges===0} style={{width:"100%",padding:"11px",borderRadius:8,border:"none",background:selClientKey&&totalExchanges>0?C.coral:T.line,color:selClientKey&&totalExchanges>0?"#fff":T.ink,fontSize:14,fontWeight:700,cursor:selClientKey&&totalExchanges>0?"pointer":"not-allowed",opacity:selClientKey&&totalExchanges>0?1:0.5,fontFamily:"inherit"}}>{lang==="tr"?"Plana Kaydet":"Save to Plan"}</button>
             {savedMsg&&<div style={{marginTop:10,fontSize:13,color:C.sage,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><Check size={14}/> {lang==="tr"?"Danışana kaydedildi!":"Saved to client!"}</div>}
             {totalExchanges===0&&<p style={{fontSize:11.5,color:T.ink,opacity:0.4,marginTop:10,lineHeight:1.5}}>{lang==="tr"?"Önce yukarıdan en az bir değişim grubu seç.":"Select at least one exchange group above first."}</p>}
+
+            {selClientKey&&totalExchanges>0&&(
+              <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${T.line}`}}>
+                <h4 style={{fontSize:12.5,fontWeight:700,color:T.ink,margin:"0 0 8px",display:"flex",alignItems:"center",gap:6}}>🍽️ {lang==="tr"?"Gerçek Diyet Planına Dönüştür":"Convert to Real Diet Plan"}</h4>
+                <p style={{fontSize:11,color:T.ink,opacity:0.55,margin:"0 0 10px",lineHeight:1.5}}>{lang==="tr"?"Bu değişim sayılarından, gerçek besin isimleri ve gramajlarıyla çok günlük bir diyet planı oluştur.":"Build a multi-day diet plan with real food names and gram amounts from these exchange counts."}</p>
+                <div style={{display:"flex",gap:8,marginBottom:10}}>
+                  <input type="number" min="1" max="14" value={genDietDays} onChange={e=>setGenDietDays(Math.max(1,Math.min(14,+e.target.value||1)))} style={{width:70,padding:"9px 10px",borderRadius:8,border:`1.5px solid ${T.line}`,background:T.paper,color:T.ink,fontSize:13,fontFamily:"inherit",boxSizing:"border-box"}}/>
+                  <span style={{fontSize:12.5,color:T.ink,opacity:0.6,alignSelf:"center"}}>{lang==="tr"?"gün":"days"}</span>
+                  <button onClick={generateDietFromExchanges} disabled={generatingDiet} style={{flex:1,padding:"9px 14px",borderRadius:8,border:"none",background:C.sage,color:"#fff",fontSize:12.5,fontWeight:700,cursor:generatingDiet?"not-allowed":"pointer",fontFamily:"inherit",opacity:generatingDiet?0.6:1}}>{generatingDiet?(lang==="tr"?"Oluşturuluyor...":"Generating..."):(lang==="tr"?"Diyet Planı Oluştur":"Generate Diet Plan")}</button>
+                </div>
+                {genDietMsg&&<div style={{fontSize:12.5,color:C.sage,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><Check size={13}/> {genDietMsg}</div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
