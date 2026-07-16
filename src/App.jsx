@@ -3466,6 +3466,25 @@ function WeeklyPlanPage({t,lang,nav,T=C}){
           <button onClick={()=>window.print()} style={{padding:"9px 16px",borderRadius:8,border:`1px solid ${T.line}`,background:"transparent",fontSize:13,cursor:"pointer",color:T.ink,fontFamily:"inherit",fontWeight:600,display:"flex",alignItems:"center",gap:6}}><Printer size={14}/> {lang==="tr"?"Yazdır":"Print"}</button>
         </div>
       </div>
+
+      {(()=>{
+        const dayEstimates=plan.map(day=>estimateDayNutrition({b:day[0],l:day[1],d:day[2],s:day[3]})).filter(Boolean);
+        if(dayEstimates.length===0)return null;
+        const avgKcal=Math.round(dayEstimates.reduce((s,d)=>s+d.kcal,0)/dayEstimates.length);
+        const avgProtein=Math.round(dayEstimates.reduce((s,d)=>s+d.protein,0)/dayEstimates.length);
+        const avgCarb=Math.round(dayEstimates.reduce((s,d)=>s+d.carb,0)/dayEstimates.length);
+        const avgFat=Math.round(dayEstimates.reduce((s,d)=>s+d.fat,0)/dayEstimates.length);
+        return(
+          <div className="np" style={{background:C.ink,borderRadius:14,padding:"16px 22px",marginBottom:20,display:"flex",gap:28,flexWrap:"wrap"}}>
+            <span style={{fontSize:11,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",alignSelf:"center"}}>📊 {lang==="tr"?`Haftalık Ort. (${dayEstimates.length}/7 gün)`:`Weekly Avg (${dayEstimates.length}/7 days)`}</span>
+            <div><div style={{fontSize:10,color:"#fff",opacity:0.55}}>kcal</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{avgKcal}</div></div>
+            <div><div style={{fontSize:10,color:"#fff",opacity:0.55}}>Protein</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{avgProtein}g</div></div>
+            <div><div style={{fontSize:10,color:"#fff",opacity:0.55}}>{lang==="tr"?"Karb":"Carbs"}</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{avgCarb}g</div></div>
+            <div><div style={{fontSize:10,color:"#fff",opacity:0.55}}>{lang==="tr"?"Yağ":"Fat"}</div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{avgFat}g</div></div>
+          </div>
+        );
+      })()}
+
       <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",minWidth:800}}>
           <thead>
@@ -3490,11 +3509,24 @@ function WeeklyPlanPage({t,lang,nav,T=C}){
                   ):(
                     <div style={{padding:"10px 12px",fontSize:12.5,lineHeight:1.5,color:plan[di][si]?T.ink:T.ink,opacity:plan[di][si]?1:0.2,minHeight:72}}>
                       {plan[di][si]||"+"}
+                      {(()=>{const est=estimateMealNutrition(plan[di][si]);return est&&<div className="np" style={{fontSize:10,fontWeight:700,color:C.coral,marginTop:4}}>~{est.kcal} kcal</div>;})()}
                     </div>
                   )}
                 </td>
               ))}
             </tr>))}
+            <tr>
+              <td style={{padding:"10px 14px",fontSize:11.5,fontWeight:700,color:T.ink,opacity:0.6,border:`1px solid ${T.line}`,background:T.paperDim,whiteSpace:"nowrap",textTransform:"uppercase"}}>{lang==="tr"?"Günlük Toplam":"Daily Total"}</td>
+              {days.map((_,di)=>{
+                const dayMeals={b:plan[di][0],l:plan[di][1],d:plan[di][2],s:plan[di][3]};
+                const dayEst=estimateDayNutrition(dayMeals);
+                return(
+                  <td key={di} style={{padding:"10px 14px",border:`1px solid ${T.line}`,background:T.paperDim,textAlign:"center"}}>
+                    {dayEst?<span style={{fontSize:13,fontWeight:800,color:C.coral}}>{dayEst.kcal} kcal</span>:<span style={{fontSize:11,color:T.ink,opacity:0.3}}>—</span>}
+                  </td>
+                );
+              })}
+            </tr>
           </tbody>
         </table>
       </div>
