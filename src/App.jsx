@@ -846,11 +846,139 @@ const STR = {
   },
 };
 
+// ============================================================
+// STORAGE LAYER — IndexedDB-backed (root-level architecture upgrade)
+// ============================================================
+// Previously this app stored everything in localStorage, which has a hard
+// ~5-10MB ceiling per origin and blocks the main thread on every read/write.
+// Progress photos alone (base64 images) can approach that limit within a
+// modestly active practice. This layer moves all persistence to IndexedDB —
+// a real browser database with capacity in the hundreds of MB and a fully
+// asynchronous API — while keeping the exact same sg/ss/sd/sl function
+// signatures, so every other part of the app works unchanged.
+//
+// A one-time migration silently copies any existing localStorage data into
+// IndexedDB the first time the app runs after this update, so no existing
+// client data is lost. If IndexedDB is ever unavailable (rare, e.g. some
+// private-browsing modes), every function transparently falls back to
+// localStorage so the app keeps working either way.
 const LS="nb:";
-const sg=async k=>{try{const r=localStorage.getItem(LS+k);return r?JSON.parse(r):null;}catch{return null;}};
-const ss=async(k,v)=>{try{localStorage.setItem(LS+k,JSON.stringify(v));return true;}catch{return false;}};
-const sd=async k=>{try{localStorage.removeItem(LS+k);return true;}catch{return false;}};
-const sl=async p=>{try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(LS+p))ks.push(k.slice(LS.length));}return ks;}catch{return[];}};
+const DB_NAME="nutribase_db";
+const DB_VERSION=1;
+const STORE_NAME="kv";
+
+let dbPromise=null;
+function openDB(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    if(typeof indexedDB==="undefined"){reject(new Error("IndexedDB unavailable"));return;}
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(STORE_NAME))db.createObjectStore(STORE_NAME);
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+  return dbPromise;
+}
+
+let migrationDone=false;
+async function migrateFromLocalStorage(){
+  if(migrationDone)return;
+  migrationDone=true;
+  try{
+    const db=await openDB();
+    const existingKeys=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readonly");
+      const req=tx.objectStore(STORE_NAME).getAllKeys();
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    if(existingKeys.length>0)return; // IndexedDB already has data — nothing to migrate
+    const toMigrate=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith(LS)){
+        try{toMigrate.push([k.slice(LS.length),JSON.parse(localStorage.getItem(k))]);}catch{}
+      }
+    }
+    if(toMigrate.length===0)return;
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readwrite");
+      const store=tx.objectStore(STORE_NAME);
+      toMigrate.forEach(([k,v])=>store.put(v,k));
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+  }catch{/* IndexedDB unavailable — per-call localStorage fallback below still works */}
+}
+
+const sg=async k=>{
+  try{
+    await migrateFromLocalStorage();
+    const db=await openDB();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readonly");
+      const req=tx.objectStore(STORE_NAME).get(k);
+      req.onsuccess=()=>resolve(req.result!==undefined?req.result:null);
+      req.onerror=()=>reject(req.error);
+    });
+  }catch{
+    try{const r=localStorage.getItem(LS+k);return r?JSON.parse(r):null;}catch{return null;}
+  }
+};
+const ss=async(k,v)=>{
+  try{
+    const db=await openDB();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readwrite");
+      tx.objectStore(STORE_NAME).put(v,k);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+    return true;
+  }catch{
+    try{localStorage.setItem(LS+k,JSON.stringify(v));return true;}catch{return false;}
+  }
+};
+const sd=async k=>{
+  try{
+    const db=await openDB();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readwrite");
+      tx.objectStore(STORE_NAME).delete(k);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+    return true;
+  }catch{
+    try{localStorage.removeItem(LS+k);return true;}catch{return false;}
+  }
+};
+const sl=async p=>{
+  try{
+    await migrateFromLocalStorage();
+    const db=await openDB();
+    const allKeys=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,"readonly");
+      const req=tx.objectStore(STORE_NAME).getAllKeys();
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    return allKeys.filter(k=>typeof k==="string"&&k.startsWith(p));
+  }catch{
+    try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(LS+p))ks.push(k.slice(LS.length));}return ks;}catch{return[];}
+  }
+};
+// A handful of tiny boot-time preference flags (dark mode, pro status, budget mode) must be
+// readable synchronously during React's useState initializer — IndexedDB is async and can't
+// serve that. These are dual-written: normal storage (IndexedDB) for consistency, plus a
+// direct localStorage mirror so the app can render instantly with the correct value on load.
+const ssSync=async(k,v)=>{
+  try{localStorage.setItem(LS+k,JSON.stringify(v));}catch{}
+  return ss(k,v);
+};
 
 function calcBMR({gender,age,height,weight}){const b=10*weight+6.25*height-5*age;return gender==="male"?b+5:b-161;}
 // WHO/Schofield weight-based equations (kcal/day) — standard reference in Turkish dietetics education
@@ -913,9 +1041,9 @@ export default function App(){
     try{const v=localStorage.getItem("nb:user:econMode");return v?JSON.parse(v):false;}catch{return false;}
   });
 
-  const toggleDark=async()=>{const nd=!isDark;setIsDark(nd);await ss("user:dark",nd);};
-  const toggleEconMode=async()=>{const ne=!econMode;setEconMode(ne);await ss("user:econMode",ne);};
-  const goPro=useCallback(async()=>{setIsPro(true);await ss("user:isPro",true);},[]);
+  const toggleDark=async()=>{const nd=!isDark;setIsDark(nd);await ssSync("user:dark",nd);};
+  const toggleEconMode=async()=>{const ne=!econMode;setEconMode(ne);await ssSync("user:econMode",ne);};
+  const goPro=useCallback(async()=>{setIsPro(true);await ssSync("user:isPro",true);},[]);
   const nav=p=>{setPage(p);window.scrollTo(0,0);};
 
   // Dynamic colors based on theme
