@@ -3,7 +3,7 @@ import {
   Calculator, Droplets, TrendingUp, Users, FileText, Lock, Check,
   ChevronRight, Globe, Plus, X, Activity, Apple, AlertCircle,
   ArrowRight, Sparkles, ClipboardList, UserPlus, Search, Trash2,
-  Crown, Scale, Printer, ChevronDown, ChevronUp, Leaf, Settings
+  Crown, Scale, Printer, ChevronDown, ChevronUp, Leaf, Settings, Bell
 } from "lucide-react";
 
 const C = {
@@ -1046,13 +1046,55 @@ export default function App(){
   const goPro=useCallback(async()=>{setIsPro(true);await ssSync("user:isPro",true);},[]);
   const nav=p=>{setPage(p);window.scrollTo(0,0);};
 
+  // ── Notification Center ──────────────────────────────────────────────────
+  // Aggregates every actionable alert already computed elsewhere in the app
+  // (upcoming/overdue appointments, low-adherence clients, pending payments)
+  // into one place, so the dietitian doesn't have to visit the Clients page
+  // just to see what needs attention. Recomputed whenever the active page
+  // changes, which is cheap and keeps the bell reasonably fresh.
+  const[notifications,setNotifications]=useState({upcoming:[],overdue:[],lowAdherence:[],pendingPayments:[]});
+  useEffect(()=>{
+    if(!isPro)return;
+    (async()=>{
+      try{
+        const ks=await sl("client:");
+        const clientList=[];
+        for(const k of ks){const v=await sg(k);if(v&&v.name)clientList.push({...v,key:k});}
+        const today=new Date();today.setHours(0,0,0,0);
+        const in7days=new Date(today);in7days.setDate(in7days.getDate()+7);
+        const upcoming=clientList.filter(c=>c.nextAppt&&new Date(c.nextAppt)>=today&&new Date(c.nextAppt)<=in7days);
+        const overdue=clientList.filter(c=>c.nextAppt&&new Date(c.nextAppt)<today);
+        const thirtyDaysAgo=Date.now()-30*24*60*60*1000;
+        const lowAdherence=[];
+        let pendingTotal=0;
+        const pendingClients=[];
+        for(const c of clientList){
+          if(c.status!=="active"&&c.status)continue;
+          const histKeys=await sl(`${c.key}:history:`);
+          const nutriKeys=await sl(`${c.key}:nutri:`);
+          let recentWeight=0,recentNutri=0;
+          for(const hk of histKeys){const v=await sg(hk);if(v&&v.ts>=thirtyDaysAgo)recentWeight++;}
+          for(const nk of nutriKeys){const v=await sg(nk);if(v&&v.ts>=thirtyDaysAgo)recentNutri++;}
+          const score=Math.round(Math.min(recentWeight/4,1)*40+Math.min(recentNutri/10,1)*40+((recentWeight+recentNutri)>0?20:0));
+          if(score<35&&(histKeys.length>0||nutriKeys.length>0))lowAdherence.push({...c,score});
+          const sessions=await sg(`${c.key}:sessions`);
+          if(sessions){
+            const pending=sessions.filter(s=>!s.paid).reduce((s,x)=>s+x.fee,0);
+            if(pending>0){pendingTotal+=pending;pendingClients.push({...c,pending});}
+          }
+        }
+        setNotifications({upcoming,overdue,lowAdherence,pendingPayments:pendingClients,pendingTotal});
+      }catch(e){/* silent — notification center is a convenience layer, never block the app */}
+    })();
+  },[page,isPro]);
+
   // Dynamic colors based on theme
   const T=isDark?DARK:C;
 
   return(
     <div style={{minHeight:"100vh",background:T.paper,color:T.ink,fontFamily:"'Inter',-apple-system,BlinkMacSystemFont,sans-serif",transition:"background 0.2s,color 0.2s"}}>
       <style>{`*{box-sizing:border-box;}body{margin:0;background:${T.paper};}::selection{background:${T.coral};color:#fff;}@keyframes nbF{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}.nbP{animation:nbF 0.2s ease both;}@media(max-width:720px){.g2{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr!important;}.hm{display:none!important;}}@media print{.np{display:none!important;}}`}</style>
-      <NavBar t={t} lang={lang} setLang={setLang} page={page} nav={nav} isPro={isPro} isDark={isDark} toggleDark={toggleDark} econMode={econMode} toggleEconMode={toggleEconMode} T={T}/>
+      <NavBar t={t} lang={lang} setLang={setLang} page={page} nav={nav} isPro={isPro} isDark={isDark} toggleDark={toggleDark} econMode={econMode} toggleEconMode={toggleEconMode} notifications={notifications} setSelClient={setSelClient} T={T}/>
       <main className="nbP" key={page}>
         {page==="landing"&&<Landing t={t} nav={nav} lang={lang} T={T}/>}
         {page==="calc"&&<CalcPage t={t} lang={lang} T={T}/>}
@@ -1073,7 +1115,10 @@ export default function App(){
   );
 }
 
-function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,econMode,toggleEconMode,T}){
+function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,econMode,toggleEconMode,notifications,setSelClient,T}){
+  const[showNotifs,setShowNotifs]=useState(false);
+  const notifCount=notifications?(notifications.upcoming.length+notifications.overdue.length+notifications.lowAdherence.length+notifications.pendingPayments.length):0;
+  const goToClient=key=>{setSelClient(key);nav("clientProfile");setShowNotifs(false);};
   const items=[
     {k:"calc",l:t.nav.calc,icon:<Calculator size={15}/>},
     {k:"food",l:t.nav.food,icon:<Search size={15}/>},
@@ -1093,6 +1138,47 @@ function NavBar({t,lang,setLang,page,nav,isPro,isDark,toggleDark,econMode,toggle
           {items.map(i=><button key={i.k} onClick={()=>nav(i.k)} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:8,border:"none",background:page===i.k?T.paperDim:"transparent",color:T.ink,fontSize:13.5,fontWeight:600,cursor:"pointer"}}>{i.icon}{i.l}{i.pro&&!isPro&&<Lock size={10} style={{marginLeft:2,opacity:0.5}}/>}</button>)}
         </nav>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {isPro&&(
+            <div style={{position:"relative"}}>
+              <button onClick={()=>setShowNotifs(f=>!f)} title={lang==="tr"?"Bildirimler":"Notifications"} style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",width:34,height:34,borderRadius:8,border:`1px solid ${T.line}`,background:showNotifs?T.line:T.paperDim,cursor:"pointer",color:T.ink}}>
+                <Bell size={15}/>
+                {notifCount>0&&<span style={{position:"absolute",top:-4,right:-4,minWidth:16,height:16,borderRadius:8,background:C.coral,color:"#fff",fontSize:9.5,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifCount>9?"9+":notifCount}</span>}
+              </button>
+              {showNotifs&&(
+                <>
+                  <div onClick={()=>setShowNotifs(false)} style={{position:"fixed",inset:0,zIndex:40}}/>
+                  <div style={{position:"absolute",top:42,right:0,width:340,maxHeight:440,overflowY:"auto",background:T.paper,border:`1px solid ${T.line}`,borderRadius:12,boxShadow:"0 12px 32px rgba(0,0,0,0.18)",zIndex:41,padding:14}}>
+                    <div style={{fontSize:13,fontWeight:700,color:T.ink,marginBottom:10}}>🔔 {lang==="tr"?"Bildirimler":"Notifications"}</div>
+                    {notifCount===0&&<p style={{fontSize:12.5,color:T.ink,opacity:0.5,textAlign:"center",padding:"20px 0"}}>{lang==="tr"?"Yeni bildirim yok, her şey yolunda!":"No new notifications — all clear!"}</p>}
+                    {notifications.overdue.length>0&&(
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:10.5,fontWeight:700,color:C.coral,textTransform:"uppercase",marginBottom:6}}>⚠️ {lang==="tr"?"Geçmiş Randevu":"Overdue Appointments"}</div>
+                        {notifications.overdue.map(c=><div key={c.key} onClick={()=>goToClient(c.key)} style={{padding:"8px 10px",borderRadius:8,cursor:"pointer",fontSize:12.5,color:T.ink,background:T.paperDim,marginBottom:4}}>{c.name}</div>)}
+                      </div>
+                    )}
+                    {notifications.upcoming.length>0&&(
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:10.5,fontWeight:700,color:C.sage,textTransform:"uppercase",marginBottom:6}}>📅 {lang==="tr"?"Yaklaşan Randevu":"Upcoming Appointments"}</div>
+                        {notifications.upcoming.map(c=><div key={c.key} onClick={()=>goToClient(c.key)} style={{padding:"8px 10px",borderRadius:8,cursor:"pointer",fontSize:12.5,color:T.ink,background:T.paperDim,marginBottom:4}}>{c.name} — {c.nextAppt}</div>)}
+                      </div>
+                    )}
+                    {notifications.lowAdherence.length>0&&(
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:10.5,fontWeight:700,color:C.gold,textTransform:"uppercase",marginBottom:6}}>🔴 {lang==="tr"?"Düşük Uyum":"Low Adherence"}</div>
+                        {notifications.lowAdherence.map(c=><div key={c.key} onClick={()=>goToClient(c.key)} style={{padding:"8px 10px",borderRadius:8,cursor:"pointer",fontSize:12.5,color:T.ink,background:T.paperDim,marginBottom:4,display:"flex",justifyContent:"space-between"}}><span>{c.name}</span><span style={{fontWeight:700}}>{c.score}/100</span></div>)}
+                      </div>
+                    )}
+                    {notifications.pendingPayments.length>0&&(
+                      <div>
+                        <div style={{fontSize:10.5,fontWeight:700,color:C.coral,textTransform:"uppercase",marginBottom:6}}>💰 {lang==="tr"?"Bekleyen Ödeme":"Pending Payment"}</div>
+                        {notifications.pendingPayments.map(c=><div key={c.key} onClick={()=>goToClient(c.key)} style={{padding:"8px 10px",borderRadius:8,cursor:"pointer",fontSize:12.5,color:T.ink,background:T.paperDim,marginBottom:4,display:"flex",justifyContent:"space-between"}}><span>{c.name}</span><span style={{fontWeight:700,color:C.coral}}>₺{c.pending.toLocaleString()}</span></div>)}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           <button onClick={()=>nav("settings")} title={lang==="tr"?"Ayarlar":"Settings"} style={{display:"flex",alignItems:"center",justifyContent:"center",width:34,height:34,borderRadius:8,border:`1px solid ${T.line}`,background:page==="settings"?T.line:T.paperDim,cursor:"pointer",color:T.ink}}>
             <Settings size={15}/>
           </button>
