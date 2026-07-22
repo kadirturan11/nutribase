@@ -818,7 +818,7 @@ const STR = {
     hero:{eyebrow:"Kalori · Su · Makro · Klinik Şablonlar",title:"Beslenme bilimini herkes için netleştir",sub:"Bireyler için doğru hesaplama, diyetisyenler için klinik düzeyde araçlar — tek uygulamada.",ctaFree:"Ücretsiz Başla",ctaPro:"Diyetisyen misiniz?"},
     stats:{t1:"Hastalık Şablonu",t2:"Dil Desteği",t3:"Besin Kaydı",t4:"Ücretsiz Erişim"},
     hiw:{title:"Nasıl Çalışır?",s1t:"Bilgilerini Gir",s1d:"Yaş, kilo, boy ve aktivite düzeyini gir.",s2t:"Anında Hesapla",s2d:"BMR, TDEE, BMİ, su ve makrolarını saniyeler içinde gör.",s3t:"Takip Et & İlerle",s3d:"Günlük kayıtlarınla ilerlemeni izle; diyetisyensen danışanlarını yönet."},
-    calc:{title:"Günlük İhtiyaç Hesaplama",sub:"Bilgilerini gir, BMR, TDEE, BMİ, su ve makro ihtiyacını hemen gör.",gender:"Cinsiyet",male:"Erkek",female:"Kadın",age:"Yaş",height:"Boy (cm)",weight:"Kilo (kg)",activity:"Aktivite Düzeyi",act:["Hareketsiz (masa başı, spor yok)","Hafif aktif (haftada 1-3 gün)","Orta aktif (haftada 3-5 gün)","Çok aktif (haftada 6-7 gün)","Üst düzey aktif (ağır iş + günlük spor)"],goal:"Hedef",goalLose:"Kilo Vermek",goalMaintain:"Kiloyu Korumak",goalGain:"Kilo Almak",calculate:"Hesapla",results:"Sonuçların",bmr:"Bazal Metabolizma (BMR)",bmrD:"Vücudunun dinlenirken yaktığı enerji",tdee:"Toplam İhtiyaç (TDEE)",tdeeD:"Aktivite dahil günlük toplam kalori",target:"Hedef Kalori",targetD:"Hedefine göre önerilen günlük alım",water:"Su İhtiyacı",waterD:"Günlük önerilen su tüketimi",bmi:"Vücut Kitle İndeksi (BMİ)",bmiD:"Boy ve kilona göre ağırlık kategorisi",macros:"Makro Dağılımı",protein:"Protein",carbs:"Karbonhidrat",fat:"Yağ",kcal:"kcal",liters:"litre",bmiUnder:"Zayıf",bmiNormal:"Normal",bmiOver:"Fazla Kilolu",bmiObese:"Obez",disclaimer:"Bu hesaplamalar genel formüllere dayanır ve bireysel tıbbi tavsiye yerine geçmez.",saveEntry:"Bugüne Kaydet",saved:"Kaydedildi!"},
+    calc:{title:"Günlük İhtiyaç Hesaplama",sub:"Bilgilerini gir, BMR, TDEE, BMİ, su ve makro ihtiyacını hemen gör.",gender:"Cinsiyet",male:"Erkek",female:"Kadın",age:"Yaş",height:"Boy (cm)",weight:"Kilo (kg)",activity:"Aktivite Düzeyi",act:["Hareketsiz (masa başı, spor yok)","Hafif aktif (haftada 1-3 gün)","Orta aktif (haftada 3-5 gün)","Çok aktif (haftada 6-7 gün)","Üst düzey aktif (ağır iş + günlük spor)"],goal:"Hedef",goalLose:"Kilo Vermek",goalMaintain:"Kiloyu Korumak",goalGain:"Kilo Almak",calculate:"Hesapla",results:"Sonuçların",bmr:"Bazal Metabolizma (BMR)",bmrD:"Vücudunun dinlenirken yaktığı enerji",tdee:"Toplam İhtiyaç (TDEE)",tdeeD:"Aktivite dahil günlük toplam kalori",target:"Hedef Kalori",targetD:"Hedefine göre önerilen günlük alım",water:"Su İhtiyacı",waterD:"Günlük önerilen su tüketimi",bmi:"Vücut Kitle İndeksi (BMİ)",bmiD:"Boy ve kilona göre ağırlık kategorisi",macros:"Makro Dağılımı",protein:"Protein",carbs:"Karbonhidrat",fat:"Yağ",kcal:"kcal",liters:"litre",bmiUnder:"Zayıf",bmiNormal:"Normal",bmiOver:"Fazla Kilolu",bmiObese:"Obez",bmiPediatric:"18 Yaş Altı — Persentil Gerekli",disclaimer:"Bu hesaplamalar genel formüllere dayanır ve bireysel tıbbi tavsiye yerine geçmez.",saveEntry:"Bugüne Kaydet",saved:"Kaydedildi!"},
     food:{title:"Besin Arama",sub:"Besin adı yazın, miktarını girin — 26 besin değerini görün.",ph:"Besin adı yazın (örn: yumurta, tavuk, elma...)",amount:"Miktar (gram)",impN:"Önemli Değerler",allN:"Tüm 26 Değer (PRO)",showAll:"↓ Tümünü Gör",showLess:"↑ Az Göster",src:"Kaynak: TurKomp + USDA veritabanları",notFound:"Besin bulunamadı. Farklı bir kelime deneyin.",selPrompt:"Soldan bir besin seçin",cats:{tahıl:"Tahıllar",et:"Etler",balık:"Balıklar","yumurta-süt":"Yumurta & Süt Ürünleri",baklagil:"Baklagiller",sebze:"Sebzeler",meyve:"Meyveler",kuruyemiş:"Kuruyemiş & Tohumlar",yağ:"Yağlar",diğer:"Diğer",yemek:"Hazır Yemekler",fastfood:"Fast Food",tatlı:"Tatlılar",içecek:"İçecekler"}},
     track:{title:"Günlük Takip",sub:"Kayıtlı hesaplamalarını ve ilerlemeni gör.",empty:"Henüz kayıt yok. Hesap makinesinden hesaplama yapıp kaydet.",date:"Tarih",weight:"Kilo",target:"Hedef Kalori",water:"Su",trend:"Kilo Değişimi"},
     upsell:{title:"Bu özellik Pro'da",sub:"Danışan yönetimi ve hastalık şablonları yalnızca Pro pakette bulunur.",cta:"Pro'yu İncele"},
@@ -834,7 +834,7 @@ const STR = {
     hero:{eyebrow:"Calories · Water · Macros · Clinical Templates",title:"Make nutrition science clear for everyone",sub:"Accurate calculations for individuals, clinical-grade tools for dietitians — in one app.",ctaFree:"Start Free",ctaPro:"Are you a dietitian?"},
     stats:{t1:"Condition Templates",t2:"Languages",t3:"Food Records",t4:"Free Access"},
     hiw:{title:"How It Works",s1t:"Enter Your Details",s1d:"Enter your age, weight, height and activity level.",s2t:"Calculate Instantly",s2d:"See your BMR, TDEE, BMI, water and macro needs in seconds.",s3t:"Track & Progress",s3d:"Monitor your progress with daily logs; manage clients if you're a dietitian."},
-    calc:{title:"Daily Needs Calculator",sub:"Enter your details to see your BMR, TDEE, BMI, water and macro needs instantly.",gender:"Gender",male:"Male",female:"Female",age:"Age",height:"Height (cm)",weight:"Weight (kg)",activity:"Activity Level",act:["Sedentary (desk job, no exercise)","Lightly active (1-3 days/week)","Moderately active (3-5 days/week)","Very active (6-7 days/week)","Extremely active (physical job + daily training)"],goal:"Goal",goalLose:"Lose Weight",goalMaintain:"Maintain Weight",goalGain:"Gain Weight",calculate:"Calculate",results:"Your Results",bmr:"Basal Metabolic Rate (BMR)",bmrD:"Energy your body burns at rest",tdee:"Total Daily Energy (TDEE)",tdeeD:"Total daily calories including activity",target:"Target Calories",targetD:"Recommended daily intake for your goal",water:"Water Needs",waterD:"Recommended daily water intake",bmi:"Body Mass Index (BMI)",bmiD:"Body weight category based on height and weight",macros:"Macro Breakdown",protein:"Protein",carbs:"Carbs",fat:"Fat",kcal:"kcal",liters:"liters",bmiUnder:"Underweight",bmiNormal:"Normal",bmiOver:"Overweight",bmiObese:"Obese",disclaimer:"These calculations use general formulas and are not a substitute for individual medical advice.",saveEntry:"Save to Today",saved:"Saved!"},
+    calc:{title:"Daily Needs Calculator",sub:"Enter your details to see your BMR, TDEE, BMI, water and macro needs instantly.",gender:"Gender",male:"Male",female:"Female",age:"Age",height:"Height (cm)",weight:"Weight (kg)",activity:"Activity Level",act:["Sedentary (desk job, no exercise)","Lightly active (1-3 days/week)","Moderately active (3-5 days/week)","Very active (6-7 days/week)","Extremely active (physical job + daily training)"],goal:"Goal",goalLose:"Lose Weight",goalMaintain:"Maintain Weight",goalGain:"Gain Weight",calculate:"Calculate",results:"Your Results",bmr:"Basal Metabolic Rate (BMR)",bmrD:"Energy your body burns at rest",tdee:"Total Daily Energy (TDEE)",tdeeD:"Total daily calories including activity",target:"Target Calories",targetD:"Recommended daily intake for your goal",water:"Water Needs",waterD:"Recommended daily water intake",bmi:"Body Mass Index (BMI)",bmiD:"Body weight category based on height and weight",macros:"Macro Breakdown",protein:"Protein",carbs:"Carbs",fat:"Fat",kcal:"kcal",liters:"liters",bmiUnder:"Underweight",bmiNormal:"Normal",bmiOver:"Overweight",bmiObese:"Obese",bmiPediatric:"Under 18 — Percentile Needed",disclaimer:"These calculations use general formulas and are not a substitute for individual medical advice.",saveEntry:"Save to Today",saved:"Saved!"},
     food:{title:"Food Search",sub:"Type a food name, enter the amount — see 26 nutritional values.",ph:"Type food name (e.g. egg, chicken, apple...)",amount:"Amount (grams)",impN:"Key Nutrients",allN:"All 26 Nutrients (PRO)",showAll:"↓ Show All",showLess:"↑ Show Less",src:"Source: TurKomp + USDA databases",notFound:"Food not found. Try a different word.",selPrompt:"Select a food on the left",cats:{tahıl:"Grains",et:"Meat",balık:"Fish","yumurta-süt":"Eggs & Dairy",baklagil:"Legumes",sebze:"Vegetables",meyve:"Fruits",kuruyemiş:"Nuts & Seeds",yağ:"Oils",diğer:"Other",yemek:"Prepared Dishes",fastfood:"Fast Food",tatlı:"Desserts",içecek:"Beverages"}},
     track:{title:"Daily Tracking",sub:"View your saved calculations and progress.",empty:"No entries yet. Run a calculation and save it.",date:"Date",weight:"Weight",target:"Target Cal",water:"Water",trend:"Weight Trend"},
     upsell:{title:"This feature is Pro",sub:"Client management and condition templates are available only in the Pro plan.",cta:"See Pro"},
@@ -1006,7 +1006,20 @@ function calcAll({gender,age,height,weight,actIdx,goal}){
   const h=+height/100;
   return{bmr:Math.round(bmr),tdee:Math.round(tdee),target:Math.round(target),water:(+weight*0.035).toFixed(1),protein:Math.round((target*0.30)/4),carbs:Math.round((target*0.40)/4),fat:Math.round((target*0.30)/9),bmi:(+weight/(h*h)).toFixed(1)};
 }
-function bmiCat(bmi,t){const v=parseFloat(bmi);if(v<18.5)return{l:t.calc.bmiUnder,col:"#3B82F6"};if(v<25)return{l:t.calc.bmiNormal,col:C.sage};if(v<30)return{l:t.calc.bmiOver,col:C.gold};return{l:t.calc.bmiObese,col:C.coral};}
+function bmiCat(bmi,t,age){
+  const v=parseFloat(bmi);
+  if(age!==undefined&&age!==null&&age!==""&&+age<18){
+    // Adult BMI cutoffs (18.5/25/30) are not clinically valid for children and
+    // adolescents — pediatric assessment requires age/gender-specific BMI-for-age
+    // percentile growth charts (WHO/CDC), which this app does not compute. Rather
+    // than showing a potentially misleading adult-style category, flag this clearly.
+    return{l:t.calc.bmiPediatric||"—",col:C.gold,isPediatric:true};
+  }
+  if(v<18.5)return{l:t.calc.bmiUnder,col:"#3B82F6"};
+  if(v<25)return{l:t.calc.bmiNormal,col:C.sage};
+  if(v<30)return{l:t.calc.bmiOver,col:C.gold};
+  return{l:t.calc.bmiObese,col:C.coral};
+}
 
 function Logo({sz=28,T=C}){return<svg width={sz} height={sz} viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke={T.ink} strokeWidth="1.5"/><path d="M13 26V14L27 26V14" stroke={T.coral} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
 function Spin(){return<div style={{display:"flex",justifyContent:"center",padding:40}}><div style={{width:28,height:28,borderRadius:"50%",border:`3px solid ${C.line}`,borderTopColor:C.coral,animation:"nbsp 0.7s linear infinite"}}/><style>{"@keyframes nbsp{to{transform:rotate(360deg)}}"}</style></div>;}
@@ -1101,7 +1114,7 @@ export default function App(){
         {page==="food"&&<FoodPage t={t} lang={lang} isPro={isPro} econMode={econMode} T={T}/>}
         {page==="track"&&<TrackPage t={t} lang={lang} T={T}/>}
         {page==="clients"&&(isPro?<ClientsPage t={t} lang={lang} nav={nav} setSel={setSelClient} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
-        {page==="clientProfile"&&(isPro?<ClientProfile t={t} lang={lang} clientId={selClient} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
+        {page==="clientProfile"&&(isPro?<ClientProfile t={t} lang={lang} clientId={selClient} nav={nav} setSelTpl={setSelTpl} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="templates"&&(isPro?<TemplatesPage t={t} lang={lang} nav={nav} setSel={setSelTpl} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="templateDetail"&&(isPro?<TemplateDetail t={t} lang={lang} id={selTpl} nav={nav} econMode={econMode} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
         {page==="weeklyPlan"&&(isPro?<WeeklyPlanPage t={t} lang={lang} nav={nav} T={T}/>:<Upsell t={t} nav={nav} T={T}/>)}
@@ -1300,7 +1313,7 @@ function CalcPage({t,lang}){
   const upd=(k,v)=>setForm(f=>({...f,[k]:v}));
   const go=()=>{if(!form.age||!form.height||!form.weight)return;setResult(calcAll(form));setSaved(false);};
   const save=async()=>{if(!result)return;await ss(`entry:${Date.now()}`,{date:new Date().toISOString().slice(0,10),weight:form.weight,target:result.target,water:result.water,ts:Date.now()});setSaved(true);};
-  const bmi=result?bmiCat(result.bmi,t):null;
+  const bmi=result?bmiCat(result.bmi,t,form.age):null;
   return(
     <section style={{maxWidth:1100,margin:"0 auto",padding:"48px 24px 80px"}}>
       <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:32,fontWeight:700,margin:"0 0 8px"}}>{t.calc.title}</h1>
@@ -1322,11 +1335,20 @@ function CalcPage({t,lang}){
             <h2 style={{fontSize:13,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",color:C.ink,opacity:0.5,marginBottom:14}}>{t.calc.results}</h2>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}><SBk icon={<Activity size={14}/>} label={t.calc.bmr} val={result.bmr} unit={t.calc.kcal} sub={t.calc.bmrD}/><SBk icon={<TrendingUp size={14}/>} label={t.calc.tdee} val={result.tdee} unit={t.calc.kcal} sub={t.calc.tdeeD}/></div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}><SBk icon={<Apple size={14}/>} label={t.calc.target} val={result.target} unit={t.calc.kcal} sub={t.calc.targetD} acc/><SBk icon={<Droplets size={14}/>} label={t.calc.water} val={result.water} unit={t.calc.liters} sub={t.calc.waterD}/></div>
-            <div style={{background:"#fff",border:`1px solid ${C.line}`,borderRadius:14,padding:"18px 20px",marginBottom:14}}>
+            <div style={{background:"#fff",border:`1px solid ${bmi.isPediatric?C.gold:C.line}`,borderRadius:14,padding:"18px 20px",marginBottom:14}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,color:C.sage}}><Scale size={14}/><span style={{fontSize:11.5,letterSpacing:"0.07em",textTransform:"uppercase",fontWeight:700}}>{t.calc.bmi}</span></div>
               <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:10}}><span style={{fontSize:34,fontWeight:800,color:C.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{result.bmi}</span><div><span style={{display:"inline-block",background:bmi.col+"20",color:bmi.col,fontWeight:700,fontSize:13,padding:"4px 12px",borderRadius:20,border:`1.5px solid ${bmi.col}40`}}>{bmi.l}</span><div style={{fontSize:12,color:C.ink,opacity:0.45,marginTop:4}}>{t.calc.bmiD}</div></div></div>
-              <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",gap:2}}>{["#3B82F6",C.sage,C.gold,C.coral].map((col,i)=><div key={i} style={{flex:1,background:col,opacity:0.7}}/>)}</div>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:C.ink,opacity:0.4,marginTop:3}}><span>{t.calc.bmiUnder}</span><span>{t.calc.bmiNormal}</span><span>{t.calc.bmiOver}</span><span>{t.calc.bmiObese}</span></div>
+              {bmi.isPediatric?(
+                <div style={{display:"flex",gap:8,alignItems:"flex-start",background:"#FFF8F0",border:`1px solid ${C.gold}40`,borderRadius:10,padding:12}}>
+                  <AlertCircle size={15} color={C.gold} style={{flexShrink:0,marginTop:1}}/>
+                  <span style={{fontSize:12,color:C.ink,opacity:0.85,lineHeight:1.5}}>{lang==="tr"?"18 yaş altı danışanlar için yetişkin BMI kategorileri (Zayıf/Normal/Fazla Kilolu/Obez) klinik olarak geçerli değildir. Değerlendirme, yaşa ve cinsiyete özel BMI-yaşa göre persentil büyüme eğrileri (WHO/CDC) ile yapılmalıdır — bu araç şu an bu hesaplamayı yapmıyor.":"Adult BMI categories (Underweight/Normal/Overweight/Obese) are not clinically valid for clients under 18. Assessment should use age- and gender-specific BMI-for-age percentile growth charts (WHO/CDC) — this tool does not currently calculate that."}</span>
+                </div>
+              ):(
+                <>
+                  <div style={{display:"flex",height:6,borderRadius:4,overflow:"hidden",gap:2}}>{["#3B82F6",C.sage,C.gold,C.coral].map((col,i)=><div key={i} style={{flex:1,background:col,opacity:0.7}}/>)}</div>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:C.ink,opacity:0.4,marginTop:3}}><span>{t.calc.bmiUnder}</span><span>{t.calc.bmiNormal}</span><span>{t.calc.bmiOver}</span><span>{t.calc.bmiObese}</span></div>
+                </>
+              )}
             </div>
             <Card st={{marginBottom:14}}>
               
@@ -2368,7 +2390,7 @@ function ClientsPage({t,lang,nav,setSel,T=C}){
     </section>
   );
 }
-function ClientProfile({t,lang,clientId,nav,T=C}){
+function ClientProfile({t,lang,clientId,nav,setSelTpl,T=C}){
   const[client,setClient]=useState(null);
   const[hist,setHist]=useState([]);
   const[showAdd,setShowAdd]=useState(false);
@@ -3065,6 +3087,20 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
       )}
 
       {/* Diet Plan Builder */}
+      {!dietPlan&&(()=>{
+        const matched=client.condition&&COND.find(c=>client.condition.toLowerCase().includes(c.tr.toLowerCase())||client.condition.toLowerCase().includes(c.en.toLowerCase()));
+        if(!matched)return null;
+        return(
+          <div className="np" style={{display:"flex",alignItems:"center",gap:14,background:C.coralSoft,border:`1px solid ${C.coral}40`,borderRadius:12,padding:"14px 18px",marginBottom:16}}>
+            <span style={{fontSize:24}}>{matched.icon}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.coral}}>{lang==="tr"?`"${client.condition}" durumu tespit edildi`:`Detected condition: "${client.condition}"`}</div>
+              <div style={{fontSize:12,color:T.ink,opacity:0.65}}>{lang==="tr"?`${lang==="tr"?matched.tr:matched.en} şablonundan bu danışan için otomatik, çok günlük bir plan oluşturabilirsin.`:`Auto-generate a multi-day plan for this client from the ${matched.en} template.`}</div>
+            </div>
+            <button onClick={()=>{setSelTpl(matched.id);nav("templateDetail");}} style={{flexShrink:0,padding:"9px 16px",borderRadius:8,border:"none",background:C.coral,color:"#fff",fontSize:12.5,fontWeight:700,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>{lang==="tr"?"Şablona Git →":"Go to Template →"}</button>
+          </div>
+        );
+      })()}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"28px 0 14px"}} className="np">
         <div><h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px",color:T.ink}}>📋 {lang==="tr"?"Diyet Planı":"Diet Plan"}</h3><span style={{fontSize:12,color:T.ink,opacity:0.5}}>{lang==="tr"?"Danışana özel yazılı diyet planı oluştur":"Create a custom written diet plan for this client"}</span></div>
         <div style={{display:"flex",gap:8}}>
@@ -3138,6 +3174,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
           {(()=>{
             const dayEstimates=dietPlan.days.map(d=>estimateDayNutrition(d.meals)).filter(Boolean);
             if(dayEstimates.length===0)return null;
+            const isDiabetic=/diyabet|diabet|şeker hastal/i.test(client.condition||"");
             const avgKcal=Math.round(dayEstimates.reduce((s,d)=>s+d.kcal,0)/dayEstimates.length);
             const avgProtein=Math.round(dayEstimates.reduce((s,d)=>s+d.protein,0)/dayEstimates.length);
             const avgCarb=Math.round(dayEstimates.reduce((s,d)=>s+d.carb,0)/dayEstimates.length);
@@ -3148,6 +3185,7 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
             const isFar=diffPct!==null&&Math.abs(diffPct)>20;
             const statusColor=target?(isClose?C.sage:isFar?C.coral:C.gold):T.ink;
             return(
+              <>
               <div style={{background:C.ink,borderRadius:14,padding:"18px 22px",marginBottom:16}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
                   <span style={{fontSize:11,fontWeight:700,color:"#fff",opacity:0.6,textTransform:"uppercase",letterSpacing:"0.05em"}}>📊 {lang==="tr"?"Otomatik Besin Analizi":"Automatic Nutrition Analysis"} <span style={{fontWeight:500,opacity:0.7}}>({lang==="tr"?`${dayEstimates.length}/${dietPlan.days.length} gün eşleşti`:`${dayEstimates.length}/${dietPlan.days.length} days matched`})</span></span>
@@ -3161,6 +3199,46 @@ function ClientProfile({t,lang,clientId,nav,T=C}){
                 </div>
                 <p style={{fontSize:10.5,color:"#fff",opacity:0.4,marginTop:12,marginBottom:0,lineHeight:1.5}}>{lang==="tr"?"Bu analiz, öğün metinlerindeki besinleri veritabanıyla otomatik eşleştirerek tahmini olarak hesaplanır; kesin değer için gramaj netleştirilmelidir.":"This analysis is estimated by automatically matching meal text against the food database; clarify exact gram amounts for precise values."}</p>
               </div>
+
+              {isDiabetic&&(
+                <div style={{background:"#FFF8F0",border:`1.5px solid ${C.gold}`,borderRadius:14,padding:"18px 20px",marginTop:16}}>
+                  <h4 style={{fontSize:13,fontWeight:700,color:T.ink,margin:"0 0 4px",display:"flex",alignItems:"center",gap:6}}>🩸 {lang==="tr"?"Öğün Başına Karbonhidrat Sayımı":"Per-Meal Carbohydrate Counting"}</h4>
+                  <p style={{fontSize:11.5,color:T.ink,opacity:0.7,margin:"0 0 12px",lineHeight:1.6}}>{lang==="tr"?"İnsülin dozu, danışanın endokrinoloğu tarafından belirlenen kişisel insülin:karbonhidrat oranına göre hesaplanır — bu, tıbbi bir karardır ve bu uygulama tarafından hesaplanmaz. Aşağıdaki gramajlar, o oranın danışan/hekim tarafından uygulanabilmesi için doğru karbonhidrat sayımını sağlar.":"Insulin dosing is calculated using the client's personal insulin-to-carb ratio, set by their endocrinologist — that is a medical decision and is not calculated by this app. The gram counts below provide accurate carb counting so the client/physician can apply their prescribed ratio."}</p>
+                  <div style={{overflowX:"auto"}}>
+                    <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
+                      <thead><tr>
+                        <th style={{textAlign:"left",padding:"6px 8px",color:T.ink,opacity:0.5,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>{lang==="tr"?"Gün":"Day"}</th>
+                        <th style={{textAlign:"right",padding:"6px 8px",color:T.ink,opacity:0.5,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>🌅</th>
+                        <th style={{textAlign:"right",padding:"6px 8px",color:T.ink,opacity:0.5,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>☀️</th>
+                        <th style={{textAlign:"right",padding:"6px 8px",color:T.ink,opacity:0.5,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>🌙</th>
+                        <th style={{textAlign:"right",padding:"6px 8px",color:T.ink,opacity:0.5,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>🍎</th>
+                        <th style={{textAlign:"right",padding:"6px 8px",color:C.coral,opacity:0.9,fontWeight:700,fontSize:10.5,textTransform:"uppercase",borderBottom:`1px solid ${T.line}`}}>{lang==="tr"?"Toplam":"Total"}</th>
+                      </tr></thead>
+                      <tbody>
+                        {dietPlan.days.map((d,di)=>{
+                          const bC=estimateMealNutrition(d.meals.b)?.carb||0;
+                          const lC=estimateMealNutrition(d.meals.l)?.carb||0;
+                          const dC=estimateMealNutrition(d.meals.d)?.carb||0;
+                          const sC=estimateMealNutrition(d.meals.s)?.carb||0;
+                          const total=bC+lC+dC+sC;
+                          if(total===0)return null;
+                          return(
+                            <tr key={di}>
+                              <td style={{padding:"6px 8px",color:T.ink,fontWeight:600,borderBottom:`1px solid ${T.paperDim}`}}>{lang==="tr"?`Gün ${d.day}`:`Day ${d.day}`}</td>
+                              <td style={{padding:"6px 8px",textAlign:"right",color:T.ink,opacity:0.8,borderBottom:`1px solid ${T.paperDim}`}}>{bC}g</td>
+                              <td style={{padding:"6px 8px",textAlign:"right",color:T.ink,opacity:0.8,borderBottom:`1px solid ${T.paperDim}`}}>{lC}g</td>
+                              <td style={{padding:"6px 8px",textAlign:"right",color:T.ink,opacity:0.8,borderBottom:`1px solid ${T.paperDim}`}}>{dC}g</td>
+                              <td style={{padding:"6px 8px",textAlign:"right",color:T.ink,opacity:0.8,borderBottom:`1px solid ${T.paperDim}`}}>{sC}g</td>
+                              <td style={{padding:"6px 8px",textAlign:"right",color:C.coral,fontWeight:800,borderBottom:`1px solid ${T.paperDim}`}}>{total}g</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              </>
             );
           })()}
 
